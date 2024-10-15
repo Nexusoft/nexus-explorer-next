@@ -64,6 +64,7 @@ function Scan({ addr }) {
 
       const trustEndpoint = 'finance/get/trust';
       const accountEndpoint = 'finance/get/account';
+      const tokenEndpoint = 'finance/get/token';
 
       params = { address: addr };
       const resolvedAccountTypeResponse = await Promise.any([
@@ -73,11 +74,18 @@ function Scan({ addr }) {
         axios.get(`${network.url}/${trustEndpoint}`, {
           params: params,
         }),
+        axios.get(`${network.url}/${tokenEndpoint}`, {
+          params: params,
+        }),
       ]);
 
       Log('[RESOLVED]:', resolvedAccountTypeResponse);
 
-      if (resolvedAccountTypeResponse.data.result.hasOwnProperty('trust')) {
+      if (resolvedAccountTypeResponse.data?.result?.type === 'TOKEN') {
+        Log('Is Token')
+        endpoint = tokenEndpoint
+        type = 'token'
+      } else if (resolvedAccountTypeResponse.data?.result?.hasOwnProperty('trust')) {
         endpoint = trustEndpoint;
         type = 'trust';
       } else {
@@ -104,9 +112,10 @@ function Scan({ addr }) {
     ['scan', addr, network.name],
     async () => {
       const { endpoint, params, type } = await getAPI(addr);
-      Log(endpoint, params, 'type:', type);
       setCardType(type);
       return getScanResults(endpoint, params);
+    }, {
+      staleTime: 60000
     }
   );
 
@@ -138,7 +147,7 @@ function Scan({ addr }) {
               {[CARD_TYPES.BLOCK, CARD_TYPES.TRANSACTION].includes(
                 cardType
               ) && <InfoCard type={cardType} data={data?.result} />}
-              {[CARD_TYPES.TRUST, CARD_TYPES.USER].includes(cardType) && (
+              {[CARD_TYPES.TRUST, CARD_TYPES.USER, CARD_TYPES.TOKEN].includes(cardType) && (
                 <UserAccount type={cardType} data={data?.result} />
               )}
               {cardType === CARD_TYPES.INVOICE && (

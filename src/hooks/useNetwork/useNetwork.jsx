@@ -192,6 +192,20 @@ export function useNetwork() {
     return res.data;
   };
 
+  const getTokenTransactions = async (address, page, limit) => {
+    const res = await axios.get(
+      `${url}/register/transactions/finance:token`,
+      {
+        params: {
+          address: address,
+          page: page,
+          limit: limit,
+        },
+      }
+    );
+    return res.data;
+  };
+
   const getInvoices = async (username, page, limit) => {
     // example command
     // ./nexus register/list/invoices:invoice limit=20 where='results.owner=username(`US:Interactions`);'
@@ -276,5 +290,6 @@ export function useNetwork() {
     getNetworkCountNodes,
     getTrustTransactions,
     getAccountTransactions,
+    getTokenTransactions,
   };
 }

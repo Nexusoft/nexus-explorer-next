@@ -30,7 +30,7 @@ export const TransactionDetails = ({ type, data }) => {
   const [pageCount] = useState(Infinity);
 
   const [tableData, setTableData] = useState([]);
-  const { network, getAccountTransactions, getTrustTransactions } =
+  const { network, getAccountTransactions, getTrustTransactions, getTokenTransactions } =
     useNetwork();
 
   const accountTransactionsRQ = useQuery(
@@ -43,8 +43,8 @@ export const TransactionDetails = ({ type, data }) => {
       network.name,
     ],
     () =>
-      type == 'user'
-        ? getAccountTransactions(data.address, pageIndex, pageSize)
+      type === 'user' ? getAccountTransactions(data.address, pageIndex, pageSize) :
+      type === 'token' ? getTokenTransactions(data.address, pageIndex, pageSize)
         : getTrustTransactions(data.address, pageIndex, pageSize),
     {
       refetchOnMount: false,
