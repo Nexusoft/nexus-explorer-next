@@ -21,7 +21,7 @@ function getAmount(contracts) {
       sum += c.amount;
     }
   });
-  return `${intlNum(sum)} NXS`;
+  return `${intlNum(sum)} ${contracts[0].ticker || ''}`;
 }
 
 export const TransactionDetails = ({ type, data }) => {
