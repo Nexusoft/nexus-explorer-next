@@ -82,10 +82,15 @@ function Scan({ addr }) {
       Log('[RESOLVED]:', resolvedAccountTypeResponse);
 
       if (resolvedAccountTypeResponse.data?.result?.type === 'TOKEN') {
-        Log('Is Token')
-        endpoint = tokenEndpoint
-        type = 'token'
-      } else if (resolvedAccountTypeResponse.data?.result?.hasOwnProperty('trust')) {
+        Log('Is Token');
+        endpoint = tokenEndpoint;
+        type = 'token';
+      } else if (resolvedAccountTypeResponse.data?.result?.form === 'ASSET') {
+        endpoint = accountEndpoint;
+        type = 'asset';
+      } else if (
+        resolvedAccountTypeResponse.data?.result?.hasOwnProperty('trust')
+      ) {
         endpoint = trustEndpoint;
         type = 'trust';
       } else {
@@ -114,8 +119,9 @@ function Scan({ addr }) {
       const { endpoint, params, type } = await getAPI(addr);
       setCardType(type);
       return getScanResults(endpoint, params);
-    }, {
-      staleTime: 60000
+    },
+    {
+      staleTime: 60000,
     }
   );
 
@@ -147,7 +153,12 @@ function Scan({ addr }) {
               {[CARD_TYPES.BLOCK, CARD_TYPES.TRANSACTION].includes(
                 cardType
               ) && <InfoCard type={cardType} data={data?.result} />}
-              {[CARD_TYPES.TRUST, CARD_TYPES.USER, CARD_TYPES.TOKEN].includes(cardType) && (
+              {[
+                CARD_TYPES.TRUST,
+                CARD_TYPES.USER,
+                CARD_TYPES.TOKEN,
+                CARD_TYPES.ASSET,
+              ].includes(cardType) && (
                 <UserAccount type={cardType} data={data?.result} />
               )}
               {cardType === CARD_TYPES.INVOICE && (
