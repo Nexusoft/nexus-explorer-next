@@ -18,6 +18,8 @@ export const CARD_TYPES = {
   USER: 'user',
   TRUST: 'trust',
   INVOICE: 'invoice',
+  TOKEN: 'token',
+  ASSET: 'asset',
 };
 
 const MAX_SUPPLY = 72586439.41;
