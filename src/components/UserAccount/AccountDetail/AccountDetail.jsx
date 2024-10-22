@@ -21,6 +21,7 @@ export const AccountDetail = ({ type, data }) => {
     total,
     name,
     rate,
+    stake,
     ...customProperties
   } = data;
   return (
