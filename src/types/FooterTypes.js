@@ -73,12 +73,6 @@ export const FooterTypes = {
             icon: (props) => <BsChatLeftText {...props} />,
           },
           {
-            href: 'https://discord.gg/KNvxWh7t4E',
-            target: '_blank',
-            label: 'Discord',
-            icon: (props) => <BsDiscord {...props} />,
-          },
-          {
             href: 'https://twitter.com/NexusOfficial',
             target: '_blank',
             label: 'Twitter',
