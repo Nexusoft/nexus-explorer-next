@@ -73,8 +73,12 @@ export const DaoInfo = ({ title }) => {
               <a
                 target="_blank"
                 rel="noopener noreferrer"
-                href={daoInfo.social.replace('@', 'https://t.me/')}>
-                Social : {daoInfo.social} <CgExternal />
+                href={
+                  daoInfo.social
+                    ? daoInfo.social.replace('@', 'https://t.me/')
+                    : undefined
+                }>
+                Social : {daoInfo.social} {!!daoInfo.social && <CgExternal />}
               </a>
             </div>
             <Link href={`/dao/invoices/${daoInfo.audit}`} passHref>

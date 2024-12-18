@@ -1,7 +1,7 @@
 {
   "interactions": {
-    "chair": "Katarzyna Ochnio",
-    "social": "@ochajo",
+    "chair": "",
+    "social": "",
     "desc": "Wallet Support, Developer support, Social Media, and Promotions",
     "audit": "US:Interactions"
   },
@@ -12,8 +12,8 @@
     "audit": "US:Impressions"
   },
   "relationships": {
-    "chair": "Sohaan",
-    "social": "@Sohaan0077 ",
+    "chair": "",
+    "social": "",
     "desc": "Outreach, Use-Cases, and Exchanges",
     "audit": "US:Relationships"
   },
@@ -24,8 +24,8 @@
     "audit": "US:Media"
   },
   "communications": {
-    "chair": "Gaia Tomas",
-    "social": "@Tomas_SWE",
+    "chair": "",
+    "social": "",
     "desc": "Content, Translations",
     "audit": "US:Communications"
   }
