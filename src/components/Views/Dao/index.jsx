@@ -6,6 +6,7 @@ import { useQuery } from 'react-query';
 import { cls, intlNum } from 'utils';
 import styles from './dao.module.scss';
 import { CgExternal } from 'react-icons/cg';
+import daoObject from '../../../../public/ambassadors.json';
 import Loader from 'components/common/NE_Loader';
 
 function BalanceWithLoader({ isLoading, balance, link }) {
@@ -30,13 +31,12 @@ function BalanceWithLoader({ isLoading, balance, link }) {
   );
 }
 
-export const DaoInfo = (props) => {
-  const { title, daoObject } = props;
+export const DaoInfo = ({ title }) => {
   const { getAccount } = useNetwork();
+  const daoInfoArr = Object.entries(daoObject);
 
   // * make balance fetch for each dao account using useQuery hook and store it in an array
   const multiQuery = useQuery;
-  const daoInfoArr = Object.entries(daoObject);
   const accountQuerys = daoInfoArr.map(([, v]) =>
     multiQuery([v.audit, 'account'], () =>
       getAccount(v.auditBalance ?? v.audit)

@@ -4,27 +4,13 @@ import { DaoInfo } from 'components/Views/Dao';
 import React from 'react';
 import TYPES from 'types';
 
-function AmbassadorDAOPage({ daoObject }) {
+function AmbassadorDAOPage() {
   return (
     <Layout>
       <PageHeader title={TYPES.PAGEMETA.DAO.AMBASSADOR.TITLE} />
-      <DaoInfo title={'Ambassador DAO'} daoObject={daoObject} />
+      <DaoInfo title={'Ambassador DAO'} />
     </Layout>
   );
 }
-
-// todo: implemenmt ISR for this page
-export const getServerSideProps = async () => {
-  const resp = await fetch(
-    `${process.env.NEXT_PUBLIC_DOMAIN_BASE_URL}/ambassadors.json`
-  );
-  const data = await resp.json();
-
-  return {
-    props: {
-      daoObject: data,
-    },
-  };
-};
 
 export default AmbassadorDAOPage;
