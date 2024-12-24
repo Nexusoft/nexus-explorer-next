@@ -6,7 +6,6 @@ import { useQuery } from 'react-query';
 import { cls, intlNum } from 'utils';
 import styles from './dao.module.scss';
 import { CgExternal } from 'react-icons/cg';
-import daoObject from '../../../../public/ambassadors.json';
 import Loader from 'components/common/NE_Loader';
 
 function BalanceWithLoader({ isLoading, balance, link }) {
@@ -31,7 +30,7 @@ function BalanceWithLoader({ isLoading, balance, link }) {
   );
 }
 
-export const DaoInfo = ({ title }) => {
+export const DaoInfo = ({ title, daoObject }) => {
   const { getAccount } = useNetwork();
   const daoInfoArr = Object.entries(daoObject);
 

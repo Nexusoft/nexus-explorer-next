@@ -3,8 +3,9 @@ import Layout from 'components/Layout';
 import { DaoInfo } from 'components/Views/Dao';
 import React from 'react';
 import TYPES from 'types';
+import daoObject from '../../../../public/developers.json';
 
-function DevloperDAOPage({ daoObject }) {
+function DevloperDAOPage() {
   return (
     <Layout>
       <PageHeader title={TYPES.PAGEMETA.DAO.DEVELOPER.TITLE} />
@@ -12,18 +13,5 @@ function DevloperDAOPage({ daoObject }) {
     </Layout>
   );
 }
-
-export const getServerSideProps = async () => {
-  const resp = await fetch(
-    `${process.env.NEXT_PUBLIC_DOMAIN_BASE_URL}/developers.json`
-  );
-  const data = await resp.json();
-
-  return {
-    props: {
-      daoObject: data,
-    },
-  };
-};
 
 export default DevloperDAOPage;
