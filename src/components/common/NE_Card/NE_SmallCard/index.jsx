@@ -1,8 +1,8 @@
-import Card from '..';
-import PropTypes from 'prop-types';
-import styles from './SmallCard.module.scss';
 import { Nexus_SVG_Icon } from 'assets/icons';
+import PropTypes from 'prop-types';
 import TYPES from 'types';
+import Card from '..';
+import styles from './SmallCard.module.scss';
 
 /**
  * Small card component with icon
@@ -52,7 +52,7 @@ export const NE_SmallCard = (props) => {
 NE_SmallCard.propTypes = {
   label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   sublabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   text: PropTypes.string,
   unit: PropTypes.string,
   onClick: PropTypes.func,
