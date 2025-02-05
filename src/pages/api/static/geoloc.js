@@ -8,7 +8,7 @@ export default async function handler(req, res) {
       baseUrl = `${process.env.NEXT_PUBLIC_TESTNET_BASE_URL}/network/list/nodes`;
     }
 
-    const nodesList = await axios.get(baseUrl, { params: req.query });
+    const nodesList = await axios.post(baseUrl, req.query);
 
     let responsePromises = [];
     // .slice(0, 100)
