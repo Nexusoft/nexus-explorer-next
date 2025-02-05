@@ -3,9 +3,9 @@ import { getGeoIp } from './geoip';
 
 export default async function handler(req, res) {
   try {
-    let baseUrl = `${process.env.NEXT_PUBLIC_NEXUS_BASE_URL}/network/list/nodes`;
+    let baseUrl = `${process.env.NEXT_PUBLIC_NEXUS_BASE_URL}/network/list/nodes/address,latency`;
     if (req.query.network == 'Testnet') {
-      baseUrl = `${process.env.NEXT_PUBLIC_TESTNET_BASE_URL}/network/list/nodes`;
+      baseUrl = `${process.env.NEXT_PUBLIC_TESTNET_BASE_URL}/network/list/nodes/address,latency`;
     }
 
     const nodesList = await axios.post(baseUrl, req.query);
@@ -25,13 +25,12 @@ export default async function handler(req, res) {
     });
 
     Promise.allSettled(responsePromises).then((results) => {
-      const packedData = results.map((result, index) => {
-        const item =
-          result.status === 'fulfilled'
-            ? result.value
-            : { location: { lat: 0, lng: 0 } };
-        const nodeInfo = nodesList.data.result[index];
-        return { ...item.location, ...nodeInfo };
+      const packedData = [];
+      results.forEach((result, index) => {
+        if (result.status !== 'fulfilled') return;
+        const { latitude, longitude } = result.value.location;
+        const { latency } = nodesList.data.result[index];
+        packedData.push({ latitude, longitude, latency });
       });
       res.json(packedData);
     });

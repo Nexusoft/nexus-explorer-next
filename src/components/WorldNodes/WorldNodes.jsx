@@ -88,19 +88,21 @@ export default function WorldNodes() {
     // * topOffset is number of pixels cropped from top of map when map, calculated as being 5 pixels when map at full height of 515
     const topOffset = (5 / 515) * height;
 
-    const _mapXYarr = networkListNodesRQ.data?.data.map((item) => {
-      const xyCordinates = robinsonProjector.convertLatLngToXy(
-        item.latitude,
-        item.longitude,
-        width,
-        topOffset
-      );
-      return {
-        ...xyCordinates,
-        ...item,
-        opacity: 1,
-      };
-    });
+    const _mapXYarr = networkListNodesRQ.data?.data.map(
+      ({ latitude, longitude, latency }) => {
+        const xyCordinates = robinsonProjector.convertLatLngToXy(
+          latitude,
+          longitude,
+          width,
+          topOffset
+        );
+        return {
+          ...xyCordinates,
+          latency,
+          opacity: 1,
+        };
+      }
+    );
 
     setMapXYarr(_mapXYarr || []);
   }, [windowSize, networkListNodesRQ.data]);
