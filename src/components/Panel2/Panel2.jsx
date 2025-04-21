@@ -100,7 +100,7 @@ function Panel2(props) {
           ...prev.stake,
           sublabel: miningData?.stake.difficulty.toFixed(2),
           reserve: miningData?.stake.height,
-          footer: miningData?.stake.fees.toFixed(2),
+          footer: miningData?.stake.fees?.toFixed(2) || '',
         },
       }));
     }
@@ -127,7 +127,7 @@ function Panel2(props) {
           text: miningData.hash.hashes,
           reserve: miningData.hash.reserve.toFixed(2),
           reward: miningData.hash.reward.toFixed(2),
-          footer: miningData.hash.fees.toFixed(2),
+          footer: miningData.hash.fees?.toFixed(2) || '',
         },
       }));
     }
@@ -141,7 +141,7 @@ function Panel2(props) {
           text: miningData.prime.primes,
           reserve: miningData.prime.reserve.toFixed(2),
           reward: miningData.prime.reward.toFixed(2),
-          footer: miningData.prime.fees.toFixed(2),
+          footer: miningData.prime.fees?.toFixed(2) || '',
         },
       }));
     }
