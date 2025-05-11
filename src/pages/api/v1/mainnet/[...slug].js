@@ -7,6 +7,7 @@ const apiProxy = createProxyMiddleware({
   changeOrigin: true,
   pathRewrite: { [`^${API_URLS.MAINNET}`]: '' },
   secure: false,
+  proxyTimeout: 120000,
 });
 
 export default function handler(req, res) {
