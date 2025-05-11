@@ -240,7 +240,7 @@ export function useNetwork() {
       limit,
       sort: 'lastseen',
       order: 'desc',
-      where: `results.lastseen>=since(\`${hours} hours\`);`,
+      // where: `results.lastseen>=since(\`${hours} hours\`);`,
       ...extraParams,
     };
 
