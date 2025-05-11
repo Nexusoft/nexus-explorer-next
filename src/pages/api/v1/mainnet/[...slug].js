@@ -10,6 +10,7 @@ const apiProxy = createProxyMiddleware({
 });
 
 export default function handler(req, res) {
+  res.setHeader('Cache-Control', 'max-age=5');
   apiProxy(req, res, (result) => {
     if (result instanceof Error) {
       throw result;
