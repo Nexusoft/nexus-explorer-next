@@ -3,7 +3,7 @@ import { API_URLS } from 'types/ConstantsTypes';
 
 // Create proxy instance outside of request handler function to avoid unnecessary re-creation
 const apiProxy = createProxyMiddleware({
-  target: process.env.NEXT_PUBLIC_NEXUS_BASE_URL,
+  target: process.env.NEXT_PUBLIC_NEXUS_DIRECT_BASE_URL,
   changeOrigin: true,
   pathRewrite: { [`^${API_URLS.MAINNET}`]: '' },
   secure: false,
