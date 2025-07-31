@@ -54,17 +54,7 @@ export function getClientIpFromRequest(req) {
     return remoteAddress.replace(/^::ffff:/, '');
   }
 
-  // NO FALLBACK: Return null when IP cannot be determined
-  // For DDOS protection, it's better to omit the header entirely rather than send fake data
-  //
-  // WHY NO FALLBACK FOR DDOS PROTECTION:
-  // 1. ACCURACY MATTERS: DDOS protection systems need real IPs for rate limiting and blocking
-  // 2. AVOID CONFUSION: Fake IPs like 127.0.0.1 could group all "unknown" requests under localhost
-  // 3. EXPLICIT FAILURE: null indicates "IP unknown" rather than providing misleading information
-  // 4. PROPER HANDLING: Upstream code can decide whether to omit the header or handle differently
-  //
-  // The calling code will check for null and omit the x-requested-by header entirely
-  // when the real client IP cannot be determined
+  // Return null when IP cannot be determined
   return null;
 }
 
@@ -84,6 +74,7 @@ export function addIpHeaderToAxiosConfig(config, req = null) {
 
   // Extract the real client IP using our robust IP detection logic
   const clientIp = getClientIpFromRequest(req);
+  console.log('addIpHeader', clientIp);
 
   // Only add the header if we successfully detected a real client IP
   // For DDOS protection, it's better to omit the header than send fake/unknown IPs

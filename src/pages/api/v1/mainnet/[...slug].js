@@ -13,6 +13,7 @@ const apiProxy = createProxyMiddleware({
     // Add the x-requested-by header with the client's IP address
     // Only add the header if we can determine the real client IP
     const clientIp = getClientIpFromRequest(req);
+    console.log('clientIp', clientIp);
     if (clientIp) {
       proxyReq.setHeader('x-requested-by', clientIp);
     }
