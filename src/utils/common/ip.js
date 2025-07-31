@@ -22,15 +22,6 @@ export function getClientIpFromRequest(req) {
   const cfConnectingIp = req.headers['cf-connecting-ip'];
   const remoteAddress =
     req.socket?.remoteAddress || req.connection?.remoteAddress;
-  console.log('forwarded', forwarded);
-  console.log('realIp', realIp);
-  console.log('cfConnectingIp', cfConnectingIp);
-  console.log(
-    'req.socket?.remoteAddress ',
-    req.socket?.remoteAddress,
-    'req.connection?.remoteAddress',
-    req.connection?.remoteAddress
-  );
 
   // PRIORITY 1: x-forwarded-for (Industry Standard)
   // This header contains a chain of IPs from every proxy the request passed through
