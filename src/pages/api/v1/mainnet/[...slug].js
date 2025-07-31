@@ -1,5 +1,6 @@
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { API_URLS } from 'types/ConstantsTypes';
+import { getClientIpFromRequest } from 'utils/common/ip';
 
 // Create proxy instance outside of request handler function to avoid unnecessary re-creation
 const apiProxy = createProxyMiddleware({
@@ -8,6 +9,14 @@ const apiProxy = createProxyMiddleware({
   pathRewrite: { [`^${API_URLS.MAINNET}`]: '' },
   secure: false,
   proxyTimeout: 120000,
+  onProxyReq: (proxyReq, req) => {
+    // Add the x-requested-by header with the client's IP address
+    // Only add the header if we can determine the real client IP
+    const clientIp = getClientIpFromRequest(req);
+    if (clientIp) {
+      proxyReq.setHeader('x-requested-by', clientIp);
+    }
+  },
 });
 
 export default function handler(req, res) {

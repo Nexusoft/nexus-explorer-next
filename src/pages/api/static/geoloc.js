@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getGeoIp } from './geoip';
+import { addIpHeaderToAxiosConfig } from 'utils/common/ip';
 
 export default async function handler(req, res) {
   try {
@@ -8,7 +9,9 @@ export default async function handler(req, res) {
       baseUrl = `${process.env.NEXT_PUBLIC_TESTNET_BASE_URL}/network/list/nodes/address,latency`;
     }
 
-    const nodesList = await axios.post(baseUrl, req.query);
+    // Add IP header to the request config
+    const axiosConfig = addIpHeaderToAxiosConfig({ url: baseUrl }, req);
+    const nodesList = await axios.post(baseUrl, req.query, axiosConfig);
 
     let responsePromises = [];
     // .slice(0, 100)
@@ -16,6 +19,7 @@ export default async function handler(req, res) {
       responsePromises.push(
         getGeoIp(node.address).catch((err) => {
           // Handle error or rejection here, e.g. return a default value or a structured error response
+          // eslint-disable-next-line no-console
           console.error(
             `Failed to get geolocation for node ${node.address}: ${err}`
           );
