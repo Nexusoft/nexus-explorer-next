@@ -22,6 +22,15 @@ export function getClientIpFromRequest(req) {
   const cfConnectingIp = req.headers['cf-connecting-ip'];
   const remoteAddress =
     req.socket?.remoteAddress || req.connection?.remoteAddress;
+  console.log('forwarded', forwarded);
+  console.log('realIp', realIp);
+  console.log('cfConnectingIp', cfConnectingIp);
+  console.log(
+    'req.socket?.remoteAddress ',
+    req.socket?.remoteAddress,
+    'req.connection?.remoteAddress',
+    req.connection?.remoteAddress
+  );
 
   // PRIORITY 1: x-forwarded-for (Industry Standard)
   // This header contains a chain of IPs from every proxy the request passed through
@@ -74,7 +83,6 @@ export function addIpHeaderToAxiosConfig(config, req = null) {
 
   // Extract the real client IP using our robust IP detection logic
   const clientIp = getClientIpFromRequest(req);
-  console.log('addIpHeader', clientIp);
 
   // Only add the header if we successfully detected a real client IP
   // For DDOS protection, it's better to omit the header than send fake/unknown IPs
