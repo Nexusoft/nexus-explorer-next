@@ -83,11 +83,11 @@ function Panel2(props) {
         price: {
           sublabel: marketData?.current_price.btc,
           text: marketData?.current_price.usd,
-          reserve: marketData?.price_change_percentage_24h.toFixed(2),
+          reserve: marketData?.price_change_percentage_24h?.toFixed(2),
           reward: marketData?.total_volume.usd,
           footer: (
             marketData?.current_price.usd * miningData?.supply.total
-          ).toFixed(2),
+          )?.toFixed(2),
         },
       }));
     }
@@ -98,7 +98,7 @@ function Panel2(props) {
         ...prev,
         stake: {
           ...prev.stake,
-          sublabel: miningData?.stake.difficulty.toFixed(2),
+          sublabel: miningData?.stake.difficulty?.toFixed(2),
           reserve: miningData?.stake.height,
           footer: miningData?.stake.fees?.toFixed(2) || '',
         },
@@ -123,10 +123,10 @@ function Panel2(props) {
       setState((prev) => ({
         ...prev,
         hash: {
-          sublabel: miningData.hash.difficulty.toFixed(2),
+          sublabel: miningData.hash.difficulty?.toFixed(2),
           text: miningData.hash.hashes,
-          reserve: miningData.hash.reserve.toFixed(2),
-          reward: miningData.hash.reward.toFixed(2),
+          reserve: miningData.hash.reserve?.toFixed(2),
+          reward: miningData.hash.reward?.toFixed(2),
           footer: miningData.hash.fees?.toFixed(2) || '',
         },
       }));
@@ -137,10 +137,10 @@ function Panel2(props) {
       setState((prev) => ({
         ...prev,
         prime: {
-          sublabel: miningData.prime.difficulty.toFixed(2),
+          sublabel: miningData.prime.difficulty?.toFixed(2),
           text: miningData.prime.primes,
-          reserve: miningData.prime.reserve.toFixed(2),
-          reward: miningData.prime.reward.toFixed(2),
+          reserve: miningData.prime.reserve?.toFixed(2),
+          reward: miningData.prime.reward?.toFixed(2),
           footer: miningData.prime.fees?.toFixed(2) || '',
         },
       }));
