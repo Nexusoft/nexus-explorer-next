@@ -6,24 +6,11 @@ import { fetchRichlist } from 'utils/common/fetch';
 export function useNetwork() {
   const { appContext } = useAppContext();
 
-  const MAINNET_URL = process.env.NEXT_PUBLIC_NEXUS_BASE_URL;
-  const TESTNET_URL = process.env.NEXT_PUBLIC_TESTNET_BASE_URL;
   const { MAINNET: MAINNET_PROXY_URL, TESTNET: TESTNET_PROXY_URL } = API_URLS;
 
-  // * Change network url based on the NEXT_PUBLIC_USE_PROXY_MIDDLEWARE env variable
-  const isProxyEnabled =
-    process.env.NEXT_PUBLIC_USE_PROXY_MIDDLEWARE.toLowerCase() == 'true'
-      ? true
-      : false;
   const isMainnetSelected = appContext.network.name === NETWORKS.MAINNET.name;
 
-  const url = isMainnetSelected
-    ? isProxyEnabled
-      ? MAINNET_PROXY_URL
-      : MAINNET_URL
-    : isProxyEnabled
-    ? TESTNET_PROXY_URL
-    : TESTNET_URL;
+  const url = isMainnetSelected ? MAINNET_PROXY_URL : TESTNET_PROXY_URL;
 
   // * resource heavy API takes 4 secs to fetch
   function getMetrics() {
@@ -193,16 +180,13 @@ export function useNetwork() {
   };
 
   const getTokenTransactions = async (address, page, limit) => {
-    const res = await axios.get(
-      `${url}/register/transactions/finance:token`,
-      {
-        params: {
-          address: address,
-          page: page,
-          limit: limit,
-        },
-      }
-    );
+    const res = await axios.get(`${url}/register/transactions/finance:token`, {
+      params: {
+        address: address,
+        page: page,
+        limit: limit,
+      },
+    });
     return res.data;
   };
 
