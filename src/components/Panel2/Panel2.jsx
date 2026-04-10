@@ -171,7 +171,7 @@ function Panel2(props) {
             type="market"
             icon={<GiTwoCoins color="white" size="2.25rem" />}
             label="Price"
-            sublabel={`${state.price?.sublabel} BTC`}
+            sublabel={''}//`${state.price?.sublabel} BTC`}
             text={`${state.price?.text}`}
             unit={'$'}
             reserveLabel="Change 24h"

@@ -19,8 +19,25 @@ export function fetchMining(url) {
   );
 }
 
-export function fetchMarket() {
-  return axios.get(`${process.env.NEXT_PUBLIC_COINGECKO_BASE_URL}/coins/nexus`);
+export async function fetchMarket() {
+  const res = await axios.get('https://api.dex-trade.com/v1/public/ticker?pair=NXSUSDT');
+  const ticker = res.data?.data || {};
+
+  return {
+    data: {
+      market_data: {
+        current_price: {
+          usd: parseFloat(ticker.last || 0),
+          btc: 0, // Dex-trade NXSUSDT ticker only provides USDT rate
+        },
+        price_change_percentage_24h: parseFloat(ticker['percent_сhange'] || 0),
+        total_volume: {
+          // Coingecko total_volume is in fiat, so multiply base volume (NXS) * price (USDT)
+          usd: parseFloat(ticker.volume_24H || 0) * parseFloat(ticker.last || 0),
+        },
+      },
+    },
+  };
 }
 
 export async function fetchRecentBlocks(MAX_ROWS = 6) {
