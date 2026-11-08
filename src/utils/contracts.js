@@ -113,24 +113,50 @@ export function transactionHeadline(tx, formatAmount) {
 }
 
 /**
- * Net change of `address` in a transaction: + received, - sent
- * Staking rewards count as received
+ * Net change per ticker of a set of addresses in a transaction: + received, - sent
+ * Moves between two addresses of the set cancel out; staking rewards count as received
+ * An incoming DEBIT counts once its CREDIT is made, an outgoing one when it is sent
  */
-export function netForAddress(tx, address) {
-  let net = 0;
-  let ticker = '';
+export function netForAddresses(tx, addresses) {
+  const nets = {};
   const counterparties = new Set();
   for (const c of tx?.contracts || []) {
     const d = describeContract(c);
     if (d.amount == null) continue;
-    ticker = ticker || d.ticker;
-    if (d.to?.address === address && d.from?.address !== address) {
-      net += d.amount;
-      if (d.from?.address) counterparties.add(d.from.address);
-    } else if (d.from?.address === address && d.to?.address !== address) {
-      net -= d.amount;
-      if (d.to?.address) counterparties.add(d.to.address);
+    const toMine = addresses.has(d.to?.address);
+    const fromMine = addresses.has(d.from?.address);
+    if (toMine === fromMine) continue;
+    const other = toMine ? d.from?.address : d.to?.address;
+    if (other) counterparties.add(other);
+    //a payment is a DEBIT by the sender, then a CREDIT by the receiver that names
+    //the sender again: the sender loses on the DEBIT, the receiver gains on the CREDIT
+    if ((d.op === 'DEBIT' && toMine) || (d.op === 'CREDIT' && fromMine)) {
+      continue;
     }
+    nets[d.ticker] = (nets[d.ticker] || 0) + (toMine ? d.amount : -d.amount);
   }
-  return { net, ticker, counterparties: [...counterparties] };
+  return { nets, counterparties: [...counterparties] };
+}
+
+/** Net change of one address in a transaction, in the ticker that moved */
+export function netForAddress(tx, address) {
+  const { nets, counterparties } = netForAddresses(tx, new Set([address]));
+  const moved = Object.entries(nets);
+  const [ticker, net] = moved.find(([, n]) => n !== 0) || moved[0] || ['', 0];
+  return { net, ticker, counterparties };
+}
+
+/** Indexer move row back into the contract shape describeContract reads */
+export function moveToContract(m) {
+  const to = { address: m.to_addr, name: m.to_name };
+  return {
+    OP: m.op,
+    amount: m.amount,
+    ticker: m.ticker,
+    from: m.from_addr ? { address: m.from_addr, name: m.from_name } : null,
+    to: m.to_addr ? to : null,
+    genesis: m.op === 'COINBASE' ? m.to_addr : undefined,
+    address: m.to_addr,
+    name: m.to_name,
+  };
 }

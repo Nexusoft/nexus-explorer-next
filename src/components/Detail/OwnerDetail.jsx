@@ -15,6 +15,7 @@ import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { formatAmount, formatInt, shortHash, timeAgo } from 'utils/format';
 import { ASSET_FORMATS } from 'utils/assets';
 import { cls } from 'utils';
+import OwnerTransactions from './OwnerTransactions';
 
 const preview = 10;
 
@@ -189,6 +190,8 @@ export default function OwnerDetail({ status }) {
           </>
         )}
       />
+
+      {index && <OwnerTransactions key={genesis} genesis={genesis} />}
 
       <RegisterCard
         title="Tokens created"

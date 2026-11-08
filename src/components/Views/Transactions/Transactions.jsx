@@ -8,23 +8,9 @@ import { formatAmount, formatDate, formatInt, timeAgo } from 'utils/format';
 import {
   describeContract,
   isRewardTx,
+  moveToContract,
   transactionHeadline,
 } from 'utils/contracts';
-
-//indexer move row back into the contract shape describeContract reads
-function moveToContract(m) {
-  const to = { address: m.to_addr, name: m.to_name };
-  return {
-    OP: m.op,
-    amount: m.amount,
-    ticker: m.ticker,
-    from: m.from_addr ? { address: m.from_addr, name: m.from_name } : null,
-    to: m.to_addr ? to : null,
-    genesis: m.op === 'COINBASE' ? m.to_addr : undefined,
-    address: m.to_addr,
-    name: m.to_name,
-  };
-}
 
 const indexPageSize = 25;
 
