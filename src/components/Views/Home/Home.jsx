@@ -13,6 +13,8 @@ import ActivityChart from './ActivityChart';
 import styles from './Home.module.scss';
 
 const latestRows = 8;
+//blocks the latest lists need, also what getStaticProps loads
+export const homeBlockCount = latestRows * 2;
 const BLOCK_POLLING_DELAY = 20 * 1000;
 
 const nxs = (v, digits = 0) =>
@@ -101,12 +103,9 @@ export default function Home(props) {
   });
   const blocksRQ = useQuery(
     ['homeBlocks', network.name],
-    () => getRecentBlocks(latestRows * 2),
+    () => getRecentBlocks(homeBlockCount),
     {
-      initialData:
-        isMainnet && props.blocks
-          ? props.blocks.slice(0, latestRows * 2)
-          : undefined,
+      initialData: isMainnet && props.blocks ? props.blocks : undefined,
       refetchInterval: BLOCK_POLLING_DELAY,
     }
   );

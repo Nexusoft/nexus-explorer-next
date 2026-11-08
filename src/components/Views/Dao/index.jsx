@@ -57,7 +57,9 @@ export const DaoInfo = ({ title, daoObject }) => {
                       </Link>
                     </td>
                     <td className={styles.hideMobile}>{dao.desc}</td>
-                    <td className={styles.right} style={{ whiteSpace: 'nowrap' }}>
+                    <td
+                      className={styles.right}
+                      style={{ whiteSpace: 'nowrap' }}>
                       {rq.isLoading
                         ? '...'
                         : rq.isError
@@ -70,14 +72,18 @@ export const DaoInfo = ({ title, daoObject }) => {
                       {dao.chair || <span className={styles.muted}>-</span>}
                       {link && (
                         <div>
-                          <a href={link} target="_blank" rel="noopener noreferrer">
+                          <a
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer">
                             {dao.social}
                           </a>
                         </div>
                       )}
                     </td>
                     <td style={{ whiteSpace: 'nowrap' }}>
-                      <Link href={`/dao/invoices/${encodeURIComponent(dao.audit)}`}>
+                      <Link
+                        href={`/dao/invoices/${encodeURIComponent(dao.audit)}`}>
                         <a>Invoices</a>
                       </Link>
                     </td>

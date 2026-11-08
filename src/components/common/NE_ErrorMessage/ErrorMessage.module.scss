@@ -1,27 +1,25 @@
-.error-container {
-  background: var(--theme-tab-bg);
-  border-radius: 0.5rem;
-  box-shadow: var(--card-shadow);
-  display: flex;
-  // align-items: center;
-  gap: 2vw;
+.box {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-left: 3px solid var(--c-down);
+  border-radius: var(--radius-panel);
+  padding: 1rem 1.25rem;
+  color: var(--c-ink);
 
-  .error-detail {
-    flex-basis: 90%;
-    margin-top: 2vmin;
-    h3 {
-      font-size: var(--font-xxl);
-      font-size: clamp(var(--font-normal), 5vw, var(--font-xxl));
-    }
+  p {
+    margin: 0;
   }
-  .error-code {
-    font-size: var(--font-normal);
-    text-transform: capitalize;
-    color: var(--theme-page-text-secondary);
+  .title {
+    font-weight: 600;
   }
-  .error-message {
-    font-size: var(--font-l);
-    text-transform: capitalize;
-    color: var(--theme-page-text);
+  .message {
+    margin-top: 0.35rem;
+    color: var(--c-ink-2);
+  }
+  .code {
+    margin-top: 0.35rem;
+    color: var(--c-ink-3);
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
   }
 }

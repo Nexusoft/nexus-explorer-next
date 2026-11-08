@@ -77,7 +77,8 @@ export function useNetwork() {
   const getTrustlist = async ({ queryKey }) => {
     const [, page, limit] = queryKey;
     const cached = await cachedList('trustlist', () => null);
-    if (cached) return { result: cached.slice(page * limit, (page + 1) * limit) };
+    if (cached)
+      return { result: cached.slice(page * limit, (page + 1) * limit) };
     const res = await axios.get(`${url}/register/list/finance:trust`, {
       headers: { 'Cache-Control': 'max-age=300' },
       params: {
@@ -223,16 +224,13 @@ export function useNetwork() {
   };
 
   const getTokenTransactions = async (address, page, limit) => {
-    const res = await axios.get(
-      `${url}/register/transactions/finance:token`,
-      {
-        params: {
-          address: address,
-          page: page,
-          limit: limit,
-        },
-      }
-    );
+    const res = await axios.get(`${url}/register/transactions/finance:token`, {
+      params: {
+        address: address,
+        page: page,
+        limit: limit,
+      },
+    });
     return res.data;
   };
 

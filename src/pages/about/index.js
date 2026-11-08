@@ -4,11 +4,18 @@ import AboutView from 'components/Views/About';
 import Layout from 'components/Layout';
 
 export const getStaticProps = async () => {
-  const res = await fetch(LinksTypes.LINKS.CONTRIBUTORS_API);
-  const data = await res.json();
+  //github can be offline or rate limited, the page still builds without the list
+  let data = [];
+  try {
+    const res = await fetch(LinksTypes.LINKS.CONTRIBUTORS_API);
+    if (res.ok) data = await res.json();
+  } catch (e) {
+    data = [];
+  }
 
   return {
-    props: { data: data },
+    props: { data },
+    revalidate: 86400,
   };
 };
 

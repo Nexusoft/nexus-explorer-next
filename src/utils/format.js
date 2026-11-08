@@ -7,7 +7,9 @@ export function formatDate(unixSeconds) {
   if (!isNum(Number(unixSeconds)) || !unixSeconds) return NO_VALUE;
   const d = new Date(unixSeconds * 1000);
   return (
-    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ` +
+    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(
+      d.getUTCDate()
+    )} ` +
     `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(
       d.getUTCSeconds()
     )} UTC`
@@ -37,7 +39,9 @@ export function timeAgo(unixSeconds, now = Date.now() / 1000) {
   for (const [name, secs] of units) {
     if (diff >= secs) {
       const n = Math.floor(diff / secs);
-      return `${n} ${name}${n > 1 && name !== 'min' && name !== 'sec' ? 's' : ''} ago`;
+      return `${n} ${name}${
+        n > 1 && name !== 'min' && name !== 'sec' ? 's' : ''
+      } ago`;
     }
   }
   return '';
@@ -60,7 +64,9 @@ export function formatInt(value) {
 export function shortHash(value, keep = 8) {
   if (!value) return '';
   const s = value.toString();
-  return s.length > keep * 2 + 3 ? `${s.slice(0, keep)}...${s.slice(-keep)}` : s;
+  return s.length > keep * 2 + 3
+    ? `${s.slice(0, keep)}...${s.slice(-keep)}`
+    : s;
 }
 
 /** Bytes to "806 B" / "1.2 kB" */

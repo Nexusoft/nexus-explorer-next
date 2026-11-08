@@ -72,7 +72,6 @@ export default function BlockDetail({ block }) {
           <Stat label="Transactions" value={formatInt(txs.length)} big />
           <Stat label="Difficulty" value={formatAmount(block.difficulty, 4)} />
           <Stat label="Size" value={formatBytes(block.size)} />
-          <Stat label="Time" value={formatDate(block.timestamp)} />
         </Stats>
       </Card>
 

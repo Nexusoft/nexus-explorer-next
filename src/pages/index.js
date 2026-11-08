@@ -8,7 +8,7 @@ import {
 } from 'utils/common/fetch';
 
 import PageHeader from 'components/Header/PageHeader';
-import HomeView from 'components/Views/Home';
+import HomeView, { homeBlockCount } from 'components/Views/Home';
 import Layout from 'components/Layout';
 
 // * SSG with initial data
@@ -22,7 +22,7 @@ export async function getStaticProps() {
       fetchInfo(),
       fetchMining(),
       fetchMarket(),
-      fetchRecentBlocks(2 * 60),
+      fetchRecentBlocks(homeBlockCount),
     ].map((p) => p.catch(() => null))
   );
 
