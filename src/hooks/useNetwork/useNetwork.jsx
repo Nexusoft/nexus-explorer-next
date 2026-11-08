@@ -31,11 +31,11 @@ export function useNetwork() {
     return res.data;
   }
 
-  //cached register list from the indexer, or the slow node query when there is none
-  async function cachedList(key, fallback) {
+  //cached node result from the indexer, or the slow node query when there is none
+  async function cachedList(key, fallback, isValid = Array.isArray) {
     try {
       const res = await getIndex(`cache/${key}`);
-      if (Array.isArray(res?.result)) return res.result;
+      if (isValid(res?.result)) return res.result;
     } catch (e) {
       //no indexer, use the node
     }
@@ -60,11 +60,18 @@ export function useNetwork() {
     });
   }
 
-  // * resource heavy API takes 10 secs with the exisitng node
+  //over 30 s on the node, the indexer keeps a copy refreshed every 10 min
   function getLedgerMetrics() {
-    return axios.get(`${url}/ledger/get/metrics`, {
-      headers: { 'Cache-Control': 'max-age=600' }, // * Cache for 10 min
-    });
+    return cachedList(
+      'ledgermetrics',
+      async () => {
+        const res = await axios.get(`${url}/ledger/get/metrics`, {
+          headers: { 'Cache-Control': 'max-age=600' },
+        });
+        return res.data.result;
+      },
+      (r) => !!r && typeof r === 'object' && !Array.isArray(r)
+    );
   }
 
   async function getRecentBlocks(MAX_ROWS = 6) {

@@ -79,7 +79,7 @@ export default function Metrics() {
 
   const m = metricsRQ.data?.data?.result;
   const supply = miningRQ.data?.data?.result?.supply;
-  const ledger = ledgerRQ.data?.data?.result;
+  const ledger = ledgerRQ.data;
   const tritiumTotal = totalNXSRQ.data?.total;
   const stakedShare =
     isNum(m?.trust?.stake) && isNum(supply?.total)
