@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { InfoCard } from 'components/common/InfoCard';
 import Button from 'components/common/NE_Button';
-import UserAccount from 'components/UserAccount';
+import BlockDetail from 'components/Detail/BlockDetail';
+import TransactionDetail from 'components/Detail/TransactionDetail';
+import AccountDetail from 'components/Detail/AccountDetail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
@@ -14,6 +15,7 @@ import { useRouter } from 'next/router';
 import Layout from 'components/Layout';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 import { pathOr } from 'utils';
+import { shortHash } from 'utils/format';
 import { classifySearch, SEARCH_KINDS } from 'utils/search';
 import SearchHelp from 'components/common/NE_SearchHelp';
 
@@ -24,6 +26,16 @@ export const getServerSideProps = async (context) => {
       addr: address,
     },
   };
+};
+
+const scanTitles = {
+  block: "Block",
+  transaction: "Transaction",
+  user: "Account",
+  trust: "Trust account",
+  token: "Token",
+  asset: "Register",
+  invoice: "Invoice",
 };
 
 function Scan({ addr }) {
@@ -131,7 +143,14 @@ function Scan({ addr }) {
 
   return (
     <Layout>
-      <PageHeader page={cardType} />
+      <PageHeader
+        page={cardType}
+        title={
+          cardType
+            ? `${scanTitles[cardType] || "Scan"} ${shortHash(addr, 6)} | Nexus Explorer`
+            : undefined
+        }
+      />
       <div>
         {!searchKind && <SearchHelp query={addr} />}
         {searchKind && isError && (
@@ -151,16 +170,19 @@ function Scan({ addr }) {
           error={{}}>
           {data?.result && (
             <>
-              {[CARD_TYPES.BLOCK, CARD_TYPES.TRANSACTION].includes(
-                cardType
-              ) && <InfoCard type={cardType} data={data?.result} />}
+              {cardType === CARD_TYPES.BLOCK && (
+                <BlockDetail block={data.result} />
+              )}
+              {cardType === CARD_TYPES.TRANSACTION && (
+                <TransactionDetail tx={data.result} />
+              )}
               {[
                 CARD_TYPES.TRUST,
                 CARD_TYPES.USER,
                 CARD_TYPES.TOKEN,
                 CARD_TYPES.ASSET,
               ].includes(cardType) && (
-                <UserAccount type={cardType} data={data?.result} />
+                <AccountDetail type={cardType} data={data.result} />
               )}
               {cardType === CARD_TYPES.INVOICE && (
                 <InvoiceWithData
