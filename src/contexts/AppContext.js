@@ -14,7 +14,10 @@ const _state = {
 
 export function ContextWrapper({ children }) {
   // sync the context with localStorage
-  const [sharedState, setSharedState] = useLocalStorage('context', _state);
+  const [sharedState, setSharedState, , storageLoaded] = useLocalStorage(
+    'context',
+    _state
+  );
 
   /**
    * setState
@@ -51,6 +54,7 @@ export function ContextWrapper({ children }) {
         setSharedState,
         appContext: sharedState,
         setAppContext,
+        storageLoaded,
       }}>
       {children}
     </AppContext.Provider>

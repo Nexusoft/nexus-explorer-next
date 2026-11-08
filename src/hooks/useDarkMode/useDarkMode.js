@@ -8,16 +8,18 @@ import { useMediaQuery } from '../useMediaQuery/useMediaQuery';
  * @returns [isDark, setDark, isDark]
  */
 export function useDarkMode() {
-  const { appContext, setAppContext } = useAppContext();
+  const { appContext, setAppContext, storageLoaded } = useAppContext();
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const isDark =
     appContext.theme == null
       ? prefersDarkMode
       : appContext.theme === TYPES.THEME.DARK;
 
+  //wait for the saved choice, the script in _document already set the class before paint
   useEffect(() => {
+    if (!storageLoaded) return;
     document.body.classList.toggle(TYPES.THEME.DARK, isDark);
-  }, [isDark]);
+  }, [isDark, storageLoaded]);
 
   const setDark = (value) => {
     const next = typeof value === 'function' ? value(isDark) : value;
