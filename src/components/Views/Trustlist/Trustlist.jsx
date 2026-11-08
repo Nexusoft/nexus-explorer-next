@@ -4,7 +4,6 @@ import { useQuery } from 'react-query';
 import styles from './trustlist.module.scss';
 import { Hash } from 'components/Detail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import PageHeader from 'components/Header/PageHeader';
 import DynamicPagination from 'components/common/NE_Pagination';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 import { intlNum, pathOr } from 'utils';
@@ -105,7 +104,6 @@ export default function Trustlist() {
 
   return (
     <>
-      <PageHeader page={'trustlist'} />
       <div className={styles.page} style={{ marginBottom: '1rem' }}>
         <PromiseLayout
           isLoading={isLoading}

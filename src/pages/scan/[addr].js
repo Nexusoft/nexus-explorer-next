@@ -135,7 +135,7 @@ function Scan({ addr }) {
   return (
     <Layout>
       <PageHeader
-        page={cardType}
+        page={cardType || 'SEARCH'}
         title={
           cardType
             ? `${scanTitles[cardType] || 'Scan'} ${shortHash(

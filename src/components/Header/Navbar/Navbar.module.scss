@@ -69,28 +69,28 @@
   }
 }
 
-.closeHamIcon {
-  position: relative;
+//menu open / close buttons on the band
+.iconButton {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-ctl);
+  color: var(--c-band-ink);
   cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  background: rgba(0, 0, 0, 0);
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    width: 2rem;
-    height: 0.18rem;
-    border-radius: 2rem;
-    background: var(--c-band-ink);
+
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
-  &::before {
-    transform: rotate(135deg) translate(13px, 13px);
+  &:hover {
+    background: var(--c-band-2);
   }
-  &::after {
-    transform: rotate(-135deg) translate(13px, -13px);
+  &:focus-visible {
+    outline: 2px solid var(--c-focus);
+    outline-offset: 2px;
   }
 }
 
@@ -104,38 +104,6 @@
   }
 
   .mobile__hamburger {
-    display: block;
-    width: 2rem;
-    height: 2rem;
-    margin: var(--space-xs) var(--space-s);
-    cursor: pointer;
-
-    .hamIcon {
-      display: block;
-      width: 2rem;
-      height: 0.18rem;
-      border-radius: 2rem;
-      background: var(--c-band-ink);
-      position: relative;
-      top: 1rem;
-
-      &::before,
-      &::after {
-        position: absolute;
-        content: '';
-        width: 1.8rem;
-        height: 0.18rem;
-        border-radius: 1.8rem;
-        background: var(--c-band-ink);
-        right: 0;
-      }
-      &::before {
-        width: 1.4rem;
-        top: -0.5rem;
-      }
-      &::after {
-        bottom: -0.5rem;
-      }
-    }
+    display: inline-flex;
   }
 }

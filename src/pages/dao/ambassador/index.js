@@ -8,7 +8,10 @@ import daoObject from '../../../../public/ambassadors.json';
 function AmbassadorDAOPage() {
   return (
     <Layout>
-      <PageHeader title={TYPES.PAGEMETA.DAO.AMBASSADOR.TITLE} />
+      <PageHeader
+        title={TYPES.PAGEMETA.DAO.AMBASSADOR.TITLE}
+        description={TYPES.PAGEMETA.DAO.AMBASSADOR.DESCRIPTION}
+      />
       <DaoInfo title={'Ambassador DAO'} daoObject={daoObject} />
     </Layout>
   );

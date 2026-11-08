@@ -29,10 +29,10 @@ const PageHeader = ({ page = 'HOME', title, description, ogImage }) => {
         content="nexus, explorer, nxs, search, blockchain, nexplorer, quantum resistance"
       />
 
-      <meta property="og:locale" content="en_IN" />
+      <meta property="og:locale" content="en_US" />
       <meta property="og:type" content="website" />
       <meta property="og:title" content={_title} />
-      <meta property="og:site_name" content="Nexus (NXS) Blockchain Explorer" />
+      <meta property="og:site_name" content={TYPES.PAGEMETA.SITE} />
       <meta property="og:description" content={_description} />
       <meta property="og:url" content={_explorer_domain} />
       <meta property="og:image" content={_og_image_url} />

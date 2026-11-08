@@ -1,61 +1,86 @@
+const SITE = 'Nexus Explorer';
+const page = (name) => `${name} | ${SITE}`;
+const homeTitle = `${SITE} - blocks, transactions and accounts of the Nexus blockchain`;
+const homeDescription =
+  'Block explorer for the Nexus blockchain: search blocks, transactions, accounts, names and tokens, and follow staking, mining and network figures.';
+
 export const PageMetaTypes = {
   PAGEMETA: {
-    TITLE: 'Nexus Blockchain Explorer V2',
-    DESCRIPTION:
-      'A Redesigned Explorer for the nexus blockchain. The Nexus Blockchain explorer provides an easy to use application to explore the nexus blockchain. You are able to track blocks, transactions, NXS addresses, ...',
-    HOME: {
-      TITLE: 'Home | Nexus Blockchain Explorer V2',
+    SITE,
+    TITLE: homeTitle,
+    DESCRIPTION: homeDescription,
+    HOME: { TITLE: homeTitle, DESCRIPTION: homeDescription },
+    ABOUT: {
+      TITLE: page('About'),
       DESCRIPTION:
-        'The Nexus Blockchain explorer provides an easy to use application to explore the nexus blockchain. You are able to track blocks, transactions, NXS addresses, ...',
+        'What the Nexus Explorer shows, where its figures come from and who built it.',
     },
     METRICS: {
-      TITLE: 'Metrics | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Network metrics'),
+      DESCRIPTION:
+        'Nexus supply, inflation, staking and ledger figures for the last day, week and month.',
     },
     BLOCKS: {
-      TITLE: 'Blocks | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Blocks'),
+      DESCRIPTION:
+        'Every Nexus block, newest first, with channel, reward, transactions and size.',
     },
     TRANSACTIONS: {
-      TITLE: 'Transactions | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Transactions'),
+      DESCRIPTION: 'The newest transactions on the Nexus blockchain.',
     },
     TRUSTLIST: {
-      TITLE: 'Trustlist | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Top stakers'),
+      DESCRIPTION:
+        'Nexus trust accounts ranked by trust score, with stake, rate and estimated daily reward.',
     },
     RICHLIST: {
-      TITLE: 'Richlist | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Rich list'),
+      DESCRIPTION:
+        'The largest NXS accounts and how the supply is spread across them.',
     },
     GLOBALNAMES: {
-      TITLE: 'Global Names | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Global names'),
+      DESCRIPTION: 'Global names registered on the Nexus blockchain.',
     },
     NAMESPACES: {
-      TITLE: 'Namespaces | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Namespaces'),
+      DESCRIPTION: 'Namespaces registered on the Nexus blockchain.',
     },
     TOKENS: {
-      TITLE: 'Tokens | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Statistics',
+      TITLE: page('Tokens'),
+      DESCRIPTION:
+        'Tokens created on the Nexus blockchain with their maximum and current supply.',
     },
     USER: {
-      TITLE: 'User | Nexus Blockchain Explorer V2',
-      DESCRIPTION: 'Nexus Blockchain Explorer provides User Statistics',
+      TITLE: page('Account'),
+      DESCRIPTION: 'Nexus account balance and transactions.',
+    },
+    SEARCH: {
+      TITLE: page('Search'),
+      DESCRIPTION:
+        'Look up a Nexus block, transaction, address or name in the explorer.',
+    },
+    NOT_FOUND: {
+      TITLE: page('Page not found'),
+      DESCRIPTION: 'This page does not exist in the Nexus Explorer.',
     },
     DAO: {
       EMBASSY: {
-        TITLE: 'Embassy DAO | Nexus Blockchain Explorer V2',
-        DESCRIPTION: 'Nexus Blockchain Explorer ',
+        TITLE: page('Embassy DAO'),
+        DESCRIPTION: 'Accounts and balances of the Nexus Embassy DAO.',
       },
       AMBASSADOR: {
-        TITLE: 'Ambassador DAO | Nexus Blockchain Explorer V2',
-        DESCRIPTION: 'Nexus Blockchain Explorer ',
+        TITLE: page('Ambassador DAO'),
+        DESCRIPTION: 'Accounts and balances of the Nexus Ambassador DAO.',
       },
       DEVELOPER: {
-        TITLE: 'Developer DAO | Nexus Blockchain Explorer V2',
-        DESCRIPTION: 'Nexus Blockchain Explorer ',
+        TITLE: page('Developer DAO'),
+        DESCRIPTION: 'Accounts and balances of the Nexus Developer DAO.',
+      },
+      INVOICES: {
+        TITLE: (username) => page(`Invoices of ${username}`),
+        DESCRIPTION: 'Invoices sent from a Nexus DAO account.',
       },
     },
   },
