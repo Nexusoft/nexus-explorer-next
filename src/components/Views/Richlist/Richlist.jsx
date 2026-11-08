@@ -77,6 +77,7 @@ export default function Richlist(props) {
     },
     {
       Header: 'Share of supply',
+      hideMobile: true,
       align: 'right',
       accessor: 'total',
       id: 'share',
@@ -87,6 +88,7 @@ export default function Richlist(props) {
     },
     {
       Header: 'Kind',
+      hideMobile: true,
       accessor: 'type',
       Cell: ({ row }) =>
         row.original.type === 'TRUST'

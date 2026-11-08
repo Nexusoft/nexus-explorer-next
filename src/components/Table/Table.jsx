@@ -3,6 +3,7 @@ import { useTable, useSortBy, usePagination } from 'react-table';
 import styles from './Table.module.scss';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Pagination from 'components/common/NE_Pagination';
+import { cls } from 'utils';
 
 // ! never initialize default value while accepting parameters in react , this causes new value to be passed everytime and results in a infinite loop
 export default function Table({ columns, data, paginate }) {
@@ -72,7 +73,10 @@ export default function Table({ columns, data, paginate }) {
                       // Apply the header cell props
                       // eslint-disable-next-line react/jsx-key
                       <th
-                        className={styles.th}
+                        className={cls(
+                          styles.th,
+                          column.hideMobile && styles.hideMobile
+                        )}
                         {...column.getHeaderProps([
                           column.getSortByToggleProps(),
                           { style: { textAlign: column.align } },
@@ -116,7 +120,10 @@ export default function Table({ columns, data, paginate }) {
                         return (
                           // eslint-disable-next-line react/jsx-key
                           <td
-                            className={styles.td}
+                            className={cls(
+                              styles.td,
+                              cell.column.hideMobile && styles.hideMobile
+                            )}
                             style={
                               cell.column.align
                                 ? {

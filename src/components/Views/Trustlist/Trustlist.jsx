@@ -35,6 +35,7 @@ export default function Trustlist() {
     },
     {
       Header: 'Balance',
+      hideMobile: true,
       align: 'right',
       accessor: 'balance',
       Cell: (props) =>
@@ -49,12 +50,14 @@ export default function Trustlist() {
     },
     {
       Header: 'Rate',
+      hideMobile: true,
       align: 'right',
       accessor: 'rate',
       Cell: ({ value }) => (value != null ? `${value} %` : '-'),
     },
     {
       Header: 'Reward per day (est.)',
+      hideMobile: true,
       align: 'right',
       id: 'daily',
       accessor: (row) => (row.stake * row.rate) / 100 / 365,
@@ -63,11 +66,13 @@ export default function Trustlist() {
     },
     {
       Header: 'Staking for',
+      hideMobile: true,
       accessor: 'age',
       Cell: ({ value }) => (value ? value.split(',')[0] : '-'),
     },
     {
       Header: 'Trust score',
+      hideMobile: true,
       align: 'right',
       accessor: 'trust',
       Cell: (props) => intlNum(props.value),

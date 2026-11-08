@@ -1,136 +1,177 @@
-import nexus_blue64 from 'assets/icons/nexus_blue64.png';
-import PushLink from 'components/common/NE_Link';
-import Image from 'next/image';
-import React from 'react';
-import { BiLink, BiArrowBack } from 'react-icons/bi';
+import React, { useEffect, useRef } from 'react';
 import { IoClose } from 'react-icons/io5';
-import TYPES from 'types';
-import { cls, intlNum, timestampToDate } from 'utils';
+import {
+  Card,
+  DetailHeader,
+  DetailPage,
+  Hash,
+  SectionTitle,
+  Stat,
+  Stats,
+  styles as detailStyles,
+} from 'components/Detail';
+import { formatAmount, formatDateShort, timeAgo } from 'utils/format';
 import { InvoiceStatus } from '../InvoiceStatus/invoiceStatus';
 import styles from './invoiceModal.module.scss';
 
 export function InvoiceModal(props) {
-  const { onClose, data } = props;
+  const { onClose } = props;
+  const closeRef = useRef(null);
+
+  useEffect(() => {
+    closeRef.current?.focus();
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
 
   return (
     <section className={styles.backdrop}>
       <div className={styles.backdrop__action} onClick={onClose}></div>
-      <InvoiceWithData data={data} onClose={onClose} {...props} />
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Invoice">
+        <button
+          ref={closeRef}
+          type="button"
+          className={styles.close}
+          aria-label="Close"
+          onClick={onClose}>
+          <IoClose aria-hidden="true" />
+        </button>
+        <InvoiceWithData {...props} onClose={null} />
+      </div>
     </section>
   );
 }
 
-export const InvoiceWithData = ({ data, onBack, onClose, isPage }) => {
-  const { address, created, modified, owner, json } = data;
+export const InvoiceWithData = ({ data, onBack, isPage }) => {
+  const { address, created, modified, owner, json = {} } = data;
   const {
-    account = 0,
+    account = '',
     amount = 0,
     sender_detail = '',
     reference = '',
     description = '',
     status = '',
     recipient = '',
+    due_date,
     items = [],
   } = json;
+
   return (
-    <>
+    <DetailPage>
       {isPage && onBack && (
-        <div className={styles.onclose_back} onClick={onBack}>
-          <BiArrowBack />
-          Back
+        <div>
+          <button
+            type="button"
+            className={detailStyles.navButton}
+            onClick={onBack}>
+            Back
+          </button>
         </div>
       )}
-      <article className={cls(styles.modal, isPage && styles.page)}>
-        {onClose && (
-          <div className={styles.close} onClick={onClose}>
-            <IoClose color={TYPES.COLORS.MARKET_RED} />
-          </div>
-        )}
-        <div className={styles.content}>
-          <header>
-            <div className={styles.stamp}>
-              <Image
-                src={nexus_blue64}
-                width={48}
-                height={48}
-                alt={'nexus logo'}
-              />
-              <div>
-                <h1> Invoice Details</h1>
-                <label className={styles.createdDate}>
-                  Created on {timestampToDate(created)}
-                </label>
-              </div>
-            </div>
-            <div className={styles.dueStatus}>
-              <label>
-                <i>Modified on:</i> {timestampToDate(modified)}
-              </label>
-              <label className={styles.status}>
-                <i>Status:</i> <InvoiceStatus status={status} />
-              </label>
-            </div>
-          </header>
-          <PushLink href={!isPage && `/scan?invoice=${address}`}>
-            <i className={styles.address}>
-              Address/InvoiceID: {address}
-              {!isPage && <BiLink />}
-            </i>
-          </PushLink>
-          <main className={styles.details}>
-            <div className={styles.details__transaction}>
-              <div>
-                <i>From:</i>
-                <div>
-                  <p>{owner}</p>
-                  <label>{sender_detail}</label>
-                </div>
-              </div>
-              <div>
-                <i>Recipient:</i>
-                <p>{recipient}</p>
-              </div>
-              <div>
-                <i>Account:</i>
-                <p>{account}</p>
-              </div>
-            </div>
-            <div className={styles.details__summary}>
-              <h3>Summary</h3>
-              {reference && (
-                <p>
-                  <i>Reference: </i>
-                  {reference}
-                </p>
-              )}
-              {description && (
-                <p>
-                  <i>Description: </i>
-                  {description}
-                </p>
-              )}
-            </div>
-            <div className={styles.details__items}>
-              <div className={cls(styles.item, styles.header)}>
-                <i>Description</i>
-                <i>Unit</i>
-                <i>Unit Amount(NXS)</i>
-              </div>
+      <DetailHeader
+        kind="Invoice"
+        title={`${formatAmount(amount)} NXS`}
+        subtitle={description || reference || null}
+        actions={<InvoiceStatus status={status} />}
+      />
+
+      <Card>
+        <Stats>
+          <Stat
+            label="Created"
+            value={formatDateShort(created)}
+            note={`UTC, ${timeAgo(created)}`}
+          />
+          {due_date && (
+            <Stat
+              label="Due"
+              value={formatDateShort(due_date)}
+              note={`UTC, ${timeAgo(due_date)}`}
+            />
+          )}
+          <Stat
+            label="Last change"
+            value={formatDateShort(modified)}
+            note={`UTC, ${timeAgo(modified)}`}
+          />
+          {reference && <Stat label="Reference" value={reference} />}
+        </Stats>
+      </Card>
+
+      <Card>
+        <SectionTitle>Parties</SectionTitle>
+        <dl className={detailStyles.kv}>
+          <dt>From</dt>
+          <dd>
+            {sender_detail && <div>{sender_detail}</div>}
+            <Hash value={owner} keep={10} />
+          </dd>
+          <dt>Recipient</dt>
+          <dd>
+            <Hash value={recipient} keep={10} />
+          </dd>
+          {account && (
+            <>
+              <dt>Pay to account</dt>
+              <dd>
+                <Hash value={account} href={`/scan/${account}`} />
+              </dd>
+            </>
+          )}
+          <dt>Invoice address</dt>
+          <dd>
+            <Hash
+              value={address}
+              href={isPage ? undefined : `/scan?invoice=${address}`}
+            />
+          </dd>
+        </dl>
+      </Card>
+
+      <Card>
+        <SectionTitle note={`${items.length}`}>Items</SectionTitle>
+        <div className={detailStyles.tableWrap}>
+          <table className={detailStyles.table}>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th className={detailStyles.right}>Units</th>
+                <th className={detailStyles.right}>Unit price</th>
+                <th className={detailStyles.right}>Total</th>
+              </tr>
+            </thead>
+            <tbody>
               {items.map((item, idx) => (
-                <div key={idx} className={styles.item}>
-                  <label>{item?.description}</label>
-                  <label>{item?.units}</label>
-                  <label>{item?.unit_amount}</label>
-                </div>
+                <tr key={idx}>
+                  <td>{item?.description}</td>
+                  <td className={detailStyles.right}>{item?.units}</td>
+                  <td className={detailStyles.right}>
+                    {formatAmount(item?.amount)} NXS
+                  </td>
+                  <td className={detailStyles.right}>
+                    {formatAmount((item?.amount || 0) * (item?.units || 0))} NXS
+                  </td>
+                </tr>
               ))}
-              <div className={cls(styles.item, styles.total)}>
-                <h3>Total Amount(NXS):</h3>
-                <h3>{intlNum(amount)}</h3>
-              </div>
-            </div>
-          </main>
+              <tr>
+                <td colSpan={3} className={detailStyles.right}>
+                  <strong>Invoice total</strong>
+                </td>
+                <td className={detailStyles.right}>
+                  <strong>{formatAmount(amount)} NXS</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </article>
-    </>
+      </Card>
+    </DetailPage>
   );
 };

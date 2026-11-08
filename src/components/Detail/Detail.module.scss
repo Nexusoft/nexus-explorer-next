@@ -40,7 +40,7 @@
 .subtitle {
   margin: 0.4rem 0 0;
   color: var(--c-ink-2);
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .badges {
@@ -367,6 +367,10 @@
   line-height: 0;
 }
 
+.showMobile {
+  display: none;
+}
+
 @media screen and (max-width: 768px) {
   .card {
     padding: 1rem;
@@ -390,6 +394,9 @@
   }
   .hideMobile {
     display: none;
+  }
+  .showMobile {
+    display: inline;
   }
 }
 

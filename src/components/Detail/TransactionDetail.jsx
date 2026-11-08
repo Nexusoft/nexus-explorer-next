@@ -12,7 +12,12 @@ import {
   TechDetails,
 } from '.';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import { formatAmount, formatDate, formatInt, timeAgo } from 'utils/format';
+import {
+  formatAmount,
+  formatDateShort,
+  formatInt,
+  timeAgo,
+} from 'utils/format';
 import { toTitleCase } from 'utils/converter';
 import { transactionHeadline } from 'utils/contracts';
 
@@ -60,8 +65,8 @@ export default function TransactionDetail({ tx }) {
         <Stats>
           <Stat
             label="Time"
-            value={formatDate(tx.timestamp)}
-            note={timeAgo(tx.timestamp)}
+            value={formatDateShort(tx.timestamp)}
+            note={`UTC, ${timeAgo(tx.timestamp)}`}
           />
           <Stat
             label="Block"

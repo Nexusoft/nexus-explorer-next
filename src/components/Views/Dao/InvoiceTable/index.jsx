@@ -1,6 +1,6 @@
 import Table from 'components/Table/Table';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useQuery } from 'react-query';
 import { columns } from './columns';
 import { BsBoxArrowLeft } from 'react-icons/bs';
@@ -34,11 +34,13 @@ function InvoicesView({ username }) {
       Header: '',
       accessor: 'address',
       Cell: (props) => (
-        <div
+        <button
+          type="button"
           className={styles.info_icon}
+          aria-label="Invoice details"
           onClick={() => handleModalOpen(props.row.original)}>
-          <FiInfo />
-        </div>
+          <FiInfo aria-hidden="true" />
+        </button>
       ),
     },
     ...columns,
@@ -59,21 +61,21 @@ function InvoicesView({ username }) {
     },
   };
 
+  //url shows the open invoice so it can be copied, back to the list url on close
   const handleModalOpen = (data) => {
     setModalData(data);
     setIsOpen(true);
-    window &&
-      window.history.replaceState(
-        'InvoiceInfo',
-        'Title',
-        '/scan?invoice=' + data.address
-      );
+    window.history.replaceState(
+      window.history.state,
+      '',
+      '/scan?invoice=' + data.address
+    );
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setIsOpen(false);
-    // TODO: need to restore prevoius url after modal close
-  };
+    window.history.replaceState(window.history.state, '', router.asPath);
+  }, [router.asPath]);
 
   return (
     <PromiseLayout

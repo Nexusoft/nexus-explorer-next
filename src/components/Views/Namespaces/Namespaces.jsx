@@ -16,6 +16,7 @@ export default function Namespaces() {
   const columns = [
     {
       Header: '#',
+      hideMobile: true,
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
 
@@ -30,6 +31,7 @@ export default function Namespaces() {
     },
     {
       Header: 'Created',
+      hideMobile: true,
       accessor: 'created',
       Cell: ({ value }) => formatDateShort(value),
     },

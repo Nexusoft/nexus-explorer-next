@@ -16,6 +16,7 @@ export default function Tokens() {
   const columns = [
     {
       Header: '#',
+      hideMobile: true,
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
     {
@@ -30,6 +31,7 @@ export default function Tokens() {
     },
     {
       Header: 'Maximum supply',
+      hideMobile: true,
       align: 'right',
       accessor: 'maxsupply',
       Cell: ({ value }) => intlNum(value),

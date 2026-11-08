@@ -26,11 +26,13 @@ export const columns = [
   },
   {
     Header: 'Reference',
+    hideMobile: true,
     accessor: 'json.reference',
     Cell: (props) => <div>{props.value}</div>,
   },
   {
     Header: 'Sender',
+    hideMobile: true,
     accessor: 'json.sender_detail',
   },
 

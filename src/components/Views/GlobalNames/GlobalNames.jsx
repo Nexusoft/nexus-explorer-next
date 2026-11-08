@@ -16,6 +16,7 @@ export default function GlobalNames() {
   const columns = [
     {
       Header: '#',
+      hideMobile: true,
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
     {
@@ -29,6 +30,7 @@ export default function GlobalNames() {
     },
     {
       Header: 'Created',
+      hideMobile: true,
       accessor: 'created',
       Cell: ({ value }) => formatDateShort(value),
     },

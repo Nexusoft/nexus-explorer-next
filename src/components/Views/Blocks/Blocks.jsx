@@ -69,7 +69,10 @@ export default function Blocks() {
                 <th>Time</th>
                 <th className={styles.hideMobile}>Channel</th>
                 <th className={styles.right}>Reward</th>
-                <th className={styles.right}>Transactions</th>
+                <th className={styles.right} title="Transactions">
+                  <span className={styles.hideMobile}>Transactions</span>
+                  <span className={styles.showMobile}>Txs</span>
+                </th>
                 <th className={`${styles.right} ${styles.hideMobile}`}>Size</th>
               </tr>
             </thead>
