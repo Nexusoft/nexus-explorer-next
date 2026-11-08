@@ -1,8 +1,8 @@
 .container {
-  background: var(--theme-tab-bg);
-  border-radius: 0.5rem;
-  box-shadow: var(--card-shadow);
-  color: var(--theme-page-text);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-panel);
+  color: var(--c-ink);
   padding: 1.5rem;
   margin: 1rem 0;
   max-width: 48rem;
@@ -14,9 +14,9 @@
 }
 
 .query {
-  font-family: monospace;
+  font-family: var(--font-mono);
   word-break: break-all;
-  color: var(--theme-page-text-secondary);
+  color: var(--c-ink-2);
   margin: 0 0 1rem;
 }
 
@@ -37,7 +37,7 @@
     flex-wrap: wrap;
     gap: 0.25rem 1rem;
     padding: 0.35rem 0;
-    border-top: 1px solid var(--theme-page-background);
+    border-top: 1px solid var(--c-line-soft);
   }
 
   dt {
@@ -47,7 +47,7 @@
 
   dd {
     margin: 0;
-    color: var(--theme-page-text-secondary);
+    color: var(--c-ink-2);
     word-break: break-all;
   }
 }

@@ -1,88 +1,102 @@
 import styles from './Footer.module.scss';
-import Image from 'next/image';
-import { ObjectToArray } from 'utils/helper';
-import ASSESTS from 'assets';
+import Link from 'next/link';
+import { useQuery } from 'react-query';
+import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import TYPES from 'types';
-import { cls } from 'utils';
+import { getVersion } from 'utils/getVersion';
 
-/**
- * Footer component for the website
- * @returns {JSX.Element}
- */
-export default function Footer() {
+const columns = [
+  {
+    title: 'Nexus',
+    links: [
+      ['nexus.io', 'https://nexus.io'],
+      ['Wiki', 'https://wiki.nexus.io'],
+      ['API documentation', 'https://wiki.nexus.io/en/tritium++'],
+    ],
+  },
+  {
+    title: 'Wallets',
+    links: [
+      ['Desktop wallet', 'https://nexus.io/wallets'],
+      [
+        'Android',
+        'https://play.google.com/store/apps/details?id=io.nexus.wallet',
+      ],
+      ['iOS (TestFlight)', 'https://testflight.apple.com/join/dJLBiKzt'],
+    ],
+  },
+  {
+    title: 'Community',
+    links: [
+      ['Telegram', 'https://t.me/NexusOfficial'],
+      ['X (Twitter)', 'https://twitter.com/NexusOfficial'],
+      ['Reddit', 'https://www.reddit.com/r/nexus_community/'],
+      ['YouTube', 'https://www.youtube.com/channel/UCDi2stU5yj71_iPgxMZF79w'],
+      ['Blog', 'https://medium.com/@NexusOfficial'],
+    ],
+  },
+  {
+    title: 'Explorer',
+    links: [
+      ['About', '/about'],
+      ['Source code', 'https://github.com/Nexusoft/nexus-explorer-next'],
+      ['Privacy policy', 'https://nexus.io/privacy'],
+      ['Terms of use', 'https://nexus.io/terms'],
+    ],
+  },
+];
+
+function FooterLink({ label, href }) {
+  if (href.startsWith('/')) {
+    return (
+      <Link href={href}>
+        <a>{label}</a>
+      </Link>
+    );
+  }
   return (
-    <footer className={styles.footer}>
-      <section className={styles.footer__primary}>
-        {/* Map and display primary section of footer */}
-        {ObjectToArray(TYPES.FOOTER_ITEMS.PRIMARY).map((info, idx) => (
-          <div className={styles.footer__info} key={idx}>
-            {info.title && (
-              <h4 className={styles.footer__info__title}>{info.title}</h4>
-            )}
-            {/* Map links and it's icon/image */}
-            {info.items.map((item, i) => (
-              <Footer_Segment item={item} idx={i} key={i} />
-            ))}
-          </div>
-        ))}
-      </section>
-      <section className={styles.footer__secondary}>
-        {/* Map and display second section of footer */}
-        {ObjectToArray(TYPES.FOOTER_ITEMS.SECONDARY).map((info, idx) => (
-          <div
-            className={cls(
-              styles[`footer__info`],
-              styles[`footer__secondary__info`]
-            )}
-            key={idx}>
-            {/* Map links and it's icon/image */}
-            {info.items.map((item, i) => (
-              <Footer_Segment item={item} idx={i} key={i} />
-            ))}
-          </div>
-        ))}
-      </section>
-    </footer>
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {label}
+    </a>
   );
 }
 
-const Footer_Segment = ({ item, idx }) => (
-  <div className={styles.footer__info__segment}>
-    <Footer_Icon Icon={item.icon} label={item.label} idx={idx} />
-    <Footer_Label
-      label={item.label}
-      href={item.href}
-      target={item.target}
-      idx={idx}
-    />
-  </div>
-);
+/**
+ * Site footer: link columns, versions and copyright
+ * @returns {JSX.Element}
+ */
+export default function Footer() {
+  const { network, getInfo } = useNetwork();
+  const { data } = useQuery(['info', network.name], getInfo, {
+    refetchInterval: TYPES.REFETCH_INTERVALS.METRICS,
+  });
+  const nodeVersion = data?.data?.result?.version;
 
-const Footer_Label = ({ label, href, target, idx }) => (
-  <a className={styles.footer__info__label} href={href} target={target}>
-    <label className={styles.footer__info__label} htmlFor={`${label}-${idx}`}>
-      {label}
-    </label>
-  </a>
-);
-
-const Footer_Icon = ({ Icon, label, idx }) => {
   return (
-    <>
-      {!!Icon && (
-        <span className={styles.footer__info__icon} id={`${label}-${idx}`}>
-          {/* Icon should be JSX.component */}
-          {(typeof Icon == 'function' && (
-            <Icon className={styles.footer__info__icon} color="inherit" />
-          )) || (
-            <Image
-              className={styles.footer__info__icon}
-              src={ASSESTS.ICON.NEXUS.BLUE}
-              alt={'nexus logo'}
-            />
-          )}
-        </span>
-      )}
-    </>
+    <footer className={styles.footer}>
+      <div className={styles.inner}>
+        <div className={styles.columns}>
+          {columns.map((col) => (
+            <nav key={col.title} aria-label={col.title}>
+              <h2>{col.title}</h2>
+              <ul>
+                {col.links.map(([label, href]) => (
+                  <li key={label}>
+                    <FooterLink label={label} href={href} />
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+        <div className={styles.bottom}>
+          <span>Copyright 2014-{new Date().getFullYear()} Nexus</span>
+          <span className={styles.versions}>
+            Explorer v{getVersion()}
+            {nodeVersion && <> &nbsp;|&nbsp; Node v{nodeVersion}</>}
+          </span>
+        </div>
+      </div>
+    </footer>
   );
-};
+}

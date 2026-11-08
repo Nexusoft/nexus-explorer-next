@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from 'react-query';
 import { useNetwork } from 'hooks';
-import { Card, SectionTitle, styles } from 'components/Detail';
+import { Card, ChannelTag, SectionTitle, styles } from 'components/Detail';
 import ListPager from 'components/Detail/ListPager';
-import { channelName } from 'components/Detail/BlockDetail';
 import {
   formatAmount,
   formatBytes,
@@ -24,10 +23,14 @@ export default function Blocks() {
     setHighlight(null);
   }, [network.name]);
 
-  const blocksRQ = useQuery(['blocks', pageSize, page, network.name], getBlocks, {
-    keepPreviousData: true,
-    refetchInterval: page === 0 ? 30000 : false,
-  });
+  const blocksRQ = useQuery(
+    ['blocks', pageSize, page, network.name],
+    getBlocks,
+    {
+      keepPreviousData: true,
+      refetchInterval: page === 0 ? 30000 : false,
+    }
+  );
   const infoRQ = useQuery(['info', network.name], getInfo);
   const tip = infoRQ.data?.data?.result?.blocks;
 
@@ -44,15 +47,10 @@ export default function Blocks() {
 
   return (
     <Card>
-      <SectionTitle
-        note={
-          first != null
-            ? `blocks ${formatInt(last)} to ${formatInt(first)}${
-                tip ? ` of ${formatInt(tip)}` : ''
-              }`
-            : null
-        }>
-        Blocks
+      <SectionTitle note={tip ? `latest is ${formatInt(tip)}` : null}>
+        {first != null
+          ? `Blocks ${formatInt(last)} to ${formatInt(first)}`
+          : 'Blocks'}
       </SectionTitle>
       {blocksRQ.isLoading && <p className={styles.muted}>Loading blocks...</p>}
       {blocksRQ.isError && (
@@ -61,7 +59,9 @@ export default function Blocks() {
       {rows.length > 0 && (
         <div
           className={styles.tableWrap}
-          style={{ opacity: blocksRQ.isFetching && blocksRQ.isPreviousData ? 0.5 : 1 }}>
+          style={{
+            opacity: blocksRQ.isFetching && blocksRQ.isPreviousData ? 0.5 : 1,
+          }}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -79,7 +79,7 @@ export default function Blocks() {
                   key={b.height}
                   style={
                     b.height === highlight
-                      ? { outline: '2px solid var(--nexus-blue)' }
+                      ? { outline: '2px solid var(--c-focus)' }
                       : undefined
                   }>
                   <td>
@@ -87,13 +87,17 @@ export default function Blocks() {
                       <a>{formatInt(b.height)}</a>
                     </Link>
                   </td>
-                  <td title={formatDate(b.timestamp)} style={{ whiteSpace: 'nowrap' }}>
+                  <td
+                    title={formatDate(b.timestamp)}
+                    style={{ whiteSpace: 'nowrap' }}>
                     {timeAgo(b.timestamp)}
                     <div className={styles.muted}>
                       {formatDate(b.timestamp).slice(0, 16)}
                     </div>
                   </td>
-                  <td className={styles.hideMobile}>{channelName(b.channel)}</td>
+                  <td className={styles.hideMobile}>
+                    <ChannelTag channel={b.channel} />
+                  </td>
                   <td className={styles.right} style={{ whiteSpace: 'nowrap' }}>
                     {formatAmount(b.mint, 2)} NXS
                   </td>

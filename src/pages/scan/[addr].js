@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Button from 'components/common/NE_Button';
+import { styles as detailStyles } from 'components/Detail';
 import BlockDetail from 'components/Detail/BlockDetail';
 import TransactionDetail from 'components/Detail/TransactionDetail';
 import AccountDetail from 'components/Detail/AccountDetail';
@@ -29,18 +29,17 @@ export const getServerSideProps = async (context) => {
 };
 
 const scanTitles = {
-  block: "Block",
-  transaction: "Transaction",
-  user: "Account",
-  trust: "Trust account",
-  token: "Token",
-  asset: "Register",
-  invoice: "Invoice",
+  block: 'Block',
+  transaction: 'Transaction',
+  user: 'Account',
+  trust: 'Trust account',
+  token: 'Token',
+  asset: 'Register',
+  invoice: 'Invoice',
 };
 
 function Scan({ addr }) {
   const router = useRouter();
-  const [showRawResponse, setShowRawResponse] = useState(false);
   const [cardType, setCardType] = useState();
   const { network, getScanResults } = useNetwork();
 
@@ -127,18 +126,10 @@ function Scan({ addr }) {
   );
 
   const rawInfo = (
-    <div style={{ margin: '1rem' }}>
-      <Button
-        type="tertiary"
-        onClick={() => setShowRawResponse((prev) => !prev)}>
-        Show RAW Response
-      </Button>
-      {showRawResponse && (
-        <pre style={{ overflow: 'scroll', color: 'var(--theme-page-text)' }}>
-          {JSON.stringify(data || error, null, 2)}
-        </pre>
-      )}
-    </div>
+    <details className={detailStyles.raw}>
+      <summary>Raw node response</summary>
+      <pre>{JSON.stringify(data || error, null, 2)}</pre>
+    </details>
   );
 
   return (
@@ -147,7 +138,10 @@ function Scan({ addr }) {
         page={cardType}
         title={
           cardType
-            ? `${scanTitles[cardType] || "Scan"} ${shortHash(addr, 6)} | Nexus Explorer`
+            ? `${scanTitles[cardType] || 'Scan'} ${shortHash(
+                addr,
+                6
+              )} | Nexus Explorer`
             : undefined
         }
       />

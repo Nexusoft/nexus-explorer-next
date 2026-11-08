@@ -2,15 +2,12 @@ import styles from './Header.module.scss';
 import { useRouter } from 'next/router';
 import Search from 'components/common/NE_SearchBar';
 import TYPES from 'types';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NETWORKS } from 'types/ConstantsTypes';
 import { useAppContext } from 'contexts/AppContext';
 import Brand from './Brand';
 import { DesktopNavbar, Hamburger, MobileMenu } from './Navbar';
-import { throttle } from 'utils/common';
-import { cls } from 'utils';
 
-/// PROGRESS: REVAMP HEADER
 /**
  * Header component for the website
  * @returns {JSX.Element}
@@ -20,8 +17,6 @@ export const Header = () => {
   const [searchInput, setSearchInput] = useState('');
   const router = useRouter();
   const { appContext, setAppContext } = useAppContext();
-
-  const onClickBrand = () => router.push('/');
 
   const handleNetworkChange = (e) => {
     const val = e.target.value;
@@ -37,35 +32,6 @@ export const Header = () => {
     );
   }, [appContext.network]);
 
-  const headerRef = useRef(null);
-
-  useEffect(() => {
-    const el = headerRef.current;
-
-    let previousValue = window.pageYOffset;
-
-    function onScroll() {
-      if (window.pageYOffset > previousValue) {
-        // avoid unnecessary increase in scroll offset Value
-        const offsetValue =
-          el.clientHeight * 2 > window.pageYOffset
-            ? window.pageYOffset
-            : el.clientHeight * 2;
-
-        el.style.transform = `translateY(-${offsetValue}px)`;
-      } else {
-        el.style.transform = `translateY(0px)`;
-      }
-      previousValue = window.pageYOffset;
-    }
-
-    if (el) {
-      window.addEventListener('scroll', throttle(onScroll));
-    }
-    return () =>
-      window && window.removeEventListener('scroll', throttle(onScroll));
-  }, []);
-
   const handleMenuToggle = () => {
     const body = document.querySelector('body');
     setToggle((prev) => {
@@ -78,14 +44,10 @@ export const Header = () => {
 
   return (
     <>
-      <header ref={headerRef} className={cls(styles.imgBg, styles.container)}>
+      <header className={styles.container}>
         <div className={styles.header}>
           <div className={styles.nav}>
-            <Brand
-              isDarkMode={appContext.theme === TYPES.THEME.DARK}
-              onClick={onClickBrand}
-              network={appContext.network.name}
-            />
+            <Brand network={appContext.network.name} />
             <DesktopNavbar
               activePathname={router.pathname}
               network={appContext.network.name}

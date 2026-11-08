@@ -1,4 +1,4 @@
-import styles from './Pagination.module.scss';
+import styles from 'components/Table/Pagination.module.scss';
 import {
   BiChevronLeft,
   BiChevronRight,

@@ -7,9 +7,11 @@
   border: 0.0625rem solid transparent;
   border-radius: 0.25rem;
   padding: 0.25rem 0.75rem;
-  color: var(--white);
-  font-weight: bold;
-  outline-color: var(--sky-blue);
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  outline-color: var(--c-focus);
   transition: all 100ms ease-out;
   cursor: pointer;
 
@@ -23,8 +25,8 @@
   }
 
   &:hover:not(:disabled) {
-    border-color: var(--sky-blue);
-    outline: 0.125rem solid var(--sky-blue);
+    border-color: var(--c-focus);
+    outline: 0.125rem solid var(--c-focus);
   }
   .body {
     width: 100%;
@@ -32,18 +34,18 @@
 }
 
 .primary {
-  background-color: var(--ocean-blue);
+  background-color: #0868a8;
   padding: 0.25rem 0.75rem;
 }
 
 .secondary {
   background: var(--theme-page-background);
-  border-color: var(--ocean-blue);
-  color: var(--ocean-blue);
+  border-color: var(--c-link);
+  color: var(--c-link);
 }
 
 .tertiary {
-  background-color: var(--ocean-blue);
+  background-color: #0868a8;
   padding-right: 0.5rem;
   &:hover {
     .icon {

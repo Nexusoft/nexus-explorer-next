@@ -24,7 +24,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--theme-page-text);
+  background: var(--c-line);
   border-radius: var(--space-xs);
 }
 
@@ -49,5 +49,5 @@
 }
 
 .monospace {
-  font-family: 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-family: var(--font-mono);
 }

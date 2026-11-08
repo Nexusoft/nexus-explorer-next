@@ -1,13 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BiCopy, BiCheck } from 'react-icons/bi';
 import styles from './Detail.module.scss';
 import { handleCopy } from 'utils/helper';
-import { shortHash, formatAmount } from 'utils/format';
+import { shortHash, formatAmount, formatDate, timeAgo } from 'utils/format';
 import { describeContract } from 'utils/contracts';
 import { cls } from 'utils';
+import { StringsTypes } from 'types/StringsTypes';
 
 export { styles };
+
+export const channelName = (channel) =>
+  StringsTypes.CHANNELS[channel] || `Channel ${channel}`;
+
+/** Stake / Prime / Hash with its channel color */
+export function ChannelTag({ channel }) {
+  return (
+    <span className={styles.channel} data-channel={channel}>
+      {channelName(channel)}
+    </span>
+  );
+}
+
+/** "2 min ago", rendered in the browser only (static pages would show build time ages) and kept current */
+export function Age({ ts }) {
+  const [now, setNow] = useState(null);
+  useEffect(() => {
+    setNow(Date.now() / 1000);
+    const id = setInterval(() => setNow(Date.now() / 1000), 15000);
+    return () => clearInterval(id);
+  }, []);
+  return <span title={formatDate(ts)}>{now ? timeAgo(ts, now) : ''}</span>;
+}
+
+/** Page heading with a one line explanation */
+export function PageTitle({ title, children }) {
+  return (
+    <header className={styles.pageTitle}>
+      <h1>{title}</h1>
+      {children && <p>{children}</p>}
+    </header>
+  );
+}
 
 export function DetailPage({ children }) {
   return <div className={styles.page}>{children}</div>;
@@ -29,7 +63,11 @@ export function DetailHeader({ kind, title, subtitle, badges = [], actions }) {
           {badges.filter(Boolean).length > 0 && (
             <div className={styles.badges}>
               {badges.filter(Boolean).map((b) => (
-                <span key={b.text} className={styles.badge} data-tone={b.tone}>
+                <span
+                  key={b.text}
+                  className={styles.badge}
+                  data-tone={b.tone}
+                  data-channel={b.channel}>
                   {b.text}
                 </span>
               ))}
@@ -108,7 +146,9 @@ export function Hash({ value, href, full = false, keep = 8 }) {
   if (!value) return <span className={styles.muted}>-</span>;
   const text = full ? value : shortHash(value, keep);
   return (
-    <span className={cls(styles.hash, styles.mono)} title={value}>
+    <span
+      className={cls(styles.hash, styles.mono, !full && styles.short)}
+      title={value}>
       {href ? (
         <Link href={href}>
           <a>{text}</a>

@@ -1,3 +1,4 @@
+import { PageTitle } from 'components/Detail';
 import PageHeader from 'components/Header/PageHeader';
 import Layout from 'components/Layout';
 import Richlist from 'components/Views/Richlist';
@@ -19,6 +20,9 @@ function index(props) {
   return (
     <Layout>
       <PageHeader page="Richlist" />
+      <PageTitle title="Rich list">
+        The largest NXS balances held in Tritium accounts and trust accounts.
+      </PageTitle>
       <Richlist data={props.richlistData} />
     </Layout>
   );

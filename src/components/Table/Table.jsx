@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTable, useSortBy, usePagination } from 'react-table';
 import styles from './Table.module.scss';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Pagination from 'components/common/NE_Pagination';
 
 // ! never initialize default value while accepting parameters in react , this causes new value to be passed everytime and results in a infinite loop
@@ -79,13 +80,15 @@ export default function Table({ columns, data, paginate }) {
                           // Render the header
                           column.render('Header')
                         }
-                        <span>
-                          {column.isSorted
-                            ? column.isSortedDesc
-                              ? ' 🔽'
-                              : ' 🔼'
-                            : ''}
-                        </span>
+                        {column.isSorted && (
+                          <span className={styles.sort} aria-hidden="true">
+                            {column.isSortedDesc ? (
+                              <FiChevronDown />
+                            ) : (
+                              <FiChevronUp />
+                            )}
+                          </span>
+                        )}
                       </th>
                     ))
                   }
@@ -127,7 +130,7 @@ export default function Table({ columns, data, paginate }) {
           </tbody>
         </table>
         {data.length === 0 && (
-          <div className={styles.noRecords}>No Records</div>
+          <div className={styles.noRecords}>Nothing to show.</div>
         )}
       </div>
       {pageCount > 1 && paginate && (

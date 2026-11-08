@@ -1,9 +1,15 @@
 import styles from './SearchBar.module.scss';
-import { Search_SVG_Icon } from 'assets/icons';
+import { FiSearch } from 'react-icons/fi';
 
 function SearchBar(props) {
   return (
-    <div className={styles.searchBar}>
+    <form
+      className={styles.searchBar}
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault();
+        props?.onSearch?.();
+      }}>
       <input
         type="search"
         results={5}
@@ -11,15 +17,13 @@ function SearchBar(props) {
         onChange={props?.onChange}
         placeholder={props?.placeholder}
         className={styles.searchInput}
-        onKeyDown={props?.onKeyDown}
+        aria-label="Search the blockchain"
       />
-      <button
-        type="submit"
-        onClick={props?.onSearch}
-        className={styles.searchBtn}>
-        <Search_SVG_Icon />
+      <button type="submit" className={styles.searchBtn}>
+        <FiSearch aria-hidden="true" />
+        <span>Search</span>
       </button>
-    </div>
+    </form>
   );
 }
 

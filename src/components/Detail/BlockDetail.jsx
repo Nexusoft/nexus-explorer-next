@@ -9,9 +9,9 @@ import {
   Stat,
   Stats,
   TechDetails,
+  channelName,
   styles,
 } from '.';
-import { StringsTypes } from 'types/StringsTypes';
 import {
   formatAmount,
   formatBytes,
@@ -21,9 +21,6 @@ import {
 } from 'utils/format';
 import { toTitleCase } from 'utils/converter';
 import { transactionHeadline } from 'utils/contracts';
-
-export const channelName = (channel) =>
-  StringsTypes.CHANNELS[channel] || `Channel ${channel}`;
 
 export default function BlockDetail({ block }) {
   const txs = block.tx || [];
@@ -39,7 +36,10 @@ export default function BlockDetail({ block }) {
           block.timestamp
         )})`}
         badges={[
-          { text: `${channelName(block.channel)} block`, tone: 'accent' },
+          {
+            text: `${channelName(block.channel)} block`,
+            channel: block.channel,
+          },
           confirmations != null && {
             text: `${formatInt(confirmations)} confirmations`,
             tone: 'good',

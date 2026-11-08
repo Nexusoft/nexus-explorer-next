@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useRef, useState } from 'react';
+import { formatInt } from 'utils/format';
 import worldBgSvg from './world-robinson.svg';
 import styles from './WorldNodes.module.scss';
 import { RobinsonProjector } from './latlongConverter';
@@ -121,39 +122,35 @@ export default function WorldNodes() {
   return (
     <div className={styles.container}>
       <div className={styles.controls}>
-        <div className={styles.left}>
-          <div>
-            Nodes Discovered: {networkCountNodesRQ.data?.data?.result?.count}
-          </div>
-          <div>
-            Nodes Shown: {mapXYarr.filter((item) => item.opacity > 0).length}
-          </div>
-          <label>
-            Last seen{' '}
-            <input
-              style={{ width: '3rem' }}
-              type="number"
-              ref={opacityControlRef}
-              onChange={(e) => {
-                setHours(e.target.value);
-              }}
-              defaultValue={hours}></input>{' '}
-            Hours ago
-          </label>
-          {networkListNodesRQ.isLoading && <div>Fetching Data Points...</div>}
-        </div>
-
-        <div className={styles.right}>
-          <div>
-            Latency: &lt; {LATENCY}ms{' '}
-            <LegendCirle color={TYPES.COLORS.NEXUS_BLUE} size={10} />
-          </div>
-          <div>
-            &gt; {LATENCY}ms <LegendCirle color={COLOR_SLOW} size={10} />
-          </div>
-          <div>
-            Not measured <LegendCirle color={COLOR_UNKNOWN} size={10} />
-          </div>
+        <p className={styles.counts}>
+          {formatInt(networkCountNodesRQ.data?.data?.result?.count)} nodes
+          known, {mapXYarr.filter((item) => item.opacity > 0).length} on the map
+          {networkListNodesRQ.isLoading && ' (loading...)'}
+        </p>
+        <label className={styles.hours}>
+          Seen in the last
+          <input
+            type="number"
+            min="1"
+            ref={opacityControlRef}
+            onChange={(e) => {
+              setHours(e.target.value);
+            }}
+            defaultValue={hours}
+          />
+          hours
+        </label>
+        <div className={styles.legend}>
+          <span>
+            <LegendCirle color={TYPES.COLORS.NEXUS_BLUE} size={8} /> Under{' '}
+            {LATENCY} ms
+          </span>
+          <span>
+            <LegendCirle color={COLOR_SLOW} size={8} /> Slower
+          </span>
+          <span>
+            <LegendCirle color={COLOR_UNKNOWN} size={8} /> Not measured
+          </span>
         </div>
       </div>
       <div className={styles.worldContainer}>

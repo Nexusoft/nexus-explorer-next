@@ -5,6 +5,8 @@
   bottom: 5rem;
 
   &__clickAble {
+    all: unset;
+    box-sizing: border-box;
     cursor: pointer;
     width: var(--space-xl);
     height: var(--space-xl);
@@ -12,15 +14,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.7;
-    background: var(--theme-page-not-background);
-    box-shadow: 0 0 0.25rem 0 rgba(226, 235, 250, 0.5);
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    color: var(--c-ink-2);
     animation: move-in 0.5s ease-in-out;
     transition: all 0.2s ease-in-out;
 
     &:hover {
-      opacity: 1;
-      border: solid var(--theme-page-text) 0.0625rem;
+      color: var(--c-link);
+      border-color: var(--c-link);
     }
   }
 

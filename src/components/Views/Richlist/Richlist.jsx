@@ -2,7 +2,7 @@ import Table from 'components/Table/Table';
 import { useQuery } from 'react-query';
 import styles from './richlist.module.scss';
 import { intlNum } from 'utils/converter';
-import ApexPie from 'components/common/NE_Chart/ChartApexPie';
+import Distribution from './Distribution';
 import TYPES from 'types';
 import CopyText from 'components/common/NE_CopyText';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
@@ -46,7 +46,12 @@ export default function Richlist(props) {
   //system/get/metrics has no supply, ledger/get/info does
   const miningRQ = useQuery(['mining', network.name], getMining);
   const totalSupply = miningRQ?.data?.data?.result?.supply?.total;
-  const PIE_LABELS = ['Top 1', 'Top 10', 'Top 100', 'Others'];
+  const PIE_LABELS = [
+    'Largest account',
+    'Ranks 2 to 10',
+    'Ranks 11 to 100',
+    'All other accounts',
+  ];
 
   const columns = [
     {
@@ -107,20 +112,11 @@ export default function Richlist(props) {
   useEffect(() => {
     if (richlist111.data) {
       const sortedData = richlist111.data.data;
-      const top1 = sortedData.slice(0, 1);
-      const top10 = sortedData.slice(1, 11);
-      const top100 = sortedData.slice(11, 111);
-      const sumTop1 = top1.reduce((acc, cur) => acc + cur.total, 0);
-      const sumTop10 = top10.reduce((acc, cur) => acc + cur.total, 0);
-      const sumTop100 = top100.reduce((acc, cur) => acc + cur.total, 0);
-
-      setPieData([
-        sumTop1,
-        sumTop10,
-        sumTop100,
-        (totalSupply || TYPES.MAX_SUPPLY.VALUE) -
-          (sumTop100 + sumTop10 + sumTop1),
-      ]);
+      const sum = (from, to) =>
+        sortedData.slice(from, to).reduce((acc, cur) => acc + cur.total, 0);
+      const groups = [sum(0, 1), sum(1, 10), sum(10, 100)];
+      const supply = totalSupply || TYPES.MAX_SUPPLY.VALUE;
+      setPieData([...groups, supply - groups.reduce((x, y) => x + y, 0)]);
     }
   }, [richlist111.data, totalSupply]);
 
@@ -132,11 +128,7 @@ export default function Richlist(props) {
           isError={isError}
           error={pathOr({}, ['response', 'data', 'error'], error)}
           loaderType={TYPES.LOADER.CIRCLE}>
-          {/* // * Pie chart */}
-          <div className={styles.chartContainer}>
-            <h3>NXS Distribution</h3>
-            {pieData && <ApexPie series={pieData} labels={PIE_LABELS} />}
-          </div>
+          {pieData && <Distribution values={pieData} labels={PIE_LABELS} />}
 
           {/* // * Table with dual pagination */}
           <div>

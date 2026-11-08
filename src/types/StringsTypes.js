@@ -18,7 +18,7 @@ export const StringsTypes = {
     TEXT: 'small-card',
   },
   PLACE_HOLDER: {
-    SEARCH: 'Search for a username:account / block / transaction / address',
+    SEARCH: 'Search by block height, block hash, transaction, address or name',
   },
 };
 

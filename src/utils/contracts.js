@@ -82,6 +82,19 @@ export function describeContract(c = {}) {
   };
 }
 
+const rewardOps = ['COINBASE', 'TRUST', 'GENESIS'];
+const isRewardContract = (c) =>
+  rewardOps.includes(c?.OP) || (c?.OP === 'CREDIT' && c?.for === 'COINBASE');
+
+/** Only mining / staking rewards (a fee next to a reward claim still counts as a reward) */
+export function isRewardTx(tx) {
+  const contracts = tx?.contracts || [];
+  return (
+    contracts.some(isRewardContract) &&
+    contracts.every((c) => isRewardContract(c) || c.OP === 'FEE')
+  );
+}
+
 /** One line headline for a transaction, e.g. "Sent 9,277.99 NXS" */
 export function transactionHeadline(tx, formatAmount) {
   const contracts = tx?.contracts || [];

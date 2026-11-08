@@ -5,21 +5,11 @@ import { useNetwork } from 'hooks';
 import { Card, Hash, Party, SectionTitle, styles } from 'components/Detail';
 import ListPager from 'components/Detail/ListPager';
 import { formatAmount, formatDate, formatInt, timeAgo } from 'utils/format';
-import { describeContract, transactionHeadline } from 'utils/contracts';
-
-//reward contracts, hidden when "transfers only" is on
-const rewardOps = ['COINBASE', 'TRUST', 'GENESIS'];
-
-function isReward(tx) {
-  const contracts = tx.contracts || [];
-  const reward = (c) =>
-    rewardOps.includes(c.OP) || (c.OP === 'CREDIT' && c.for === 'COINBASE');
-  //a fee next to a reward claim does not make it a transfer
-  return (
-    contracts.some(reward) &&
-    contracts.every((c) => reward(c) || c.OP === 'FEE')
-  );
-}
+import {
+  describeContract,
+  isRewardTx,
+  transactionHeadline,
+} from 'utils/contracts';
 
 //indexer move row back into the contract shape describeContract reads
 function moveToContract(m) {
@@ -110,7 +100,7 @@ export default function Transactions() {
     for (const b of blocks) {
       for (const tx of b.tx || []) all.push({ ...tx, height: b.height });
     }
-    const shown = transfersOnly ? all.filter((tx) => !isReward(tx)) : all;
+    const shown = transfersOnly ? all.filter((tx) => !isRewardTx(tx)) : all;
     return { rows: shown, hidden: all.length - shown.length };
   }, [blocks, transfersOnly, indexed, idxRQ.data]);
 
@@ -122,13 +112,10 @@ export default function Transactions() {
 
   return (
     <Card>
-      <SectionTitle
-        note={
-          first != null
-            ? `in blocks ${formatInt(last)} to ${formatInt(first)}`
-            : null
-        }>
-        Transactions
+      <SectionTitle>
+        {first != null
+          ? `In blocks ${formatInt(last)} to ${formatInt(first)}`
+          : 'Transactions'}
       </SectionTitle>
       <label
         className={styles.muted}
@@ -146,20 +133,26 @@ export default function Transactions() {
         <p className={styles.muted}>Loading transactions...</p>
       )}
       {activeRQ.isError && (
-        <p className={styles.muted}>Could not load transactions from the node.</p>
+        <p className={styles.muted}>
+          Could not load transactions from the node.
+        </p>
       )}
       {!activeRQ.isLoading && !activeRQ.isError && rows.length === 0 && (
         <p className={styles.muted}>
           {indexed
             ? 'No transactions found.'
-            : `No ${transfersOnly ? 'transfers' : 'transactions'} in these ${blocks.length} blocks. Try Older.`}
+            : `No ${transfersOnly ? 'transfers' : 'transactions'} in these ${
+                blocks.length
+              } blocks. Try Older.`}
         </p>
       )}
 
       {rows.length > 0 && (
         <div
           className={styles.tableWrap}
-          style={{ opacity: activeRQ.isFetching && activeRQ.isPreviousData ? 0.5 : 1 }}>
+          style={{
+            opacity: activeRQ.isFetching && activeRQ.isPreviousData ? 0.5 : 1,
+          }}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -177,7 +170,9 @@ export default function Transactions() {
                 const more = (tx.contracts?.length || 0) > 1;
                 return (
                   <tr key={tx.txid}>
-                    <td title={formatDate(tx.timestamp)} style={{ whiteSpace: 'nowrap' }}>
+                    <td
+                      title={formatDate(tx.timestamp)}
+                      style={{ whiteSpace: 'nowrap' }}>
                       {timeAgo(tx.timestamp)}
                     </td>
                     <td>{transactionHeadline(tx, formatAmount)}</td>
@@ -194,7 +189,11 @@ export default function Transactions() {
                       </Link>
                     </td>
                     <td>
-                      <Hash value={tx.txid} href={`/scan/${tx.txid}`} keep={5} />
+                      <Hash
+                        value={tx.txid}
+                        href={`/scan/${tx.txid}`}
+                        keep={5}
+                      />
                     </td>
                   </tr>
                 );
@@ -208,14 +207,18 @@ export default function Transactions() {
         setPage={setPage}
         pageSize={blocksPerPage}
         hasOlder={
-          indexed ? idxRQ.data?.next != null && cursors.length > page + 1 : last > 0
+          indexed
+            ? idxRQ.data?.next != null && cursors.length > page + 1
+            : last > 0
         }
       />
       <p className={styles.muted}>
         {indexed
-          ? `From the explorer index (blocks ${formatInt(indexLow)} to ${formatInt(
-              statusRQ.data.result.high
-            )}${indexLow > 1 ? ', still indexing older blocks' : ''}).`
+          ? `From the explorer index (blocks ${formatInt(
+              indexLow
+            )} to ${formatInt(statusRQ.data.result.high)}${
+              indexLow > 1 ? ', still indexing older blocks' : ''
+            }).`
           : `The node has no global transaction index, so this list scans ${blocksPerPage} blocks per page.`}
       </p>
     </Card>

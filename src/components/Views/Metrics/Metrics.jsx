@@ -12,7 +12,8 @@ import {
 import { formatAmount, formatInt } from 'utils/format';
 import { isNum } from 'utils/converter';
 
-const nxs = (v, digits = 0) => (isNum(v) ? `${formatAmount(v, digits)} NXS` : '-');
+const nxs = (v, digits = 0) =>
+  isNum(v) ? `${formatAmount(v, digits)} NXS` : '-';
 const pct = (v, digits = 2) => (isNum(v) ? `${v.toFixed(digits)} %` : '-');
 
 function Loading({ rq, children }) {
@@ -27,7 +28,7 @@ function Loading({ rq, children }) {
 function PeriodTable({ rows }) {
   return (
     <div className={styles.tableWrap}>
-      <table className={styles.table}>
+      <table className={styles.table} style={{ minWidth: '34rem' }}>
         <thead>
           <tr>
             <th></th>
@@ -44,7 +45,10 @@ function PeriodTable({ rows }) {
                 {note && <div className={styles.muted}>{note}</div>}
               </td>
               {['daily', 'weekly', 'monthly'].map((p) => (
-                <td key={p} className={styles.right} style={{ whiteSpace: 'nowrap' }}>
+                <td
+                  key={p}
+                  className={styles.right}
+                  style={{ whiteSpace: 'nowrap' }}>
                   {values ? fmt(values[p]) : '-'}
                 </td>
               ))}
@@ -102,9 +106,7 @@ export default function Metrics() {
             />
             <Stat
               label="Held in Tritium accounts"
-              value={
-                totalNXSRQ.isLoading ? 'Loading...' : nxs(tritiumTotal)
-              }
+              value={totalNXSRQ.isLoading ? 'Loading...' : nxs(tritiumTotal)}
               note="Sum of all account and trust balances; coins not yet moved to Tritium are not included"
             />
             <Stat
@@ -170,18 +172,18 @@ export default function Metrics() {
                 formatInt,
                 'One transaction can hold several contracts',
               ],
+              ['Accounts', ledger?.volumes?.accounts, formatInt],
               [
-                'Accounts',
-                ledger?.volumes?.accounts,
-                formatInt,
-              ],
-              ['Minted by mining', ledger?.network?.mint?.mining, (v) => nxs(v)],
-              ['Minted by staking', ledger?.network?.mint?.staking, (v) => nxs(v)],
-              [
-                'Added to stake',
-                ledger?.network?.stake,
+                'Minted by mining',
+                ledger?.network?.mint?.mining,
                 (v) => nxs(v),
               ],
+              [
+                'Minted by staking',
+                ledger?.network?.mint?.staking,
+                (v) => nxs(v),
+              ],
+              ['Added to stake', ledger?.network?.stake, (v) => nxs(v)],
               [
                 'Legacy deposits',
                 ledger?.exchanges?.deposits,

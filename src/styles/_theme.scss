@@ -1,135 +1,97 @@
+//design tokens, light is the default; the old --theme-* names below map onto them
 :root,
 .light {
-  --theme-shimmer: var(--paper-white);
-  --theme-color: var(--ocean-blue);
-  --theme-page-background: var(--white);
-  --theme-page-not-background: var(--midnight-blue);
-  --theme-page-text: var(--midnight-blue);
-  --theme-page-text-secondary: var(--ocean-blue);
-  --theme-page-border: var(--nexus-blue);
-  --theme-gradient: var(--radial-sky-white);
-  --theme-gradient-radial: var(--radial-sky-white);
-  --theme-gradient-linear: var(--linear-sky-white);
-  --theme-bg-under: var(--pale-white);
-  --theme-layout-background: var(--radial-ocean-midnight);
-  --theme-search: var(--white);
-  --theme-search-text: var(--white);
-  --theme-hue-rotate: hue-rotate(20deg);
-  --theme-nav-bg: var(--linear-frost-white);
-  --theme-footer-bg: var(--linear-frost-white-reverse);
-  --theme-nav-brand: var(--nexus-blue);
-  --theme-btn-background: var(--ocean-blue);
-  --theme-btn-text: var(--white);
-  --theme-invert: brightness(70%) sepia(100) saturate(60) hue-rotate(190deg);
-  --theme-detail-card: var(--linear-nexus-sky);
-  --theme-tab-bg: var(--frost-white);
-  --theme-tab-highlight: var(--nexus-blue);
-  --theme-tab-text: var(--dark-grey);
-  --theme-toast-bg: hsl(220, 10%, 16%);
-  --theme-icon-color: var(--dark-grey);
-  --theme-hover-bg: var(--ocean-blue);
-  --theme-hover-text: var(--frost-white);
-  --theme-badge-bg: var(--nexus-blue);
-  --theme-badge-text: var(--white);
+  --c-page: #f3f5f7;
+  --c-surface: #ffffff;
+  --c-surface-2: #f6f8fa;
+  --c-line: #dce2e7;
+  --c-line-soft: #e9edf0;
+  --c-ink: #13232f;
+  --c-ink-2: #4c5d6a;
+  --c-ink-3: #788894;
+  --c-link: #0868a8;
+  --c-brand: #0ca4fb;
+  --c-band: #0b2235;
+  --c-band-2: #12314a;
+  --c-band-ink: #e8f0f6;
+  --c-band-ink-2: #a3b8c8;
+  --c-up: #157a47;
+  --c-down: #b8323b;
+  --c-warn: #9a6700;
+  --c-focus: #0ca4fb;
 
-  /* shadows */
-  --card-shadow: 0rem 0.25rem 0.5rem #0002;
-  --card-shadow-subtle: 0rem 0.25rem 0.5rem #0001;
-  --card-shadow-border: 0 0 0.1rem 0.1rem inset hsla(0, 0%, 67%, 0.1);
+  //the three Nexus block channels, same colors everywhere
+  --ch-stake: #1d8468;
+  --ch-prime: #6a4cc0;
+  --ch-hash: #b87412;
+
+  --radius-panel: 6px;
+  --radius-ctl: 4px;
+
+  --theme-shimmer: var(--c-surface-2);
+  --theme-color: var(--c-link);
+  --theme-page-background: var(--c-surface);
+  --theme-page-not-background: var(--c-ink);
+  --theme-page-text: var(--c-ink);
+  --theme-page-text-secondary: var(--c-ink-2);
+  --theme-page-border: var(--c-line);
+  --theme-gradient: var(--c-surface);
+  --theme-gradient-radial: var(--c-surface);
+  --theme-gradient-linear: var(--c-surface);
+  --theme-bg-under: var(--c-page);
+  --theme-layout-background: var(--c-page);
+  --theme-search: var(--c-surface);
+  --theme-search-text: var(--c-ink-3);
+  --theme-hue-rotate: hue-rotate(0deg);
+  --theme-nav-bg: var(--c-band);
+  --theme-footer-bg: var(--c-surface);
+  --theme-nav-brand: var(--c-band-ink);
+  --theme-btn-background: var(--c-link);
+  --theme-btn-text: #ffffff;
+  --theme-invert: none;
+  --theme-detail-card: var(--c-surface);
+  --theme-tab-bg: var(--c-surface-2);
+  --theme-tab-highlight: var(--c-link);
+  --theme-tab-text: var(--c-ink-2);
+  --theme-toast-bg: #1d2a35;
+  --theme-icon-color: var(--c-ink-3);
+  --theme-hover-bg: var(--c-link);
+  --theme-hover-text: var(--c-surface-2);
+  --theme-badge-bg: var(--c-surface-2);
+  --theme-badge-text: var(--c-ink);
+
+  //panels are separated by a hairline, not by shadows
+  --card-shadow: 0 0 0 0 transparent;
+  --card-shadow-subtle: 0 0 0 0 transparent;
+  --card-shadow-border: 0 0 0 1px var(--c-line);
 }
+
 [data-color-theme='dark'],
 .dark {
-  --theme-shimmer: rgba(85, 161, 191, 0.154);
-  --theme-color: var(--dark-grey);
-  --theme-page-background: var(--midnight-blue);
-  --theme-page-not-background: var(--ocean-blue);
-  --theme-page-text: var(--white);
-  --theme-page-text-secondary: var(--sky-blue);
-  --theme-page-border: var(--ocean-blue);
-  --theme-gradient: var(--radial-ocean-midnight);
-  --theme-gradient-radial: var(--radial-ocean-midnight);
-  --theme-gradient-linear: var(--linear-ocean-midnight);
-  --theme-bg-under: var(--radial-ocean-midnight);
-  --theme-layout-background: var(--midnight-blue);
-  --theme-search: var(--white);
-  --theme-search-text: var(--white);
-  --theme-hue-rotate: hue-rotate(0deg);
-  --theme-nav-bg: var(--theme-layout-background);
-  --theme-footer-bg: var(--theme-layout-background);
-  --theme-nav-brand: var(--paper-white);
-  --theme-invert: invert(0);
-  --theme-btn-background: var(--midnight-blue);
-  --theme-btn-text: var(--white-blue);
-  --theme-detail-card: var(--radial-ocean-midnight);
-  --theme-tab-text: var(--frost-white);
-  --theme-tab-bg: var(--ocean-blue);
-  --theme-tab-highlight: var(--midnight-blue);
-  --theme-toast-bg: hsl(220, 10%, 16%);
-  --theme-icon-color: var(--sky-blue);
-  --theme-hover-bg: var(--ocean-blue);
-  --theme-hover-text: var(--white);
-  --theme-badge-bg: var(--nexus-blue);
-  --theme-badge-text: var(--white);
+  --c-page: #0a141c;
+  --c-surface: #0f1c27;
+  --c-surface-2: #142432;
+  --c-line: #223545;
+  --c-line-soft: #1a2b39;
+  --c-ink: #e1e8ee;
+  --c-ink-2: #a2b2bf;
+  --c-ink-3: #74868f;
+  --c-link: #62b8ec;
+  --c-band: #07111a;
+  --c-band-2: #0f2232;
+  --c-band-ink: #e1e8ee;
+  --c-band-ink-2: #8fa4b4;
+  --c-up: #44bd80;
+  --c-down: #e6656d;
+  --c-warn: #d9a441;
 
-  /* shadows */
-  --card-shadow: 0rem 0.25rem 0.5rem #0002;
-  --card-shadow-subtle: 0rem 0.25rem 0.5rem #0001;
-  --card-shadow-border: 0 0 0.1rem 0.1rem inset hsla(0, 0%, 67%, 0.3);
+  --ch-stake: #3cb894;
+  --ch-prime: #9d86ea;
+  --ch-hash: #e0a13d;
+
+  --theme-toast-bg: #1d2a35;
 }
 
 .testnet-filter {
   filter: hue-rotate(-30deg) contrast(0.98);
-  // --nexus-blue: hsl(calc(202 - 30), 97%, 52%);
-  // --sky-blue: hsl(calc(200 - 30), 99%, 71%);
-  // --ocean-blue: hsl(calc(202 - 30), 97%, 29%);
-  // --midnight-blue: hsl(calc(202 - 30), 96%, 11%);
-  // --white: hsl(-30, 0%, 100%);
-  // --dark-grey: hsl(290, 7%, 17%);
-  // --market-green: hsl(calc(134 - 30), 61%, 41%);
-  // --market-red: hsl(354, 70%, 54%);
-  // --market-yellow: hsl(50, 70%, 50%);
-  // --paper-white: hsl(calc(210 - 30), 17%, 98%);
-  // --pale-white: hsl(calc(210 - 30), 25%, 97%);
-  // --frost-white: hsl(calc(201 - 30), 54%, 91%);
-
-  // /* gradient */
-  // --linear-frost-white: linear-gradient(
-  //   180deg,
-  //   var(--white) 0%,
-  //   hsl(calc(201 - 30), 54%, 91%) 100%
-  // );
-
-  // --linear-frost-white-reverse: linear-gradient(
-  //   0deg,
-  //   hsla(calc(0 - 30), 0%, 100%, 0.5) 0%,
-  //   hsl(calc(201 - 30), 54%, 91%) 100%
-  // );
-
-  // --linear-ocean-midnight: linear-gradient(
-  //   175.94deg,
-  //   hsla(calc(202 - 30), 96%, 11%, 0.702) 5.59%,
-  //   hsla(calc(202 - 30), 97%, 29%, 0.702) 73.28%
-  // );
-  // --linear-sky-white: linear-gradient(
-  //   175.94deg,
-  //   hsla(calc(202 - 30), 97%, 52%, 0.7) 5.59%,
-  //   hsla(calc(200 - 30), 99%, 71%, 0.35) 73.28%
-  // );
-  // --linear-nexus-sky: linear-gradient(
-  //   328deg,
-  //   var(--nexus-blue) 0%,
-  //   var(--sky-blue) 80%,
-  //   var(--white) 100%
-  // );
-  // --radial-ocean-midnight: radial-gradient(
-  //   circle,
-  //   hsl(calc(202 - 30), 79%, 11%) 0%,
-  //   hsl(calc(202 - 30), 92%, 14%) 100%
-  // );
-
-  // --radial-sky-white: radial-gradient(
-  //   114.53% 197.34% at 25.54% -14.53%,
-  //   var(--white) 26.66%,
-  //   var(--sky-blue) 100%
-  // );
 }

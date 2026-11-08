@@ -3,9 +3,12 @@
 .desktopNavbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--space-xs);
-  gap: var(--space-xxs);
+  align-self: stretch;
+  gap: 0.5rem;
+
+  > nav {
+    margin-right: 0.75rem;
+  }
 }
 
 .mobileView {
@@ -26,12 +29,8 @@
     }
   }
 
-  background-color: var(--midnight-blue);
-  box-shadow: -0.125rem 0rem 1rem hsla(202, 96%, 11%, 40%);
-  @supports (backdrop-filter: blur(0.5rem)) {
-    backdrop-filter: blur(0.5rem);
-    background-color: hsla(202, 96%, 11%, 80%);
-  }
+  background-color: var(--c-band);
+  border-left: 1px solid var(--c-band-2);
 
   position: fixed;
   min-height: 100vh;
@@ -85,7 +84,7 @@
     width: 2rem;
     height: 0.18rem;
     border-radius: 2rem;
-    background: var(--sky-blue);
+    background: var(--c-band-ink);
   }
   &::before {
     transform: rotate(135deg) translate(13px, 13px);
@@ -116,7 +115,7 @@
       width: 2rem;
       height: 0.18rem;
       border-radius: 2rem;
-      background: var(--sky-blue);
+      background: var(--c-band-ink);
       position: relative;
       top: 1rem;
 
@@ -127,7 +126,7 @@
         width: 1.8rem;
         height: 0.18rem;
         border-radius: 1.8rem;
-        background: var(--sky-blue);
+        background: var(--c-band-ink);
         right: 0;
       }
       &::before {
