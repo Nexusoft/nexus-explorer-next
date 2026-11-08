@@ -1,10 +1,18 @@
-.header {
-  color: var(--theme-page-text);
-  display: flex;
-  gap: var(--space-xs);
+.back {
+  all: unset;
+  display: inline-flex;
   align-items: center;
-  .backIcon {
-    cursor: pointer;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--c-link);
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+  svg {
+    width: 1rem;
+    height: 1rem;
   }
 }
 

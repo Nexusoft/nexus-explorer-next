@@ -73,9 +73,10 @@ export default function Table({ columns, data, paginate }) {
                       // eslint-disable-next-line react/jsx-key
                       <th
                         className={styles.th}
-                        {...column.getHeaderProps(
-                          column.getSortByToggleProps()
-                        )}>
+                        {...column.getHeaderProps([
+                          column.getSortByToggleProps(),
+                          { style: { textAlign: column.align } },
+                        ])}>
                         {
                           // Render the header
                           column.render('Header')
@@ -114,7 +115,17 @@ export default function Table({ columns, data, paginate }) {
                         // Apply the cell props
                         return (
                           // eslint-disable-next-line react/jsx-key
-                          <td className={styles.td} {...cell.getCellProps()}>
+                          <td
+                            className={styles.td}
+                            style={
+                              cell.column.align
+                                ? {
+                                    textAlign: cell.column.align,
+                                    whiteSpace: 'nowrap',
+                                  }
+                                : undefined
+                            }
+                            {...cell.getCellProps()}>
                             {
                               // Render the cell contents
                               cell.render('Cell')

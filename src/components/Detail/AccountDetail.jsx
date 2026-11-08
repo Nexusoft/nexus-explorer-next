@@ -96,7 +96,9 @@ function AccountTransactions({ type, address }) {
       <SectionTitle note={page > 0 ? `page ${page + 1}` : null}>
         Transactions
       </SectionTitle>
-      {txRQ.isLoading && <p className={styles.muted}>Loading transactions...</p>}
+      {txRQ.isLoading && (
+        <p className={styles.muted}>Loading transactions...</p>
+      )}
       {txRQ.isError && (
         <p className={styles.muted}>Could not load the transactions.</p>
       )}
@@ -132,8 +134,7 @@ function AccountTransactions({ type, address }) {
                     <td
                       title={formatDate(tx.timestamp)}
                       style={{ whiteSpace: 'nowrap' }}>
-                      {formatDateShort(tx.timestamp).slice(0, 10)}
-                      <div>{formatDateShort(tx.timestamp).slice(11)}</div>
+                      {formatDateShort(tx.timestamp)}
                       <div className={styles.muted}>
                         {timeAgo(tx.timestamp)}
                       </div>
@@ -165,7 +166,11 @@ function AccountTransactions({ type, address }) {
                       </span>
                     </td>
                     <td className={styles.hideMobile}>
-                      <Hash value={tx.txid} href={`/scan/${tx.txid}`} keep={6} />
+                      <Hash
+                        value={tx.txid}
+                        href={`/scan/${tx.txid}`}
+                        keep={6}
+                      />
                     </td>
                   </tr>
                 );
@@ -203,12 +208,27 @@ export default function AccountDetail({ type, data }) {
   const isNxs = data.token === '0' || data.ticker === 'NXS';
   const ticker = data.ticker || (isNxs ? 'NXS' : '');
 
-  const title =
-    type === CARD_TYPES.TOKEN
-      ? data.ticker || 'Token'
-      : data.name
-      ? data.name
-      : `${ticker} ${type === CARD_TYPES.TRUST ? 'trust account' : 'account'}`;
+  //names and namespaces are registers too, but hold no balance or transfers
+  const isName = data.type === 'NAME';
+  const isNamespace = data.type === 'NAMESPACE';
+  const hasBalance = isNum(Number(data.balance)) && data.balance !== undefined;
+  const hasTransfers =
+    !isName && !isNamespace && (type !== CARD_TYPES.ASSET || hasBalance);
+  const kind = isName
+    ? data.global
+      ? 'Global name'
+      : 'Name'
+    : isNamespace
+    ? 'Namespace'
+    : KIND[type] || 'Address';
+
+  const title = isNamespace
+    ? data.namespace
+    : type === CARD_TYPES.TOKEN
+    ? data.ticker || 'Token'
+    : data.name
+    ? data.name
+    : `${ticker} ${type === CARD_TYPES.TRUST ? 'trust account' : 'account'}`;
 
   const extra = Object.entries(data).filter(
     ([k, v]) => !knownFields.includes(k) && typeof v !== 'object'
@@ -222,7 +242,7 @@ export default function AccountDetail({ type, data }) {
   return (
     <DetailPage>
       <DetailHeader
-        kind={KIND[type] || 'Address'}
+        kind={kind}
         title={title}
         subtitle={<Hash value={data.address} full />}
         badges={[
@@ -266,12 +286,28 @@ export default function AccountDetail({ type, data }) {
             </>
           ) : (
             <>
-              <Stat
-                label={type === CARD_TYPES.TRUST ? 'Available balance' : 'Balance'}
-                value={`${formatAmount(data.balance, 2)} ${ticker}`}
-                note={isNxs ? usd(data.balance, price) : null}
-                big
-              />
+              {isName && (
+                <Stat
+                  label="Points to"
+                  value={
+                    <Hash
+                      value={data.register}
+                      href={`/scan/${data.register}`}
+                    />
+                  }
+                  note="The register this name stands for"
+                />
+              )}
+              {hasBalance && (
+                <Stat
+                  label={
+                    type === CARD_TYPES.TRUST ? 'Available balance' : 'Balance'
+                  }
+                  value={`${formatAmount(data.balance, 2)} ${ticker}`}
+                  note={isNxs ? usd(data.balance, price) : null}
+                  big
+                />
+              )}
               {type === CARD_TYPES.TRUST && (
                 <>
                   <Stat
@@ -280,7 +316,10 @@ export default function AccountDetail({ type, data }) {
                     note={usd(data.stake, price)}
                     big
                   />
-                  <Stat label="Stake rate" value={`${formatAmount(data.rate, 2)} %`} />
+                  <Stat
+                    label="Stake rate"
+                    value={`${formatAmount(data.rate, 2)} %`}
+                  />
                   <Stat
                     label="Estimated reward"
                     value={
@@ -304,26 +343,30 @@ export default function AccountDetail({ type, data }) {
               {!isNxs && data.token && (
                 <Stat
                   label="Token"
-                  value={<Hash value={data.token} href={`/scan/${data.token}`} />}
+                  value={
+                    <Hash value={data.token} href={`/scan/${data.token}`} />
+                  }
                 />
               )}
             </>
           )}
           <Stat
             label="Created"
-            value={formatDate(data.created)}
-            note={timeAgo(data.created)}
+            value={formatDateShort(data.created)}
+            note={`UTC, ${timeAgo(data.created)}`}
           />
           <Stat
             label="Last change"
-            value={formatDate(data.modified)}
-            note={timeAgo(data.modified)}
+            value={formatDateShort(data.modified)}
+            note={`UTC, ${timeAgo(data.modified)}`}
           />
           <Stat label="Owner" value={<Hash value={data.owner} keep={6} />} />
         </Stats>
       </Card>
 
-      <AccountTransactions type={type} address={data.address} />
+      {hasTransfers && (
+        <AccountTransactions type={type} address={data.address} />
+      )}
 
       <TechDetails
         title="All fields"

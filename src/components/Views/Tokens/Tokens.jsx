@@ -1,4 +1,4 @@
-import CopyText from 'components/common/NE_CopyText';
+import { Hash } from 'components/Detail';
 import ErrorCard from 'components/common/NE_ErrorCard';
 import Loader from 'components/common/NE_Loader';
 import Table from 'components/Table';
@@ -15,27 +15,28 @@ export default function Tokens() {
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
     {
-      Header: 'Token Register Address',
+      Header: 'Address',
       accessor: 'token',
-      Cell: ({ value }) => (
-        <CopyText value={value} link={`/scan?token=${value}`} />
-      ),
+      Cell: ({ value }) => <Hash value={value} href={`/scan/${value}`} />,
     },
     {
-      Header: 'Token Name',
+      Header: 'Ticker',
       accessor: 'ticker',
+      Cell: ({ value }) => value || '-',
     },
     {
-      Header: 'Max Supply',
+      Header: 'Maximum supply',
+      align: 'right',
       accessor: 'maxsupply',
       Cell: ({ value }) => intlNum(value),
     },
     {
-      Header: 'Current Supply',
+      Header: 'Current supply',
+      align: 'right',
       accessor: 'currentsupply',
       Cell: ({ value }) => intlNum(value),
     },

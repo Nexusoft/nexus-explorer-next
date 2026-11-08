@@ -1,18 +1,23 @@
 .invoiceStatus {
-  color: var(--white);
-  padding: var(--space-xxxs) var(--space-xxxs);
-  border-radius: var(--space-xxxs);
-  width: fit-content;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  color: var(--c-ink-2);
+  text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .paid {
-  background-color: var(--market-green);
+  color: var(--c-up);
 }
 
 .outstanding {
-  background-color: var(--market-yellow);
+  color: var(--c-warn);
 }
 
 .cancelled {
-  background-color: var(--market-red);
+  color: var(--c-down);
 }

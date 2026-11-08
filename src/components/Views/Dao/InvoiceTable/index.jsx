@@ -4,13 +4,14 @@ import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import { columns } from './columns';
 import { BsBoxArrowLeft } from 'react-icons/bs';
-import { cls, pathOr } from 'utils';
+import { pathOr } from 'utils';
 import styles from './invoices.module.scss';
 import { useRouter } from 'next/router';
 import TYPES from 'types';
 import NE_Pagination from 'components/common/NE_Pagination';
 import { InvoiceModal } from '../InvoiceModal';
 import { FiInfo } from 'react-icons/fi';
+import { PageTitle } from 'components/Detail';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 
 function InvoicesView({ username }) {
@@ -81,12 +82,13 @@ function InvoicesView({ username }) {
       error={pathOr({}, ['response', 'data', 'error'], error)}
       loaderType={TYPES.LOADER.DOT}
       loaderSize={'2.5rem'}>
-      <div className={cls(styles.header)}>
-        <BsBoxArrowLeft className={styles.backIcon} onClick={router.back} />
-        <p>
-          Invoices {' > '} {username}
-        </p>
-      </div>
+      <button type="button" className={styles.back} onClick={router.back}>
+        <BsBoxArrowLeft aria-hidden="true" /> Back
+      </button>
+      <PageTitle title={`Invoices of ${username}`}>
+        Payment requests sent from this DAO account. Open one with the info
+        icon.
+      </PageTitle>
       <Table columns={updatedColumn} data={data} paginate={false} />
       <NE_Pagination controls={dynamicPageControls} />
       {isOpen && (

@@ -1,4 +1,5 @@
-import CopyText from 'components/common/NE_CopyText';
+import { Hash } from 'components/Detail';
+import { formatDateShort } from 'utils/format';
 import ErrorCard from 'components/common/NE_ErrorCard';
 import Loader from 'components/common/NE_Loader';
 import Table from 'components/Table/Table';
@@ -14,16 +15,14 @@ export default function Namespaces() {
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
 
     {
       Header: 'Address',
       accessor: 'address',
-      Cell: ({ value }) => (
-        <CopyText value={value} link={`/scan?namespace=${value}`} />
-      ),
+      Cell: ({ value }) => <Hash value={value} href={`/scan/${value}`} />,
     },
     {
       Header: 'Namespace',
@@ -32,7 +31,7 @@ export default function Namespaces() {
     {
       Header: 'Created',
       accessor: 'created',
-      Cell: ({ value }) => new Date(value * 1000).toDateString(),
+      Cell: ({ value }) => formatDateShort(value),
     },
   ];
 

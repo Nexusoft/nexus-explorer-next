@@ -2,7 +2,7 @@ import Table from 'components/Table/Table';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
 import styles from './trustlist.module.scss';
-import CopyText from 'components/common/NE_CopyText/CopyText';
+import { Hash } from 'components/Detail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import PageHeader from 'components/Header/PageHeader';
 import DynamicPagination from 'components/common/NE_Pagination';
@@ -23,7 +23,7 @@ export default function Trustlist() {
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
       Cell: (props) => (
         <div>{parseInt(props.cell.row.id) + 1 + pageIndex * pageSize}</div>
       ),
@@ -31,25 +31,31 @@ export default function Trustlist() {
     {
       Header: 'Address',
       accessor: 'address',
-      Cell: ({ value }) => <CopyText link={`/scan/${value}`} value={value} />,
+      Cell: ({ value }) => <Hash value={value} href={`/scan/${value}`} />,
     },
     {
       Header: 'Balance',
+      align: 'right',
       accessor: 'balance',
-      Cell: (props) => intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
+      Cell: (props) =>
+        intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
     },
     {
       Header: 'Stake',
+      align: 'right',
       accessor: 'stake',
-      Cell: (props) => intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
+      Cell: (props) =>
+        intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
     },
     {
-      Header: 'Stake Rate',
+      Header: 'Rate',
+      align: 'right',
       accessor: 'rate',
       Cell: ({ value }) => (value != null ? `${value} %` : '-'),
     },
     {
-      Header: 'Est. reward / day',
+      Header: 'Reward per day (est.)',
+      align: 'right',
       id: 'daily',
       accessor: (row) => (row.stake * row.rate) / 100 / 365,
       Cell: ({ value }) =>
@@ -61,7 +67,8 @@ export default function Trustlist() {
       Cell: ({ value }) => (value ? value.split(',')[0] : '-'),
     },
     {
-      Header: 'Trust',
+      Header: 'Trust score',
+      align: 'right',
       accessor: 'trust',
       Cell: (props) => intlNum(props.value),
     },

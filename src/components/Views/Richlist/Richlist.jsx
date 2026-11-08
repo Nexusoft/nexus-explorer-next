@@ -4,7 +4,7 @@ import styles from './richlist.module.scss';
 import { intlNum } from 'utils/converter';
 import Distribution from './Distribution';
 import TYPES from 'types';
-import CopyText from 'components/common/NE_CopyText';
+import { Hash } from 'components/Detail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { useEffect, useState } from 'react';
 import Pagination from 'components/common/NE_Pagination';
@@ -55,7 +55,7 @@ export default function Richlist(props) {
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
       Cell: (props) => (
         <div>{parseInt(props.cell.row.id) + 1 + pageIndex * pageSize}</div>
       ),
@@ -64,10 +64,11 @@ export default function Richlist(props) {
       Header: 'Address',
       accessor: 'address',
       Cell: ({ value }) =>
-        value ? <CopyText link={`/scan/${value}`} value={value} /> : '-',
+        value ? <Hash value={value} href={`/scan/${value}`} /> : '-',
     },
     {
       Header: 'Balance',
+      align: 'right',
       accessor: 'total',
       Cell: ({ value }) =>
         value
@@ -76,6 +77,7 @@ export default function Richlist(props) {
     },
     {
       Header: 'Share of supply',
+      align: 'right',
       accessor: 'total',
       id: 'share',
       Cell: ({ value }) =>
