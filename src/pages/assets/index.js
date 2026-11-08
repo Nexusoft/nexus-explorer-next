@@ -9,7 +9,8 @@ export default function Assets() {
       <PageHeader page="ASSETS" />
       <DetailPage>
         <PageTitle title="Assets">
-          Assets registered on the Nexus blockchain, newest change first.
+          Assets and supply items registered on the Nexus blockchain, newest
+          change first.
         </PageTitle>
         <AssetsView />
       </DetailPage>

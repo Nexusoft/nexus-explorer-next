@@ -24,7 +24,7 @@ import {
 import { describeContract, netForAddress } from 'utils/contracts';
 import { isNum } from 'utils/converter';
 import { CARD_TYPES } from 'types/ConstantsTypes';
-import { ASSET_FORMATS, isAsset } from 'utils/assets';
+import { ASSET_FORMATS, assetFormat, isAsset } from 'utils/assets';
 import TYPES from 'types';
 
 const pageSize = 20;
@@ -64,7 +64,11 @@ const assetJson = (data) =>
     : {};
 
 function assetTitle(data) {
-  const t = data.title || assetJson(data).title || assetJson(data).name;
+  const t =
+    data.title ||
+    assetJson(data).title ||
+    assetJson(data).name ||
+    data.question;
   return typeof t === 'string' && t ? t : data.name || 'Asset';
 }
 
@@ -102,9 +106,7 @@ function AssetContent({ data, fields }) {
   const rows = json === assetJson(data) ? Object.entries(json) : fields;
   return (
     <Card>
-      <SectionTitle note={ASSET_FORMATS[data.type] || ASSET_FORMATS.OBJECT}>
-        Content
-      </SectionTitle>
+      <SectionTitle note={assetFormat(data)}>Content</SectionTitle>
       {json !== undefined && rows === fields ? (
         <FieldValue value={json} />
       ) : rows.length === 0 ? (
@@ -294,7 +296,9 @@ export default function AccountDetail({ type, data }) {
     : isNamespace
     ? 'Namespace'
     : asset
-    ? 'Asset'
+    ? data.form === 'SUPPLY'
+      ? 'Supply item'
+      : 'Asset'
     : KIND[type] || 'Address';
 
   //account names like "default" or "trust" are labels inside a profile, not titles

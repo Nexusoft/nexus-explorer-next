@@ -50,7 +50,7 @@ export const PageMetaTypes = {
     ASSETS: {
       TITLE: page('Assets'),
       DESCRIPTION:
-        'Assets registered on the Nexus blockchain: art, achievements, posts and other on-chain records.',
+        'Assets and supply items registered on the Nexus blockchain: art, achievements, posts and other on-chain records.',
     },
     MARKET: {
       TITLE: page('Market'),

@@ -190,8 +190,9 @@ export default function Assets() {
       )}
       <p className={styles.muted}>
         Assets are registers that hold any data their owner puts on chain: art,
-        achievements, posts, product records, settings. Kind is the type the
-        creating app wrote into the asset, when it wrote one. The index
+        achievements, posts, product records, settings. Supply items are the
+        same kind of record, made with the supply chain API. Kind is the type
+        the creating app wrote into the asset, when it wrote one. The index
         refreshes the list every 10 minutes.
       </p>
     </Card>
