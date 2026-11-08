@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import styles from './Panel3.module.scss';
 import { useEffect, useState } from 'react';
-import { intlNum, toTitleCase } from 'utils/converter';
+import { intlNum, toFixedSafe, toTitleCase } from 'utils/converter';
 import Loader from 'components/common/NE_Loader';
 import RTTable, {
   RTTRowBlock,
@@ -25,7 +25,7 @@ function Panel3({ blocks }) {
     ['blocks', network.name],
     () => getRecentBlocks(MAX_ROWS),
     {
-      initialData: blocks,
+      initialData: blocks || undefined,
       refetchInterval: BLOCK_POLLING_DELAY,
     }
   );
@@ -36,8 +36,8 @@ function Panel3({ blocks }) {
         key={newRowData.height}
         block={intlNum(newRowData.height)}
         date={getDateObject(newRowData.date)}
-        mint={intlNum(newRowData.mint.toFixed(2))}
-        txns={newRowData.tx.length}
+        mint={toFixedSafe(newRowData.mint)}
+        txns={newRowData.tx?.length ?? 0}
         size={newRowData.size}
         channel={TYPES.CHANNELS[newRowData.channel]}
         onClick={() => router.push(`/scan/${newRowData.height}`)}

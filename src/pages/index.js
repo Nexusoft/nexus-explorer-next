@@ -15,27 +15,27 @@ import Layout from 'components/Layout';
 // * https://react-query.tanstack.com/guides/ssr
 
 export async function getStaticProps() {
-  // eslint-disable-next-line no-undef
-  const responses = await Promise.all([
-    fetchMetrics(),
-    fetchInfo(),
-    fetchMining(),
-    fetchMarket(),
-    fetchRecentBlocks(2 * 60),
-  ]);
-  const metrics = responses[0];
-  const info = responses[1];
-  const mining = responses[2];
-  const market = responses[3];
-  const blocks = responses[4];
+  //one failing source must not take the whole page down, the client refetches anything missing
+  const [metrics, info, mining, market, blocks] = await Promise.all(
+    [
+      fetchMetrics(),
+      fetchInfo(),
+      fetchMining(),
+      fetchMarket(),
+      fetchRecentBlocks(2 * 60),
+    ].map((p) => p.catch(() => null))
+  );
+
+  //react-query initialData: undefined (not null) so the query fetches on mount
+  const initial = (res) => (res?.data ? { data: res.data } : null);
 
   return {
     props: {
-      metrics: { data: metrics.data },
-      info: { data: info.data },
-      mining: { data: mining.data },
-      market: { data: market?.data || null },
-      blocks,
+      metrics: initial(metrics),
+      info: initial(info),
+      mining: initial(mining),
+      market: initial(market),
+      blocks: blocks || null,
     },
 
     revalidate: TYPES.REFETCH_INTERVALS.REGENERATE_SSG_INTERVAL,

@@ -14,6 +14,8 @@ import { useRouter } from 'next/router';
 import Layout from 'components/Layout';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 import { pathOr } from 'utils';
+import { classifySearch, SEARCH_KINDS } from 'utils/search';
+import SearchHelp from 'components/common/NE_SearchHelp';
 
 export const getServerSideProps = async (context) => {
   let address = context.params.addr;
@@ -30,87 +32,72 @@ function Scan({ addr }) {
   const [cardType, setCardType] = useState();
   const { network, getScanResults } = useNetwork();
 
+  const searchKind = classifySearch(addr);
+
+  //register object type from register/get/any to the endpoint + card that shows it
+  const registerTypes = {
+    TOKEN: { endpoint: 'finance/get/token', type: CARD_TYPES.TOKEN },
+    TRUST: { endpoint: 'finance/get/trust', type: CARD_TYPES.TRUST },
+    ACCOUNT: { endpoint: 'finance/get/account', type: CARD_TYPES.USER },
+  };
+
   /**
    * identify the endpoint to use from the scan
    * @param {*} addr pass the address to scan
    * @returns {*} the {endpoint, params, type} to use
    */
   async function getAPI(addr) {
-    let endpoint = '';
-    let params = {};
-    let type = '';
-
-    if (addr.includes(':trust')) {
-      endpoint = 'finance/get/trust';
-      params = {
-        name: addr,
-      };
-      type = 'trust';
-    } else if (addr.includes(':')) {
-      endpoint = 'finance/get/account';
-      params = {
-        name: addr,
-      };
-      type = 'user';
-    } else if (addr.includes('invoice-')) {
-      endpoint = 'invoices/get/invoice';
-      params = {
-        address: addr.substring(8),
-      };
-      type = 'invoice';
-    } else if (addr.length === 51) {
-      // * address might be trust acc or user acc address, so query for both and identify which one is correct
-      Log('Checking if the addr is trust / account');
-
-      const trustEndpoint = 'finance/get/trust';
-      const accountEndpoint = 'finance/get/account';
-      const tokenEndpoint = 'finance/get/token';
-
-      params = { address: addr };
-      const resolvedAccountTypeResponse = await Promise.any([
-        axios.get(`${network.url}/${accountEndpoint}`, {
-          params: params,
-        }),
-        axios.get(`${network.url}/${trustEndpoint}`, {
-          params: params,
-        }),
-        axios.get(`${network.url}/${tokenEndpoint}`, {
-          params: params,
-        }),
-      ]);
-
-      Log('[RESOLVED]:', resolvedAccountTypeResponse);
-
-      if (resolvedAccountTypeResponse.data?.result?.type === 'TOKEN') {
-        Log('Is Token');
-        endpoint = tokenEndpoint;
-        type = 'token';
-      } else if (resolvedAccountTypeResponse.data?.result?.form === 'ASSET') {
-        endpoint = accountEndpoint;
-        type = 'asset';
-      } else if (
-        resolvedAccountTypeResponse.data?.result?.hasOwnProperty('trust')
-      ) {
-        endpoint = trustEndpoint;
-        type = 'trust';
-      } else {
-        endpoint = accountEndpoint;
-        type = 'user';
+    switch (searchKind) {
+      case SEARCH_KINDS.TRUST_NAME:
+        return {
+          endpoint: 'finance/get/trust',
+          params: { name: addr },
+          type: CARD_TYPES.TRUST,
+        };
+      case SEARCH_KINDS.NAME:
+        return {
+          endpoint: 'finance/get/account',
+          params: { name: addr },
+          type: CARD_TYPES.USER,
+        };
+      case SEARCH_KINDS.INVOICE:
+        return {
+          endpoint: 'invoices/get/invoice',
+          params: { address: addr.substring(8) },
+          type: CARD_TYPES.INVOICE,
+        };
+      case SEARCH_KINDS.ADDRESS: {
+        //one lookup tells what the address holds, then ask the matching endpoint
+        const res = await axios.get(`${network.url}/register/get/any`, {
+          params: { address: addr },
+        });
+        const object = res.data?.result || {};
+        Log('[RESOLVED]:', object.type);
+        const match = registerTypes[object.type] || {
+          endpoint: 'register/get/any',
+          type: CARD_TYPES.ASSET,
+        };
+        return { ...match, params: { address: addr } };
       }
-    } else if (addr.length === 128) {
-      endpoint = 'ledger/get/transaction';
-      params = { hash: addr };
-      type = 'transaction';
-    } else if (addr.length === 256) {
-      endpoint = 'ledger/get/block';
-      params = { hash: addr, verbose: 'detail' };
-      type = 'block';
-    } else {
-      endpoint = 'ledger/get/block';
-      params = { height: addr, verbose: 'detail' };
-      type = 'block';
+      case SEARCH_KINDS.TRANSACTION:
+        return {
+          endpoint: 'ledger/get/transaction',
+          params: { hash: addr },
+          type: CARD_TYPES.TRANSACTION,
+        };
+      case SEARCH_KINDS.BLOCK_HASH:
+        return {
+          endpoint: 'ledger/get/block',
+          params: { hash: addr, verbose: 'detail' },
+          type: CARD_TYPES.BLOCK,
+        };
+      default:
+        return {
+          endpoint: 'ledger/get/block',
+          params: { height: addr, verbose: 'detail' },
+          type: CARD_TYPES.BLOCK,
+        };
     }
-    return { endpoint, params, type };
   }
 
   const { isLoading, data, error, isError } = useQuery(
@@ -122,6 +109,8 @@ function Scan({ addr }) {
     },
     {
       staleTime: 60000,
+      enabled: !!searchKind,
+      retry: false,
     }
   );
 
@@ -144,10 +133,22 @@ function Scan({ addr }) {
     <Layout>
       <PageHeader page={cardType} />
       <div>
+        {!searchKind && <SearchHelp query={addr} />}
+        {searchKind && isError && (
+          <SearchHelp
+            query={addr}
+            notFound
+            message={pathOr(
+              error?.message,
+              ['response', 'data', 'error', 'message'],
+              error
+            )}
+          />
+        )}
         <PromiseLayout
-          isLoading={isLoading}
-          isError={isError}
-          error={pathOr({}, ['response', 'data', 'error'], error)}>
+          isLoading={!!searchKind && isLoading}
+          isError={false}
+          error={{}}>
           {data?.result && (
             <>
               {[CARD_TYPES.BLOCK, CARD_TYPES.TRANSACTION].includes(

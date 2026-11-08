@@ -16,7 +16,7 @@ export default function Home(props) {
   const { network, getMetrics, getInfo, getMining } = useNetwork();
 
   const metricsRQ = useQuery(['metrics', network.name], getMetrics, {
-    initialData: props.metrics,
+    initialData: props.metrics || undefined,
     refetchInterval: TYPES.REFETCH_INTERVALS.METRICS,
   });
 
@@ -25,12 +25,12 @@ export default function Home(props) {
   });
 
   const marketRQ = useQuery('market', fetchMarket, {
-    initialData: props.market,
+    initialData: props.market || undefined,
     refetchInterval: TYPES.REFETCH_INTERVALS.MARKET,
   });
 
   const miningRQ = useQuery(['mining', network.name], getMining, {
-    initialData: props.mining,
+    initialData: props.mining || undefined,
     refetchInterval: TYPES.REFETCH_INTERVALS.MINING,
   });
 

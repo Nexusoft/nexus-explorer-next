@@ -28,7 +28,7 @@ function AreaChart({ initialData }) {
     {
       initialData:
         limit <= 120 && network.name == NETWORKS.MAINNET.name
-          ? initialData
+          ? initialData || undefined
           : undefined,
     }
   );

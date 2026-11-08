@@ -1,5 +1,17 @@
+export const NO_VALUE = '-';
+
+export function isNum(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
 export function intlNum(num, ...args) {
+  if (num == null || num === '' || Number.isNaN(Number(num))) return NO_VALUE;
   return new Intl.NumberFormat(...args).format(num);
+}
+
+/** toFixed that returns NO_VALUE for missing / non numeric input */
+export function toFixedSafe(value, digits = 2) {
+  return isNum(value) ? value.toFixed(digits) : NO_VALUE;
 }
 
 export function middleElipsis(text, sliceAt) {
@@ -36,6 +48,10 @@ export function toTitleCase(str) {
 }
 
 export function abbreviateNumber(number) {
+  if (!isNum(Number(number)) || number === null || number === '') {
+    return NO_VALUE;
+  }
+  number = Number(number);
   let SI_SYMBOL = ['', 'k', 'M', 'G', 'T', 'P', 'E'];
   // what tier? (determines SI symbol)
   let tier = (Math.log10(Math.abs(number)) / 3) | 0;

@@ -100,7 +100,9 @@ export const Header = () => {
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder={TYPES.PLACE_HOLDER.SEARCH}
               onSearch={() => {
-                router.push(`/scan/${searchInput}`);
+                const q = searchInput.trim();
+                if (!q) return;
+                router.push(`/scan/${encodeURIComponent(q)}`);
               }}
             />
           </div>

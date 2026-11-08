@@ -19,8 +19,37 @@ export function fetchMining(url) {
   );
 }
 
-export function fetchMarket() {
-  return axios.get(`${process.env.NEXT_PUBLIC_COINGECKO_BASE_URL}/coins/nexus`);
+/**
+ * NXS market data from CoinGecko simple/price (coins/nexus no longer answers)
+ * Resolves to { data: { market_data } } in the old coins/nexus shape
+ */
+export async function fetchMarket() {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_COINGECKO_BASE_URL}/simple/price`,
+    {
+      params: {
+        ids: 'nexus',
+        vs_currencies: 'usd,btc',
+        include_market_cap: true,
+        include_24hr_vol: true,
+        include_24hr_change: true,
+      },
+    }
+  );
+  const p = res.data?.nexus;
+  if (!p || p.usd == null) {
+    throw new Error('No NXS price in CoinGecko response');
+  }
+  return {
+    data: {
+      market_data: {
+        current_price: { usd: p.usd, btc: p.btc },
+        price_change_percentage_24h: p.usd_24h_change,
+        total_volume: { usd: p.usd_24h_vol },
+        market_cap: { usd: p.usd_market_cap },
+      },
+    },
+  };
 }
 
 export async function fetchRecentBlocks(MAX_ROWS = 6) {

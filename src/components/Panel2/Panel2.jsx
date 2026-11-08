@@ -2,7 +2,13 @@ import styles from './Panel2.module.scss';
 
 import DetailCard from 'components/common/NE_Card';
 import React, { useState, useEffect } from 'react';
-import { abbreviateNumber, intlNum } from 'utils/converter';
+import {
+  abbreviateNumber,
+  intlNum,
+  isNum,
+  toFixedSafe,
+  NO_VALUE,
+} from 'utils/converter';
 import { GiTwoCoins } from 'react-icons/gi';
 import { BsFillCpuFill } from 'react-icons/bs';
 import { AiFillBank } from 'react-icons/ai';
@@ -15,9 +21,9 @@ import ErrorCard from 'components/common/NE_ErrorCard';
 function ErrorFallback({ hasError, children }) {
   if (hasError) {
     return (
-      <p>
+      <div>
         <ErrorCard />
-      </p>
+      </div>
     );
   }
 
@@ -28,39 +34,30 @@ function IsMainnet({ network, children }) {
   return network.name === NETWORKS.MAINNET.name ? children : null;
 }
 
+const emptyCard = {
+  sublabel: null,
+  text: null,
+  reserve: null,
+  reward: null,
+  footer: null,
+};
+
+//NXS amount with unit, or NO_VALUE when the node does not report it
+function nxs(value, maxDigits = 2) {
+  return isNum(value)
+    ? `${intlNum(value, 'en-US', { maximumFractionDigits: maxDigits })} NXS`
+    : NO_VALUE;
+}
+
 function Panel2(props) {
   const { network } = useNetwork();
   const { metricsRQ, marketRQ, miningRQ } = props;
 
   const [state, setState] = useState({
-    price: {
-      sublabel: null,
-      text: null,
-      reserve: null,
-      reward: null,
-      footer: null,
-    },
-    stake: {
-      sublabel: null,
-      text: null,
-      reserve: null,
-      reward: null,
-      footer: null,
-    },
-    prime: {
-      sublabel: null,
-      text: null,
-      reserve: null,
-      reward: null,
-      footer: null,
-    },
-    hash: {
-      sublabel: null,
-      text: null,
-      reserve: null,
-      reward: null,
-      footer: null,
-    },
+    price: emptyCard,
+    stake: emptyCard,
+    prime: emptyCard,
+    hash: emptyCard,
   });
 
   const [cardRefreshTimeout, setCardRefreshTimeout] = useState(
@@ -74,74 +71,61 @@ function Panel2(props) {
   const marketData = marketRQ.data?.data?.market_data;
   const miningData = miningRQ.data?.data?.result;
   const metricsData = metricsRQ.data?.data?.result;
+
   // * initialize state when RQ has data
+  //every field is optional, nodes and CoinGecko leave some out (eg fees, 24h change)
   useEffect(() => {
-    // * set price data
     if (marketRQ.data) {
+      const usd = marketData?.current_price?.usd;
+      const change = marketData?.price_change_percentage_24h;
+      const marketCap = isNum(marketData?.market_cap?.usd)
+        ? marketData.market_cap.usd
+        : usd * miningData?.supply?.total;
       setState((prev) => ({
         ...prev,
         price: {
-          sublabel: marketData?.current_price.btc,
-          text: marketData?.current_price.usd,
-          reserve: marketData?.price_change_percentage_24h.toFixed(2),
-          reward: marketData?.total_volume.usd,
-          footer: (
-            marketData?.current_price.usd * miningData?.supply.total
-          ).toFixed(2),
+          sublabel: marketData?.current_price?.btc,
+          text: usd,
+          reserve: isNum(change) ? `${change.toFixed(2)} %` : null,
+          reward: marketData?.total_volume?.usd,
+          footer: isNum(marketCap) ? marketCap : null,
         },
       }));
     }
 
-    // * set stake data
     if (miningRQ.data) {
       setState((prev) => ({
         ...prev,
         stake: {
           ...prev.stake,
-          sublabel: miningData?.stake.difficulty.toFixed(2),
-          reserve: miningData?.stake.height,
-          footer: miningData?.stake.fees.toFixed(2),
+          sublabel: toFixedSafe(miningData?.stake?.difficulty, 4),
+          reserve: miningData?.stake?.height,
+          footer: miningData?.stake?.fees,
+        },
+        prime: {
+          sublabel: toFixedSafe(miningData?.prime?.difficulty),
+          text: miningData?.prime?.primes,
+          reserve: miningData?.prime?.reserve,
+          reward: miningData?.prime?.reward,
+          footer: miningData?.prime?.fees,
+        },
+        hash: {
+          sublabel: toFixedSafe(miningData?.hash?.difficulty),
+          text: miningData?.hash?.hashes,
+          reserve: miningData?.hash?.reserve,
+          reward: miningData?.hash?.reward,
+          footer: miningData?.hash?.fees,
         },
       }));
     }
 
-    // * set stake data trust values
     if (metricsRQ.data) {
       setState((prev) => ({
         ...prev,
         stake: {
           ...prev.stake,
-          text: metricsData.trust.stake,
-          reward: metricsData.trust.total,
-        },
-      }));
-    }
-
-    // * set hash card data
-    if (miningRQ.data) {
-      const miningData = miningRQ.data.data.result;
-      setState((prev) => ({
-        ...prev,
-        hash: {
-          sublabel: miningData.hash.difficulty.toFixed(2),
-          text: miningData.hash.hashes,
-          reserve: miningData.hash.reserve.toFixed(2),
-          reward: miningData.hash.reward.toFixed(2),
-          footer: miningData.hash.fees.toFixed(2),
-        },
-      }));
-    }
-
-    // * set prime card data
-    if (miningRQ.data) {
-      setState((prev) => ({
-        ...prev,
-        prime: {
-          sublabel: miningData.prime.difficulty.toFixed(2),
-          text: miningData.prime.primes,
-          reserve: miningData.prime.reserve.toFixed(2),
-          reward: miningData.prime.reward.toFixed(2),
-          footer: miningData.prime.fees.toFixed(2),
+          text: metricsData?.trust?.stake,
+          reward: metricsData?.trust?.total,
         },
       }));
     }
@@ -154,7 +138,7 @@ function Panel2(props) {
     }
   }, [metricsRQ.data]);
 
-  // * increment the card timeout evry second
+  // * decrement the card timeout every second
   useEffect(() => {
     const interval = setInterval(() => {
       setCardRefreshTimeout((prev) => (prev > 0 ? prev - 1 : 0));
@@ -166,20 +150,36 @@ function Panel2(props) {
   return (
     <section className={styles.panelTwoContainer}>
       <IsMainnet network={network}>
-        <ErrorFallback hasError={marketRQ.isError}>
+        <ErrorFallback hasError={marketRQ.isError && !state.price?.text}>
           <DetailCard
             type="market"
             icon={<GiTwoCoins color="white" size="2.25rem" />}
             label="Price"
-            sublabel={`${state.price?.sublabel} BTC`}
+            sublabel={
+              isNum(state.price?.sublabel)
+                ? `${state.price.sublabel.toFixed(10)} BTC`
+                : ''
+            }
             text={`${state.price?.text}`}
             unit={'$'}
             reserveLabel="Change 24h"
-            reserve={`${state.price?.reserve} %`}
-            rewardLabel="Total Volume"
-            reward={`${intlNum(state.price?.reward)} $`}
+            reserve={state.price?.reserve}
+            rewardLabel="Volume 24h"
+            reward={
+              isNum(state.price?.reward)
+                ? `${intlNum(state.price.reward, 'en-US', {
+                    maximumFractionDigits: 0,
+                  })} $`
+                : NO_VALUE
+            }
             footerLabel="Market Cap "
-            footerValue={`${intlNum(state.price?.footer)} $`}
+            footerValue={
+              isNum(state.price?.footer)
+                ? `${intlNum(state.price.footer, 'en-US', {
+                    maximumFractionDigits: 0,
+                  })} $`
+                : NO_VALUE
+            }
             delayTime={`${cardRefreshTimeout}s`}
             isLoading={isInvalid(state.price?.text)}
           />
@@ -191,14 +191,18 @@ function Panel2(props) {
           icon={<AiFillBank color="white" size="2.25rem" />}
           label={StringsTypes.CHANNELS[0]}
           sublabel={`Difficulty : ${state.stake?.sublabel}`}
-          text={`${intlNum(state.stake?.text)}`}
+          text={`${intlNum(state.stake?.text, 'en-US', {
+            maximumFractionDigits: 0,
+          })}`}
           unit="NXS"
           reserveLabel="Height"
           reserve={`${intlNum(state.stake?.reserve)}`}
-          reward={`${state.stake?.reward}`}
+          reward={`${intlNum(state.stake?.reward, 'en-US', {
+            maximumFractionDigits: 0,
+          })}`}
           rewardLabel="Total"
           footerLabel="Fees "
-          footerValue={`${intlNum(state.stake?.footer)} NXS`}
+          footerValue={nxs(state.stake?.footer)}
           delayTime={`${cardRefreshTimeout}s`}
           isLoading={miningRQ.isLoading || isInvalid(state.stake?.text)}
         />
@@ -212,11 +216,11 @@ function Panel2(props) {
           text={`${abbreviateNumber(state.prime?.text)}`}
           unit="P/s"
           reserveLabel="Reserve"
-          reserve={`${state.prime?.reserve} NXS`}
+          reserve={nxs(state.prime?.reserve)}
           rewardLabel="Reward"
-          reward={`${state.prime?.reward} NXS`}
+          reward={nxs(state.prime?.reward, 4)}
           footerLabel="Fees"
-          footerValue={`${intlNum(state.prime?.footer)} NXS`}
+          footerValue={nxs(state.prime?.footer)}
           delayTime={`${cardRefreshTimeout}s`}
           isLoading={isInvalid(state.prime?.text)}
         />
@@ -230,11 +234,11 @@ function Panel2(props) {
           text={`${abbreviateNumber(state.hash?.text)}`}
           unit="H/s"
           reserveLabel="Reserve"
-          reserve={`${intlNum(state.hash?.reserve)} NXS`}
+          reserve={nxs(state.hash?.reserve)}
           rewardLabel="Reward"
-          reward={`${state.hash?.reward} NXS`}
+          reward={nxs(state.hash?.reward, 4)}
           footerLabel="Fees"
-          footerValue={`${intlNum(state.hash?.footer)} NXS`}
+          footerValue={nxs(state.hash?.footer)}
           delayTime={`${cardRefreshTimeout}s`}
           isLoading={isInvalid(state.hash?.text)}
         />
