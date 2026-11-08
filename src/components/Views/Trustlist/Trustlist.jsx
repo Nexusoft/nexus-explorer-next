@@ -36,16 +36,29 @@ export default function Trustlist() {
     {
       Header: 'Balance',
       accessor: 'balance',
-      Cell: (props) => intlNum(props.value.toFixed(2)) + ' NXS',
+      Cell: (props) => intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
     },
     {
       Header: 'Stake',
       accessor: 'stake',
-      Cell: (props) => intlNum(props.value.toFixed(2)) + ' NXS',
+      Cell: (props) => intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
     },
     {
       Header: 'Stake Rate',
       accessor: 'rate',
+      Cell: ({ value }) => (value != null ? `${value} %` : '-'),
+    },
+    {
+      Header: 'Est. reward / day',
+      id: 'daily',
+      accessor: (row) => (row.stake * row.rate) / 100 / 365,
+      Cell: ({ value }) =>
+        Number.isFinite(value) ? `${value.toFixed(2)} NXS` : '-',
+    },
+    {
+      Header: 'Staking for',
+      accessor: 'age',
+      Cell: ({ value }) => (value ? value.split(',')[0] : '-'),
     },
     {
       Header: 'Trust',

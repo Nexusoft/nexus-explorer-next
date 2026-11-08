@@ -20,7 +20,7 @@ export default function Richlist(props) {
   const [pieData, setPieData] = useState();
 
   // * api calls
-  const { network, getRichlist, getMetrics } = useNetwork();
+  const { network, getRichlist, getMining } = useNetwork();
   const isMainnet = network.name === NETWORKS.MAINNET.name;
   const { isLoading, data, error, isError } = useQuery(
     ['richlist', pageIndex, pageSize, network.name],
@@ -43,8 +43,9 @@ export default function Richlist(props) {
     }
   );
 
-  const metricsRQ = useQuery(['metrics', network.name], getMetrics);
-  const totalSupply = metricsRQ?.data?.result?.supply?.total;
+  //system/get/metrics has no supply, ledger/get/info does
+  const miningRQ = useQuery(['mining', network.name], getMining);
+  const totalSupply = miningRQ?.data?.data?.result?.supply?.total;
   const PIE_LABELS = ['Top 1', 'Top 10', 'Top 100', 'Others'];
 
   const columns = [
@@ -63,17 +64,27 @@ export default function Richlist(props) {
     {
       Header: 'Balance',
       accessor: 'total',
-      Cell: ({ value }) => (value ? intlNum(value.toFixed(2)) + ' NXS' : '-'),
+      Cell: ({ value }) =>
+        value
+          ? intlNum(value, 'en-US', { maximumFractionDigits: 0 }) + ' NXS'
+          : '-',
     },
     {
-      Header: 'Trust',
-      accessor: 'trust',
-      Cell: ({ value }) => (value ? intlNum(value) + '' : '-'),
+      Header: 'Share of supply',
+      accessor: 'total',
+      id: 'share',
+      Cell: ({ value }) =>
+        value && totalSupply
+          ? `${((value / totalSupply) * 100).toFixed(3)} %`
+          : '-',
     },
     {
-      Header: 'Stake Rate',
-      accessor: 'rate',
-      Cell: ({ value }) => (value ? intlNum(value.toFixed(2)) + '' : '-'),
+      Header: 'Kind',
+      accessor: 'type',
+      Cell: ({ row }) =>
+        row.original.type === 'TRUST'
+          ? `Staking (${intlNum(row.original.rate?.toFixed(2))} %)`
+          : 'Account',
     },
   ];
 
@@ -111,7 +122,7 @@ export default function Richlist(props) {
           (sumTop100 + sumTop10 + sumTop1),
       ]);
     }
-  }, [richlist111.data]);
+  }, [richlist111.data, totalSupply]);
 
   return (
     <>

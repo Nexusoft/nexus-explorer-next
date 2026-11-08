@@ -1,130 +1,120 @@
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useQuery } from 'react-query';
-import Loader from 'components/common/NE_Loader';
-import Table from 'components/Table';
-import TYPES from 'types';
-import { useState, useEffect } from 'react';
-import { totalPages } from 'utils/helper';
-import DynamicPagination from 'components/common/NE_Pagination';
 import { useNetwork } from 'hooks';
+import { Card, SectionTitle, styles } from 'components/Detail';
+import ListPager from 'components/Detail/ListPager';
+import { channelName } from 'components/Detail/BlockDetail';
+import {
+  formatAmount,
+  formatBytes,
+  formatDate,
+  formatInt,
+  timeAgo,
+} from 'utils/format';
 
 export default function Blocks() {
-  // wrap these states in the specific network's state
-  const [pageSize, setPageSize] = useState(10);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageCount, setPageCount] = useState(1);
-  const [totalRows, setTotalRows] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [page, setPage] = useState(0);
+  const [highlight, setHighlight] = useState(null);
+  const { network, getBlocks, getInfo } = useNetwork();
 
-  // * api calls
-  const { network, getBlocks } = useNetwork();
-  const { isLoading, data, error } = useQuery(
-    ['blocks', pageSize, pageIndex, network.name],
-    getBlocks
-  );
-
-  const columns = [
-    {
-      Header: 'Block',
-      accessor: 'height',
-      Cell: (props) => <a href={`/scan/${props.value}`}>{props.value}</a>,
-    },
-    {
-      Header: 'Timestamp',
-      accessor: 'timestamp',
-      Cell: (props) => new Date(props.value * 1000).toLocaleTimeString(),
-    },
-    {
-      Header: 'Mint',
-      accessor: 'mint',
-      Cell: (props) => props.value.toFixed(2),
-    },
-    {
-      Header: 'TXNs',
-      accessor: 'tx',
-      Cell: ({ value }) => value.length,
-    },
-    {
-      Header: 'Channel',
-      accessor: 'channel',
-      key: 'channel',
-      Cell: (props) => {
-        return TYPES.CHANNELS[props.value];
-      },
-    },
-  ];
-
-  // * reset all pagination props on network.name change
   useEffect(() => {
-    setPageSize(10);
-    setPageIndex(0);
-    setPageCount(1);
-    setTotalRows(0);
+    setPage(0);
+    setHighlight(null);
   }, [network.name]);
 
-  // * calculate totalRows from blockHeight for pageCount
-  useEffect(() => {
-    if (data) {
-      let height = data[0].height;
-      if (height > totalRows) {
-        setTotalRows(height);
-      }
-    }
-  }, [data, pageSize]);
+  const blocksRQ = useQuery(['blocks', pageSize, page, network.name], getBlocks, {
+    keepPreviousData: true,
+    refetchInterval: page === 0 ? 30000 : false,
+  });
+  const infoRQ = useQuery(['info', network.name], getInfo);
+  const tip = infoRQ.data?.data?.result?.blocks;
 
-  // * set pagecount based on total rows
-  useEffect(() => {
-    setPageCount(totalPages(totalRows, pageSize));
-  }, [totalRows, pageSize, network.name]);
+  const rows = blocksRQ.data || [];
+  const first = rows[0]?.height;
+  const last = rows[rows.length - 1]?.height;
 
-  if (isLoading)
-    return (
-      <div
-        style={{
-          display: 'grid',
-          placeItems: 'center',
-          minHeight: '200px',
-          margin: 'auto',
-        }}>
-        <Loader type="circle" size="5rem" />
-      </div>
-    );
+  const jump = (height) => {
+    if (!tip) return;
+    const h = Math.min(height, tip);
+    setHighlight(h);
+    setPage(Math.floor((tip - h) / pageSize));
+  };
 
-  if (error) return <pre>{JSON.stringify(error, null, 2)}</pre>;
-
-  if (data) {
-    const dynamicPageControls = {
-      canPreviousPage: pageIndex > 0,
-      canNextPage: pageIndex < pageCount - 1,
-      pageCount: pageCount,
-      gotoPage: (pageIndex) => {
-        setPageIndex(pageIndex);
-      },
-      setPageSize: (pageSize) => {
-        setPageIndex(0);
-        setPageSize(pageSize);
-      },
-      pageIndex: pageIndex,
-      pageSize: pageSize,
-      handleStartOfPageClick: () => {
-        setPageIndex(0);
-      },
-      handlePreviousPageClick: () => {
-        setPageIndex(pageIndex - 1);
-      },
-      handleNextPageClick: () => {
-        setPageIndex(pageIndex + 1);
-      },
-    };
-
-    return (
-      <div style={{ overflow: 'visible' }}>
-        <Table columns={columns} data={data} paginate={false} />
-        <div style={{ marginBottom: '1rem' }}>
-          <DynamicPagination
-            controls={dynamicPageControls}
-            isStaticPanination={false}
-          />
+  return (
+    <Card>
+      <SectionTitle
+        note={
+          first != null
+            ? `blocks ${formatInt(last)} to ${formatInt(first)}${
+                tip ? ` of ${formatInt(tip)}` : ''
+              }`
+            : null
+        }>
+        Blocks
+      </SectionTitle>
+      {blocksRQ.isLoading && <p className={styles.muted}>Loading blocks...</p>}
+      {blocksRQ.isError && (
+        <p className={styles.muted}>Could not load blocks from the node.</p>
+      )}
+      {rows.length > 0 && (
+        <div
+          className={styles.tableWrap}
+          style={{ opacity: blocksRQ.isFetching && blocksRQ.isPreviousData ? 0.5 : 1 }}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Height</th>
+                <th>Time</th>
+                <th className={styles.hideMobile}>Channel</th>
+                <th className={styles.right}>Reward</th>
+                <th className={styles.right}>Transactions</th>
+                <th className={`${styles.right} ${styles.hideMobile}`}>Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((b) => (
+                <tr
+                  key={b.height}
+                  style={
+                    b.height === highlight
+                      ? { outline: '2px solid var(--nexus-blue)' }
+                      : undefined
+                  }>
+                  <td>
+                    <Link href={`/scan/${b.height}`}>
+                      <a>{formatInt(b.height)}</a>
+                    </Link>
+                  </td>
+                  <td title={formatDate(b.timestamp)} style={{ whiteSpace: 'nowrap' }}>
+                    {timeAgo(b.timestamp)}
+                    <div className={styles.muted}>
+                      {formatDate(b.timestamp).slice(0, 16)}
+                    </div>
+                  </td>
+                  <td className={styles.hideMobile}>{channelName(b.channel)}</td>
+                  <td className={styles.right} style={{ whiteSpace: 'nowrap' }}>
+                    {formatAmount(b.mint, 2)} NXS
+                  </td>
+                  <td className={styles.right}>{b.tx?.length ?? 0}</td>
+                  <td className={`${styles.right} ${styles.hideMobile}`}>
+                    {formatBytes(b.size)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
-    );
-  }
+      )}
+      <ListPager
+        page={page}
+        setPage={setPage}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+        hasOlder={last > 0}
+        onJump={tip ? jump : undefined}
+      />
+    </Card>
+  );
 }
