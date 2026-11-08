@@ -20,6 +20,7 @@ import { pathOr } from 'utils';
 import { shortHash } from 'utils/format';
 import { classifySearch, SEARCH_KINDS } from 'utils/search';
 import SearchHelp from 'components/common/NE_SearchHelp';
+import NameSearch from 'components/Views/Search/NameSearch';
 
 export const getServerSideProps = async (context) => {
   let address = context.params.addr;
@@ -155,7 +156,7 @@ function Scan({ addr }) {
         }
       />
       <div>
-        {!searchKind && <SearchHelp query={addr} />}
+        {!searchKind && <NameSearch query={addr} />}
         {searchKind && isError && (
           <SearchHelp
             query={addr}

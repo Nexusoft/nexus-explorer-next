@@ -51,4 +51,5 @@ export const SEARCH_HELP = [
   ['Signature chain (owner)', '64 hex characters'],
   ['Address', '51 characters, e.g. 8BZcAo489savefJH...'],
   ['Account or trust name', 'username:default, username:trust'],
+  ['Token, global name, namespace or asset', 'its name or the start of it'],
 ];
