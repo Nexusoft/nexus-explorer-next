@@ -22,6 +22,7 @@ const navLinks = [
       { title: 'Tokens', path: '/tokens' },
     ],
   },
+  { title: 'Market', path: '/market', disabledNets: [NETWORKS.TESTNET.name] },
   { title: 'Metrics', path: '/metrics' },
   {
     title: 'DAO',

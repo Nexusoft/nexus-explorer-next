@@ -47,6 +47,11 @@ export const PageMetaTypes = {
       TITLE: page('Namespaces'),
       DESCRIPTION: 'Namespaces registered on the Nexus blockchain.',
     },
+    MARKET: {
+      TITLE: page('Market'),
+      DESCRIPTION:
+        'Open and filled orders on the Nexus on-chain market for tokens traded against NXS.',
+    },
     TOKENS: {
       TITLE: page('Tokens'),
       DESCRIPTION:
