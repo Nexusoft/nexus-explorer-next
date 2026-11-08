@@ -25,6 +25,7 @@ import { describeContract, netForAddress } from 'utils/contracts';
 import { isNum } from 'utils/converter';
 import { CARD_TYPES } from 'types/ConstantsTypes';
 import { ASSET_FORMATS, assetFormat, isAsset } from 'utils/assets';
+import TokenHolders from './TokenHolders';
 import TYPES from 'types';
 
 const pageSize = 20;
@@ -462,6 +463,8 @@ export default function AccountDetail({ type, data }) {
           fields={extra.filter(([k]) => k !== 'json')}
         />
       )}
+
+      {type === CARD_TYPES.TOKEN && <TokenHolders token={data} />}
 
       {hasTransfers && (
         <AccountTransactions type={type} address={data.address} />

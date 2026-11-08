@@ -7,11 +7,25 @@ import { useQuery } from 'react-query';
 import { intlNum } from 'utils/converter';
 
 export default function Tokens() {
-  const { network, getTokens } = useNetwork();
+  const { network, getTokens, getTokenHolders } = useNetwork();
   const { isLoading, data, error } = useQuery(
     ['tokens', network.name],
     getTokens
   );
+  const holdersRQ = useQuery(['tokenholders', network.name], getTokenHolders, {
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+  const holders = holdersRQ.data;
+
+  const holdersColumn = {
+    Header: 'Holders',
+    id: 'holders',
+    align: 'right',
+    accessor: (row) => holders?.[row.token]?.owners || 0,
+    sortDescFirst: true,
+    Cell: ({ value }) => intlNum(value),
+  };
 
   const columns = [
     {
@@ -42,6 +56,7 @@ export default function Tokens() {
       accessor: 'currentsupply',
       Cell: ({ value }) => intlNum(value),
     },
+    ...(holders ? [holdersColumn] : []),
   ];
 
   if (isLoading) {

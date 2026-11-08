@@ -155,6 +155,14 @@ export function useNetwork() {
   //asset registers without content, indexer only like the markets
   const getAssets = () => cachedList('assets', () => null);
 
+  //{token address: {accounts, owners, top}}, indexer only, refreshed hourly
+  const getTokenHolders = () =>
+    cachedList(
+      'tokenholders',
+      () => null,
+      (v) => !!v && typeof v === 'object' && !Array.isArray(v)
+    );
+
   const getTokens = async () => {
     const cached = await cachedList('tokens', () => null);
     if (cached) return { data: { result: cached } };
@@ -314,6 +322,7 @@ export function useNetwork() {
     getTokens,
     getMarkets,
     getAssets,
+    getTokenHolders,
     getMining,
     getAccount,
     getInvoice,
