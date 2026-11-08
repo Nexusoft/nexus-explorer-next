@@ -129,7 +129,7 @@ export const InvoiceWithData = ({ data, onBack, isPage }) => {
           <dd>
             <Hash
               value={address}
-              href={isPage ? undefined : `/scan?invoice=${address}`}
+              href={isPage ? undefined : `/scan/invoice-${address}`}
             />
           </dd>
         </dl>

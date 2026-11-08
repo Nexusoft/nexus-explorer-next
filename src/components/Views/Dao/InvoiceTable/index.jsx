@@ -67,7 +67,7 @@ function InvoicesView({ username }) {
     window.history.replaceState(
       window.history.state,
       '',
-      '/scan?invoice=' + data.address
+      '/scan/invoice-' + data.address
     );
   };
 

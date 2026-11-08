@@ -9,6 +9,7 @@ import { useQuery } from 'react-query';
 import { isDev } from 'utils/middleware';
 import { Log } from 'utils/customLog';
 import PageHeader from 'components/Header/PageHeader';
+import TYPES from 'types';
 import { CARD_TYPES } from 'types/ConstantsTypes';
 import { InvoiceWithData } from 'components/Views/Dao/InvoiceModal';
 import { useRouter } from 'next/router';
@@ -139,9 +140,9 @@ function Scan({ addr }) {
         title={
           cardType
             ? `${scanTitles[cardType] || 'Scan'} ${shortHash(
-                addr,
+                addr.replace(/^invoice-/, ''),
                 6
-              )} | Nexus Explorer`
+              )} | ${TYPES.PAGEMETA.SITE}`
             : undefined
         }
       />
