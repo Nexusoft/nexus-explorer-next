@@ -472,3 +472,24 @@
     font-size: 0.8rem;
   }
 }
+
+//JSON stored in an asset
+.json {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  max-height: 24rem;
+  overflow: auto;
+  background: var(--c-surface-2);
+  border-radius: var(--radius-panel);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.kv dd a {
+  color: var(--c-link);
+  &:hover {
+    text-decoration: underline;
+  }
+}

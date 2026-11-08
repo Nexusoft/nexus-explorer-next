@@ -20,6 +20,7 @@ const navLinks = [
       { title: 'Global names', path: '/globalnames' },
       { title: 'Namespaces', path: '/namespaces' },
       { title: 'Tokens', path: '/tokens' },
+      { title: 'Assets', path: '/assets' },
     ],
   },
   { title: 'Market', path: '/market', disabledNets: [NETWORKS.TESTNET.name] },

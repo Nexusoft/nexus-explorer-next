@@ -152,6 +152,9 @@ export function useNetwork() {
   //NXS market pairs, collected by the indexer only (null when it is not running)
   const getMarkets = () => cachedList('markets', () => null);
 
+  //asset registers without content, indexer only like the markets
+  const getAssets = () => cachedList('assets', () => null);
+
   const getTokens = async () => {
     const cached = await cachedList('tokens', () => null);
     if (cached) return { data: { result: cached } };
@@ -310,6 +313,7 @@ export function useNetwork() {
     getToken,
     getTokens,
     getMarkets,
+    getAssets,
     getMining,
     getAccount,
     getInvoice,

@@ -24,6 +24,7 @@ import {
 import { describeContract, netForAddress } from 'utils/contracts';
 import { isNum } from 'utils/converter';
 import { CARD_TYPES } from 'types/ConstantsTypes';
+import { ASSET_FORMATS, isAsset } from 'utils/assets';
 import TYPES from 'types';
 
 const pageSize = 20;
@@ -56,6 +57,77 @@ const knownFields = [
   'currentsupply',
   'maxsupply',
 ];
+
+const assetJson = (data) =>
+  data.json && typeof data.json === 'object' && !Array.isArray(data.json)
+    ? data.json
+    : {};
+
+function assetTitle(data) {
+  const t = data.title || assetJson(data).title || assetJson(data).name;
+  return typeof t === 'string' && t ? t : data.name || 'Asset';
+}
+
+//same rule as the indexer's asset list
+function assetKind(data) {
+  //an object's own "type" field hides the register type
+  const ownType = ASSET_FORMATS[data.type] ? null : data.type;
+  const k =
+    data['distordia-type'] ||
+    assetJson(data).type ||
+    ownType ||
+    (data.bounty_id ? 'bounty' : null);
+  return typeof k === 'string' ? k : null;
+}
+
+const isUrl = (v) => typeof v === 'string' && /^https?:\/\/\S+$/i.test(v);
+
+function FieldValue({ value }) {
+  if (value !== null && typeof value === 'object') {
+    return <pre className={styles.json}>{JSON.stringify(value, null, 2)}</pre>;
+  }
+  if (isUrl(value)) {
+    return (
+      <a href={value} target="_blank" rel="nofollow noopener noreferrer ugc">
+        {value}
+      </a>
+    );
+  }
+  return String(value);
+}
+
+/** What the owner stored in an asset: its own fields, or the json of a raw / read-only one */
+function AssetContent({ data, fields }) {
+  const json = data.json;
+  const rows = json === assetJson(data) ? Object.entries(json) : fields;
+  return (
+    <Card>
+      <SectionTitle note={ASSET_FORMATS[data.type] || ASSET_FORMATS.OBJECT}>
+        Content
+      </SectionTitle>
+      {json !== undefined && rows === fields ? (
+        <FieldValue value={json} />
+      ) : rows.length === 0 ? (
+        <p className={styles.muted}>This asset holds no fields.</p>
+      ) : (
+        <dl className={styles.kv}>
+          {rows.map(([k, v]) => (
+            <div key={k} style={{ display: 'contents' }}>
+              <dt>{k}</dt>
+              <dd>
+                <FieldValue value={v} />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      <p className={styles.muted}>
+        Written by the owner; the explorer shows it as stored and does not check
+        it.
+      </p>
+    </Card>
+  );
+}
 
 function usd(value, price) {
   if (!isNum(value) || !isNum(price)) return null;
@@ -214,12 +286,15 @@ export default function AccountDetail({ type, data }) {
   const hasBalance = isNum(Number(data.balance)) && data.balance !== undefined;
   const hasTransfers =
     !isName && !isNamespace && (type !== CARD_TYPES.ASSET || hasBalance);
+  const asset = type === CARD_TYPES.ASSET && isAsset(data);
   const kind = isName
     ? data.global
       ? 'Global name'
       : 'Name'
     : isNamespace
     ? 'Namespace'
+    : asset
+    ? 'Asset'
     : KIND[type] || 'Address';
 
   //account names like "default" or "trust" are labels inside a profile, not titles
@@ -230,10 +305,16 @@ export default function AccountDetail({ type, data }) {
     ? data.ticker || 'Token'
     : isAccount
     ? `${ticker} ${type === CARD_TYPES.TRUST ? 'trust account' : 'account'}`
+    : asset
+    ? assetTitle(data)
     : data.name || 'Register';
 
+  //an asset's own fields go to its Content card, objects included
   const extra = Object.entries(data).filter(
-    ([k, v]) => !knownFields.includes(k) && typeof v !== 'object'
+    ([k, v]) =>
+      !knownFields.includes(k) &&
+      k !== 'form' &&
+      (asset || typeof v !== 'object')
   );
 
   const dailyReward =
@@ -250,6 +331,10 @@ export default function AccountDetail({ type, data }) {
         badges={[
           ticker && { text: ticker, tone: 'accent' },
           isAccount && data.name && { text: `name: ${data.name}` },
+          asset &&
+            data.name &&
+            data.name !== title && { text: `name: ${data.name}` },
+          asset && assetKind(data) && { text: assetKind(data), tone: 'accent' },
           data.modified && {
             text: `last active ${timeAgo(data.modified)}`,
           },
@@ -367,6 +452,13 @@ export default function AccountDetail({ type, data }) {
         </Stats>
       </Card>
 
+      {asset && (
+        <AssetContent
+          data={data}
+          fields={extra.filter(([k]) => k !== 'json')}
+        />
+      )}
+
       {hasTransfers && (
         <AccountTransactions type={type} address={data.address} />
       )}
@@ -376,11 +468,12 @@ export default function AccountDetail({ type, data }) {
         rows={[
           ['Address', data.address],
           ['Owner (signature chain)', data.owner],
+          ['Form', data.form],
           ['Type', data.type],
           ['Version', data.version],
           ['Created (unix)', data.created],
           ['Modified (unix)', data.modified],
-          ...extra.map(([k, v]) => [k, String(v)]),
+          ...(asset ? [] : extra.map(([k, v]) => [k, String(v)])),
         ]}
       />
     </DetailPage>
