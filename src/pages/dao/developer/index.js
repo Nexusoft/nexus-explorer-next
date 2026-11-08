@@ -12,7 +12,11 @@ function DevloperDAOPage() {
         title={TYPES.PAGEMETA.DAO.DEVELOPER.TITLE}
         description={TYPES.PAGEMETA.DAO.DEVELOPER.DESCRIPTION}
       />
-      <DaoInfo title={'Developer DAO'} daoObject={daoObject} />
+      <DaoInfo
+        title={'Developer DAO'}
+        description={TYPES.PAGEMETA.DAO.DEVELOPER.DESCRIPTION}
+        daoObject={daoObject}
+      />
     </Layout>
   );
 }

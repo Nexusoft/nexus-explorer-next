@@ -12,7 +12,11 @@ function AmbassadorDAOPage() {
         title={TYPES.PAGEMETA.DAO.AMBASSADOR.TITLE}
         description={TYPES.PAGEMETA.DAO.AMBASSADOR.DESCRIPTION}
       />
-      <DaoInfo title={'Ambassador DAO'} daoObject={daoObject} />
+      <DaoInfo
+        title={'Ambassador DAO'}
+        description={TYPES.PAGEMETA.DAO.AMBASSADOR.DESCRIPTION}
+        daoObject={daoObject}
+      />
     </Layout>
   );
 }

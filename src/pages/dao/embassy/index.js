@@ -11,7 +11,11 @@ function EmbassyDAOPage() {
         title={TYPES.PAGEMETA.DAO.EMBASSY.TITLE}
         description={TYPES.PAGEMETA.DAO.EMBASSY.DESCRIPTION}
       />
-      <DaoInfo title={'Embassy DAO'} daoObject={daoObject} />
+      <DaoInfo
+        title={'Embassy DAO'}
+        description={TYPES.PAGEMETA.DAO.EMBASSY.DESCRIPTION}
+        daoObject={daoObject}
+      />
     </Layout>
   );
 }

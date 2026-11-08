@@ -42,18 +42,13 @@ export const StaticNavLinks = ({
   }
 
   return (
-    <>
-      <Link href={pathname} passHref>
-        <span className={cls(isActivePath && styles.active)}>{label}</span>
-      </Link>
-      <style jsx>{`
-        span {
-          justify-content: center;
-          padding: 0.5rem 1rem;
-          padding: var(--space-xxs);
-        }
-      `}</style>
-    </>
+    <Link href={pathname}>
+      <a
+        className={cls(styles.navItem, isActivePath && styles.active)}
+        aria-current={isActivePath ? 'page' : undefined}>
+        {label}
+      </a>
+    </Link>
   );
 };
 
@@ -115,15 +110,18 @@ export const NestedNavLinks = ({
       title={title}
       selected={options.some((item) => activePathname === item.path)}>
       {options.map((item, index) => (
-        <Link key={item.path + index} href={item.path} passHref>
-          <span
+        <Link key={item.path + index} href={item.path}>
+          <a
             className={cls(
               isRouteEqual(activePathname, item.path) &&
                 styles.dropDown__active,
               styles.dropDown__item
-            )}>
+            )}
+            aria-current={
+              isRouteEqual(activePathname, item.path) ? 'page' : undefined
+            }>
             {item.title}
-          </span>
+          </a>
         </Link>
       ))}
     </NavDropdown>

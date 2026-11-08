@@ -2,14 +2,20 @@ import Link from 'next/link';
 import React from 'react';
 import { useQueries } from 'react-query';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import { Card, DetailPage, SectionTitle, styles } from 'components/Detail';
+import {
+  Card,
+  DetailPage,
+  PageTitle,
+  SectionTitle,
+  styles,
+} from 'components/Detail';
 import { formatAmount } from 'utils/format';
 
 function telegram(social) {
   return social?.startsWith('@') ? social.replace('@', 'https://t.me/') : null;
 }
 
-export const DaoInfo = ({ title, daoObject }) => {
+export const DaoInfo = ({ title, description, daoObject }) => {
   const { getAccount } = useNetwork();
   const entries = Object.entries(daoObject);
 
@@ -28,10 +34,11 @@ export const DaoInfo = ({ title, daoObject }) => {
 
   return (
     <DetailPage>
+      <PageTitle title={title}>{description}</PageTitle>
       <Card>
         <SectionTitle
           note={loading ? null : `${formatAmount(total, 2)} NXS in total`}>
-          {title}
+          Accounts
         </SectionTitle>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
