@@ -222,13 +222,15 @@ export default function AccountDetail({ type, data }) {
     ? 'Namespace'
     : KIND[type] || 'Address';
 
+  //account names like "default" or "trust" are labels inside a profile, not titles
+  const isAccount = type === CARD_TYPES.USER || type === CARD_TYPES.TRUST;
   const title = isNamespace
     ? data.namespace
     : type === CARD_TYPES.TOKEN
     ? data.ticker || 'Token'
-    : data.name
-    ? data.name
-    : `${ticker} ${type === CARD_TYPES.TRUST ? 'trust account' : 'account'}`;
+    : isAccount
+    ? `${ticker} ${type === CARD_TYPES.TRUST ? 'trust account' : 'account'}`
+    : data.name || 'Register';
 
   const extra = Object.entries(data).filter(
     ([k, v]) => !knownFields.includes(k) && typeof v !== 'object'
@@ -247,6 +249,7 @@ export default function AccountDetail({ type, data }) {
         subtitle={<Hash value={data.address} full />}
         badges={[
           ticker && { text: ticker, tone: 'accent' },
+          isAccount && data.name && { text: `name: ${data.name}` },
           data.modified && {
             text: `last active ${timeAgo(data.modified)}`,
           },

@@ -7,7 +7,6 @@ import { BsBoxArrowLeft } from 'react-icons/bs';
 import { pathOr } from 'utils';
 import styles from './invoices.module.scss';
 import { useRouter } from 'next/router';
-import TYPES from 'types';
 import NE_Pagination from 'components/common/NE_Pagination';
 import { InvoiceModal } from '../InvoiceModal';
 import { FiInfo } from 'react-icons/fi';
@@ -81,9 +80,7 @@ function InvoicesView({ username }) {
     <PromiseLayout
       isLoading={isLoading}
       isError={isError}
-      error={pathOr({}, ['response', 'data', 'error'], error)}
-      loaderType={TYPES.LOADER.DOT}
-      loaderSize={'2.5rem'}>
+      error={pathOr({}, ['response', 'data', 'error'], error)}>
       <button type="button" className={styles.back} onClick={router.back}>
         <BsBoxArrowLeft aria-hidden="true" /> Back
       </button>

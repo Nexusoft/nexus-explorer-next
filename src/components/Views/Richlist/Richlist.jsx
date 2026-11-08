@@ -130,8 +130,7 @@ export default function Richlist(props) {
         <PromiseLayout
           isLoading={isLoading}
           isError={isError}
-          error={pathOr({}, ['response', 'data', 'error'], error)}
-          loaderType={TYPES.LOADER.CIRCLE}>
+          error={pathOr({}, ['response', 'data', 'error'], error)}>
           {pieData && <Distribution values={pieData} labels={PIE_LABELS} />}
 
           {/* // * Table with dual pagination */}

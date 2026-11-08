@@ -45,17 +45,7 @@ export default function Tokens() {
   ];
 
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: 'grid',
-          placeItems: 'center',
-          minHeight: '200px',
-          margin: 'auto',
-        }}>
-        <Loader type="circle" size="5rem" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {

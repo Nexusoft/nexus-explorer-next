@@ -7,7 +7,6 @@ import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import DynamicPagination from 'components/common/NE_Pagination';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 import { intlNum, pathOr } from 'utils';
-import TYPES from 'types';
 
 export default function Trustlist() {
   const [pageIndex, setPageIndex] = useState(0);
@@ -108,8 +107,7 @@ export default function Trustlist() {
         <PromiseLayout
           isLoading={isLoading}
           isError={isError}
-          error={pathOr({}, ['response', 'data', 'error'], error)}
-          loaderType={TYPES.LOADER.CIRCLE}>
+          error={pathOr({}, ['response', 'data', 'error'], error)}>
           {data && (
             <Table
               columns={columns}

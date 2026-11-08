@@ -6,7 +6,6 @@ import React from 'react';
 import { useQuery } from 'react-query';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 import { pathOr } from 'utils';
-import TYPES from 'types';
 import InfoCard from 'components/common/InfoCard';
 
 export default function Index() {
@@ -50,7 +49,6 @@ export default function Index() {
     <Layout>
       <PromiseLayout
         isLoading={invoiceRQ.isLoading}
-        loaderType={TYPES.LOADER.CIRCLE}
         isError={invoiceRQ.isError}
         error={pathOr({}, ['response', 'data', 'error'], invoiceRQ.error)}>
         {invoiceRQ.data && (
@@ -59,14 +57,12 @@ export default function Index() {
       </PromiseLayout>
       <PromiseLayout
         isLoading={tokenRQ.isLoading}
-        loaderType={TYPES.LOADER.CIRCLE}
         isError={tokenRQ.isError}
         error={pathOr({}, ['response', 'data', 'error'], tokenRQ.error)}>
         {tokenRQ.data && <InfoCard type="token object" data={tokenRQ.data} />}
       </PromiseLayout>
       <PromiseLayout
         isLoading={namespaceRQ.isLoading}
-        loaderType={TYPES.LOADER.CIRCLE}
         isError={namespaceRQ.isError}
         error={pathOr({}, ['response', 'data', 'error'], namespaceRQ.error)}>
         {namespaceRQ.data && (
@@ -75,7 +71,6 @@ export default function Index() {
       </PromiseLayout>
       <PromiseLayout
         isLoading={globalNameRQ.isLoading}
-        loaderType={TYPES.LOADER.CIRCLE}
         isError={globalNameRQ.isError}
         error={pathOr({}, ['response', 'data', 'error'], globalNameRQ.error)}>
         {globalNameRQ.data && (

@@ -4,6 +4,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { IconContext } from 'react-icons';
 import { useState } from 'react';
+import RouteProgress from 'components/common/RouteProgress';
 
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en.json';
@@ -32,6 +33,7 @@ function MyApp({ Component, pageProps }) {
           style: { verticalAlign: 'middle' },
         }}>
         <QueryClientProvider client={queryClient}>
+          <RouteProgress />
           <Component {...pageProps} />
           <ReactQueryDevtools position="bottom-right" />
         </QueryClientProvider>

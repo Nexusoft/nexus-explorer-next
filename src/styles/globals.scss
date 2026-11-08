@@ -40,14 +40,6 @@
   all: unset;
 }
 
-.center-loader {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-inline: auto;
-  height: 50vh;
-}
-
 .monospace {
   font-family: var(--font-mono);
 }

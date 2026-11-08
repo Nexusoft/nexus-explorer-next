@@ -1,21 +1,11 @@
-import TYPES from 'types';
-import { CircleLoader } from './CircularLoader';
-import { DotLoader } from './DotLoader';
-import PropTypes from 'prop-types';
+import styles from './Loader.module.scss';
 
-export default function Loader({ type, ...props }) {
-  if (type === TYPES.LOADER.DOT) return <DotLoader {...props} />;
-  return <CircleLoader {...props} />;
+/** Small spinner with a label, fills the space the content will take */
+export default function Loader({ label = 'Loading' }) {
+  return (
+    <div className={styles.loader} role="status" aria-live="polite">
+      <span className={styles.spinner} aria-hidden="true" />
+      <span>{label}</span>
+    </div>
+  );
 }
-
-Loader.propTypes = {
-  type: PropTypes.oneOf(['circle', 'dot']),
-  size: PropTypes.string,
-  color: PropTypes.string,
-};
-
-Loader.defaultProps = {
-  type: TYPES.LOADER.CIRCLE,
-  size: '3rem',
-  color: TYPES.COLORS.NEXUS_BLUE,
-};
