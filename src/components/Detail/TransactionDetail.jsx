@@ -108,7 +108,15 @@ export default function TransactionDetail({ tx }) {
               full
             />,
           ],
-          ['Signature chain', <Hash key="g" value={tx.genesis} full />],
+          [
+            'Signature chain',
+            <Hash
+              key="g"
+              value={tx.genesis}
+              href={`/scan/${tx.genesis}`}
+              full
+            />,
+          ],
           ['Sequence', tx.sequence],
           [
             'Previous tx',

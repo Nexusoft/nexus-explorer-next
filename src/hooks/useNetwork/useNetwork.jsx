@@ -155,6 +155,15 @@ export function useNetwork() {
   //asset registers without content, indexer only like the markets
   const getAssets = () => cachedList('assets', () => null);
 
+  //registers of one signature chain from the hourly owner index, null without an index
+  const getOwner = async (genesis) => {
+    try {
+      return (await getIndex(`owner/${genesis}`)).result;
+    } catch (e) {
+      return null;
+    }
+  };
+
   //{token address: {accounts, owners, top}}, indexer only, refreshed hourly
   const getTokenHolders = () =>
     cachedList(
@@ -322,6 +331,7 @@ export function useNetwork() {
     getTokens,
     getMarkets,
     getAssets,
+    getOwner,
     getTokenHolders,
     getMining,
     getAccount,

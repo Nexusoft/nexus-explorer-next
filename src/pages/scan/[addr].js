@@ -3,6 +3,7 @@ import { styles as detailStyles } from 'components/Detail';
 import BlockDetail from 'components/Detail/BlockDetail';
 import TransactionDetail from 'components/Detail/TransactionDetail';
 import AccountDetail from 'components/Detail/AccountDetail';
+import OwnerDetail from 'components/Detail/OwnerDetail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
@@ -37,6 +38,7 @@ const scanTitles = {
   token: 'Token',
   asset: 'Register',
   invoice: 'Invoice',
+  genesis: 'Signature chain',
 };
 
 function Scan({ addr }) {
@@ -91,6 +93,12 @@ function Scan({ addr }) {
         };
         return { ...match, params: { address: addr } };
       }
+      case SEARCH_KINDS.GENESIS:
+        return {
+          endpoint: 'profiles/status/master',
+          params: { genesis: addr.toLowerCase() },
+          type: CARD_TYPES.GENESIS,
+        };
       case SEARCH_KINDS.TRANSACTION:
         return {
           endpoint: 'ledger/get/transaction',
@@ -152,11 +160,16 @@ function Scan({ addr }) {
           <SearchHelp
             query={addr}
             notFound
-            message={pathOr(
-              error?.message,
-              ['response', 'data', 'error', 'message'],
-              error
-            )}
+            message={
+              //the node answers "Block not found" for an unknown genesis
+              searchKind === SEARCH_KINDS.GENESIS
+                ? 'No signature chain with this genesis'
+                : pathOr(
+                    error?.message,
+                    ['response', 'data', 'error', 'message'],
+                    error
+                  )
+            }
           />
         )}
         <PromiseLayout
@@ -178,6 +191,9 @@ function Scan({ addr }) {
                 CARD_TYPES.ASSET,
               ].includes(cardType) && (
                 <AccountDetail type={cardType} data={data.result} />
+              )}
+              {cardType === CARD_TYPES.GENESIS && (
+                <OwnerDetail status={data.result} />
               )}
               {cardType === CARD_TYPES.INVOICE && (
                 <InvoiceWithData data={data?.result} onBack={goBack} isPage />

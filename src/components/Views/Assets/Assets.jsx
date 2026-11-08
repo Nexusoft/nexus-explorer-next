@@ -164,7 +164,7 @@ export default function Assets() {
                     {ASSET_FORMATS[a.type] || a.type}
                   </td>
                   <td className={styles.hideMobile}>
-                    <Hash value={a.owner} keep={6} />
+                    <Hash value={a.owner} href={`/scan/${a.owner}`} keep={6} />
                   </td>
                   <td
                     title={`Created ${formatDateShort(a.created)}`}

@@ -11,6 +11,7 @@ import {
   styles as detailStyles,
 } from 'components/Detail';
 import { formatAmount, formatDateShort, timeAgo } from 'utils/format';
+import { genesisHref } from 'utils/search';
 import { InvoiceStatus } from '../InvoiceStatus/invoiceStatus';
 import styles from './invoiceModal.module.scss';
 
@@ -111,11 +112,11 @@ export const InvoiceWithData = ({ data, onBack, isPage }) => {
           <dt>From</dt>
           <dd>
             {sender_detail && <div>{sender_detail}</div>}
-            <Hash value={owner} keep={10} />
+            <Hash value={owner} href={genesisHref(owner)} keep={10} />
           </dd>
           <dt>Recipient</dt>
           <dd>
-            <Hash value={recipient} keep={10} />
+            <Hash value={recipient} href={genesisHref(recipient)} keep={10} />
           </dd>
           {account && (
             <>

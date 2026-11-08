@@ -66,6 +66,11 @@ export const PageMetaTypes = {
       TITLE: page('Account'),
       DESCRIPTION: 'Nexus account balance and transactions.',
     },
+    GENESIS: {
+      TITLE: page('Signature chain'),
+      DESCRIPTION:
+        'Accounts, tokens, assets and names owned by one Nexus signature chain.',
+    },
     SEARCH: {
       TITLE: page('Search'),
       DESCRIPTION:

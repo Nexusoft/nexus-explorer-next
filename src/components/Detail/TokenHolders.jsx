@@ -99,7 +99,7 @@ export default function TokenHolders({ token }) {
                     />
                   </td>
                   <td className={styles.hideMobile}>
-                    <Hash value={a.owner} keep={6} />
+                    <Hash value={a.owner} href={`/scan/${a.owner}`} keep={6} />
                   </td>
                   <td className={styles.right}>
                     {formatAmount(a.balance)} {ticker}

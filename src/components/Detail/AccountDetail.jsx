@@ -453,7 +453,12 @@ export default function AccountDetail({ type, data }) {
             value={formatDateShort(data.modified)}
             note={`UTC, ${timeAgo(data.modified)}`}
           />
-          <Stat label="Owner" value={<Hash value={data.owner} keep={6} />} />
+          <Stat
+            label="Owner"
+            value={
+              <Hash value={data.owner} href={`/scan/${data.owner}`} keep={6} />
+            }
+          />
         </Stats>
       </Card>
 
