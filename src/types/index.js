@@ -1,25 +1,19 @@
-import { ButtonTypes } from './ButtonTypes';
 import { ColorsTypes } from './ColorsTypes';
 import { ConstantsTypes } from './ConstantsTypes';
 import { LinksTypes } from './LinksTypes';
 import { NavbarTypes } from './NavbarTypes';
 import { PageMetaTypes } from './PageMetaTypes';
-import { QueryKeys } from './QueryKeys';
 import { StringsTypes } from './StringsTypes';
 import { ThemeTypes } from './ThemeTypes';
-import { ToastMessageTypes } from './ToastMessageTypes';
 
 export const TYPES = {
-  ...ButtonTypes,
   ...ColorsTypes,
   ...ConstantsTypes,
   ...LinksTypes,
   ...NavbarTypes,
-  ...QueryKeys,
   ...PageMetaTypes,
   ...StringsTypes,
   ...ThemeTypes,
-  ...ToastMessageTypes,
 };
 
 export default TYPES;

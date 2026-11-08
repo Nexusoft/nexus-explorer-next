@@ -1,6 +1,6 @@
 import { Hash } from 'components/Detail';
 import { formatDateShort } from 'utils/format';
-import ErrorCard from 'components/common/NE_ErrorCard';
+import ErrorMessage from 'components/common/NE_ErrorMessage';
 import Loader from 'components/common/NE_Loader';
 import Table from 'components/Table/Table';
 import { useNetwork } from 'hooks';
@@ -44,7 +44,7 @@ export default function Namespaces() {
   if (error) {
     return (
       <div>
-        <ErrorCard />
+        <ErrorMessage error={error} />
       </div>
     );
   }

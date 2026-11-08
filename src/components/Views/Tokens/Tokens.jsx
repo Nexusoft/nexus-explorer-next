@@ -1,5 +1,5 @@
 import { Hash } from 'components/Detail';
-import ErrorCard from 'components/common/NE_ErrorCard';
+import ErrorMessage from 'components/common/NE_ErrorMessage';
 import Loader from 'components/common/NE_Loader';
 import Table from 'components/Table';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
@@ -51,7 +51,7 @@ export default function Tokens() {
   if (error) {
     return (
       <div>
-        <ErrorCard />
+        <ErrorMessage error={error} />
       </div>
     );
   }
