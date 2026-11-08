@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import styles from './Panel3.module.scss';
 import { useEffect, useState } from 'react';
-import { intlNum, toFixedSafe, toTitleCase } from 'utils/converter';
+import { intlNum, toFixedSafe } from 'utils/converter';
 import Loader from 'components/common/NE_Loader';
 import RTTable, {
   RTTRowBlock,
@@ -11,6 +11,7 @@ import { useQuery } from 'react-query';
 import TYPES from 'types';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { getDateObject, Warn } from 'utils';
+import { describeContract } from 'utils/contracts';
 
 function Panel3({ blocks }) {
   const router = useRouter();
@@ -69,7 +70,7 @@ function Panel3({ blocks }) {
               toId={newRowData[txidx]?.contracts[cidx]?.to?.address ?? ''}
               txnId={newRowData[txidx]?.txid}
               operation={newRowData[txidx]?.contracts[cidx]?.OP}
-              txType={toTitleCase(newRowData[txidx]?.type)}
+              txType={describeContract(newRowData[txidx].contracts[cidx]).label}
               amount={intlNum(
                 newRowData[txidx]?.contracts[cidx]?.amount?.toFixed(2)
               )}

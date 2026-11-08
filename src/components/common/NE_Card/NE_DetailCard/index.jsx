@@ -42,7 +42,8 @@ const Card_Header = ({ label, sublabel, ticker }) => (
 );
 
 /* Card footer section */
-const Card_Footer = ({ footerLabel, footerValue }) => (
+const Card_Footer = ({ footerLabel, footerValue }) =>
+  !!(footerLabel || footerValue) && (
   <div className={cls(styles.footer)}>
     <label className={styles.footer__label}>{footerLabel}</label>
     <p className={styles.footer__value}>{footerValue}</p>

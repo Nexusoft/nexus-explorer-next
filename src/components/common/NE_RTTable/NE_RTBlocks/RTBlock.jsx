@@ -54,7 +54,7 @@ function RTTRowBlock(props) {
 RTTRowBlock.propTypes = {
   block: PropTypes.string,
   channel: PropTypes.string,
-  date: PropTypes.string,
+  date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   mint: PropTypes.string,
   mintUnit: PropTypes.string,
   size: PropTypes.number,

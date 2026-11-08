@@ -100,21 +100,18 @@ function Panel2(props) {
           ...prev.stake,
           sublabel: toFixedSafe(miningData?.stake?.difficulty, 4),
           reserve: miningData?.stake?.height,
-          footer: miningData?.stake?.fees,
         },
         prime: {
           sublabel: toFixedSafe(miningData?.prime?.difficulty),
           text: miningData?.prime?.primes,
           reserve: miningData?.prime?.reserve,
           reward: miningData?.prime?.reward,
-          footer: miningData?.prime?.fees,
         },
         hash: {
           sublabel: toFixedSafe(miningData?.hash?.difficulty),
           text: miningData?.hash?.hashes,
           reserve: miningData?.hash?.reserve,
           reward: miningData?.hash?.reward,
-          footer: miningData?.hash?.fees,
         },
       }));
     }
@@ -201,8 +198,6 @@ function Panel2(props) {
             maximumFractionDigits: 0,
           })}`}
           rewardLabel="Total"
-          footerLabel="Fees "
-          footerValue={nxs(state.stake?.footer)}
           delayTime={`${cardRefreshTimeout}s`}
           isLoading={miningRQ.isLoading || isInvalid(state.stake?.text)}
         />
@@ -219,8 +214,6 @@ function Panel2(props) {
           reserve={nxs(state.prime?.reserve)}
           rewardLabel="Reward"
           reward={nxs(state.prime?.reward, 4)}
-          footerLabel="Fees"
-          footerValue={nxs(state.prime?.footer)}
           delayTime={`${cardRefreshTimeout}s`}
           isLoading={isInvalid(state.prime?.text)}
         />
@@ -237,8 +230,6 @@ function Panel2(props) {
           reserve={nxs(state.hash?.reserve)}
           rewardLabel="Reward"
           reward={nxs(state.hash?.reward, 4)}
-          footerLabel="Fees"
-          footerValue={nxs(state.hash?.footer)}
           delayTime={`${cardRefreshTimeout}s`}
           isLoading={isInvalid(state.hash?.text)}
         />

@@ -45,7 +45,7 @@ function Panel1({ metricsRQ, infoRQ, miningRQ, blocks }) {
         blocks: infoRQ.data.data.result?.blocks || 0,
       }));
     }
-  }, [metricsRQ.data, infoRQ.data, metricsRQ.data]);
+  }, [metricsRQ.data, infoRQ.data, miningRQ.data]);
 
   // * handle errors on API failure
   if (metricsRQ.isError || miningRQ.isError || infoRQ.isError) {
@@ -65,7 +65,6 @@ function Panel1({ metricsRQ, infoRQ, miningRQ, blocks }) {
           label="Chain Height"
           sublabel="Blocks"
           value={new Intl.NumberFormat('en-US').format(state.blocks)}
-          unit="^"
           onClick={() => {
             router.push(`/scan/${state.blocks}`);
           }}

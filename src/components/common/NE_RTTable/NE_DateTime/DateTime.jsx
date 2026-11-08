@@ -25,7 +25,7 @@ export const DateTime = ({ date, time, timeFormat }) => {
 };
 
 DateTime.propTypes = {
-  date: PropTypes.string,
+  date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   time: PropTypes.string,
   timeFormat: PropTypes.string,
 };
