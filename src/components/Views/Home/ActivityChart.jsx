@@ -108,7 +108,11 @@ export default function ActivityChart({ initialBlocks }) {
     },
     xaxis: {
       type: 'datetime',
-      labels: { datetimeUTC: false, style: { colors: colors.text } },
+      labels: {
+        datetimeUTC: true,
+        datetimeFormatter: { day: 'dd MMM', hour: 'HH:mm', minute: 'HH:mm' },
+        style: { colors: colors.text },
+      },
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
@@ -121,7 +125,7 @@ export default function ActivityChart({ initialBlocks }) {
     },
     tooltip: {
       theme: isDarkMode ? 'dark' : 'light',
-      x: { format: 'dd MMM HH:mm' },
+      x: { format: 'dd MMM HH:mm UTC' },
     },
     states: { hover: { filter: { type: 'darken', value: 0.9 } } },
   };

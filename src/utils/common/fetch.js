@@ -19,11 +19,8 @@ export function fetchMining(url) {
   );
 }
 
-/**
- * NXS market data from CoinGecko simple/price (coins/nexus no longer answers)
- * Resolves to { data: { market_data } } in the old coins/nexus shape
- */
-export async function fetchMarket() {
+/** Raw CoinGecko simple/price answer for NXS */
+export async function fetchCoingeckoPrice() {
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_COINGECKO_BASE_URL}/simple/price`,
     {
@@ -34,9 +31,43 @@ export async function fetchMarket() {
         include_24hr_vol: true,
         include_24hr_change: true,
       },
+      timeout: 10000,
     }
   );
-  const p = res.data?.nexus;
+  return res.data;
+}
+
+//server side only: one coingecko call per interval for all visitors and page builds
+const marketCacheSeconds = 120;
+let marketCache = { at: 0, data: null };
+
+/** CoinGecko price from the server cache, last good answer while CoinGecko fails */
+export async function cachedCoingeckoPrice() {
+  const now = Date.now() / 1000;
+  if (marketCache.data && now - marketCache.at < marketCacheSeconds) {
+    return marketCache.data;
+  }
+  try {
+    const data = await fetchCoingeckoPrice();
+    marketCache = { at: now, data };
+    return data;
+  } catch (e) {
+    if (marketCache.data) return marketCache.data;
+    throw e;
+  }
+}
+
+/**
+ * NXS market data from CoinGecko simple/price (coins/nexus no longer answers)
+ * Resolves to { data: { market_data } } in the old coins/nexus shape
+ */
+export async function fetchMarket() {
+  //browsers go through our own cached api route, the server asks coingecko itself
+  const raw =
+    typeof window === 'undefined'
+      ? await cachedCoingeckoPrice()
+      : (await axios.get('/api/market')).data;
+  const p = raw?.nexus;
   if (!p || p.usd == null) {
     throw new Error('No NXS price in CoinGecko response');
   }
