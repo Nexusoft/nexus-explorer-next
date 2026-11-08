@@ -25,6 +25,23 @@ export function useNetwork() {
     ? TESTNET_PROXY_URL
     : TESTNET_URL;
 
+  //optional indexer next to the node (backend /explorer/...), callers fall back to the node API
+  async function getIndex(path, params) {
+    const res = await axios.get(`${url}/explorer/${path}`, { params });
+    return res.data;
+  }
+
+  //cached register list from the indexer, or the slow node query when there is none
+  async function cachedList(key, fallback) {
+    try {
+      const res = await getIndex(`cache/${key}`);
+      if (Array.isArray(res?.result)) return res.result;
+    } catch (e) {
+      //no indexer, use the node
+    }
+    return fallback();
+  }
+
   // * resource heavy API takes 4 secs to fetch
   function getMetrics() {
     return axios.get(`${url}/system/get/metrics`, {
@@ -58,6 +75,9 @@ export function useNetwork() {
   }
 
   const getTrustlist = async ({ queryKey }) => {
+    const [, page, limit] = queryKey;
+    const cached = await cachedList('trustlist', () => null);
+    if (cached) return { result: cached.slice(page * limit, (page + 1) * limit) };
     const res = await axios.get(`${url}/register/list/finance:trust`, {
       headers: { 'Cache-Control': 'max-age=300' },
       params: {
@@ -71,11 +91,17 @@ export function useNetwork() {
   };
 
   const getRichlist = async (page = 0, limit = 111) => {
+    const cached = await cachedList('richlist', () => null);
+    if (cached && (page + 1) * limit <= cached.length) {
+      return { data: cached.slice(page * limit, (page + 1) * limit) };
+    }
     return fetchRichlist(url, page, limit);
   };
 
   // ! fetch doesnt return rejected promise by default which is required by react-query to correctly handle error scenarios, hence use axios library th
   const getGlobalNames = async () => {
+    const cached = await cachedList('globalnames', () => null);
+    if (cached) return { result: cached };
     const res = await axios(`${url}/register/list/names:global`, {
       method: 'POST',
       headers: {
@@ -97,7 +123,9 @@ export function useNetwork() {
     return res.data.result;
   };
 
-  const getNamespaces = () => {
+  const getNamespaces = async () => {
+    const cached = await cachedList('namespaces', () => null);
+    if (cached) return { data: { result: cached } };
     return axios.get(`${url}/register/list/names:namespaces?limit=1000`, {
       headers: { 'Cache-Control': 'max-age=300' },
     });
@@ -113,7 +141,9 @@ export function useNetwork() {
     return res.data.result;
   };
 
-  const getTokens = () => {
+  const getTokens = async () => {
+    const cached = await cachedList('tokens', () => null);
+    if (cached) return { data: { result: cached } };
     return axios.get(
       `${url}/register/list/finance:tokens?sort=maxsupply&limit=1000`,
       {
@@ -265,6 +295,7 @@ export function useNetwork() {
 
   return {
     network: { name: appContext.network.name, url },
+    getIndex,
     getInfo,
     getTrust,
     getBlocks,
