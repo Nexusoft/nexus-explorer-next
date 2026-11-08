@@ -1,6 +1,7 @@
 import Table from 'components/Table/Table';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import React, { useCallback, useState } from 'react';
+import { useBack } from 'hooks/useBack/useBack';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import { columns } from './columns';
 import { BsBoxArrowLeft } from 'react-icons/bs';
@@ -28,6 +29,7 @@ function InvoicesView({ username }) {
     () => getInvoices(username, pageIndex, pageSize)
   );
   const router = useRouter();
+  const goBack = useBack();
   const updatedColumn = [
     {
       Header: '',
@@ -76,12 +78,21 @@ function InvoicesView({ username }) {
     window.history.replaceState(window.history.state, '', router.asPath);
   }, [router.asPath]);
 
+  //put the list url back before leaving, or next.js replaces the list entry instead of adding one
+  useEffect(() => {
+    if (!isOpen) return;
+    const restore = () =>
+      window.history.replaceState(window.history.state, '', router.asPath);
+    router.events.on('routeChangeStart', restore);
+    return () => router.events.off('routeChangeStart', restore);
+  }, [isOpen, router.asPath, router.events]);
+
   return (
     <PromiseLayout
       isLoading={isLoading}
       isError={isError}
       error={pathOr({}, ['response', 'data', 'error'], error)}>
-      <button type="button" className={styles.back} onClick={router.back}>
+      <button type="button" className={styles.back} onClick={goBack}>
         <BsBoxArrowLeft aria-hidden="true" /> Back
       </button>
       <PageTitle title={`Invoices of ${username}`}>

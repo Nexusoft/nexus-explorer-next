@@ -12,7 +12,7 @@ import PageHeader from 'components/Header/PageHeader';
 import TYPES from 'types';
 import { CARD_TYPES } from 'types/ConstantsTypes';
 import { InvoiceWithData } from 'components/Views/Dao/InvoiceModal';
-import { useRouter } from 'next/router';
+import { useBack } from 'hooks/useBack/useBack';
 import Layout from 'components/Layout';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 import { pathOr } from 'utils';
@@ -40,7 +40,7 @@ const scanTitles = {
 };
 
 function Scan({ addr }) {
-  const router = useRouter();
+  const goBack = useBack();
   const [cardType, setCardType] = useState();
   const { network, getScanResults } = useNetwork();
 
@@ -180,11 +180,7 @@ function Scan({ addr }) {
                 <AccountDetail type={cardType} data={data.result} />
               )}
               {cardType === CARD_TYPES.INVOICE && (
-                <InvoiceWithData
-                  data={data?.result}
-                  onBack={router.back}
-                  isPage
-                />
+                <InvoiceWithData data={data?.result} onBack={goBack} isPage />
               )}
             </>
           )}
