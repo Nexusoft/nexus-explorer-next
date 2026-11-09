@@ -5,6 +5,7 @@ import {
   fetchMetrics,
   fetchMining,
   fetchRecentBlocks,
+  forBuild,
 } from 'utils/common/fetch';
 
 import PageHeader from 'components/Header/PageHeader';
@@ -15,7 +16,7 @@ import Layout from 'components/Layout';
 // * https://react-query.tanstack.com/guides/ssr
 
 export async function getStaticProps() {
-  //one failing source must not take the whole page down, the client refetches anything missing
+  //one failing or slow source must not take the whole page down, the client refetches anything missing
   const [metrics, info, mining, market, blocks] = await Promise.all(
     [
       fetchMetrics(),
@@ -23,7 +24,7 @@ export async function getStaticProps() {
       fetchMining(),
       fetchMarket(),
       fetchRecentBlocks(homeBlockCount),
-    ].map((p) => p.catch(() => null))
+    ].map(forBuild)
   );
 
   //react-query initialData: undefined (not null) so the query fetches on mount

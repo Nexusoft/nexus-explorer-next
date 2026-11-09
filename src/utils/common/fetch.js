@@ -138,6 +138,18 @@ export async function fetchRichlist(
 //a static page build gives up on a page after 60 s
 const buildTimeout = 20000;
 
+/** A build time fetch that answers null when it fails or is too slow */
+export const forBuild = (promise) => {
+  let timer;
+  const late = new Promise((resolve) => {
+    timer = setTimeout(() => resolve(null), buildTimeout);
+  });
+  return Promise.race([
+    Promise.resolve(promise).catch(() => null),
+    late,
+  ]).finally(() => clearTimeout(timer));
+};
+
 /**
  * Rich list for a static page build: the indexer's copy first, the slow node query only
  * without it, and null when both fail (the page then loads it in the browser)
@@ -145,22 +157,10 @@ const buildTimeout = 20000;
 export async function fetchRichlistForBuild(
   url = process.env.NEXT_PUBLIC_NEXUS_BASE_URL
 ) {
-  try {
-    const res = await axios.get(`${url}/explorer/cache/richlist`, {
-      timeout: buildTimeout,
-    });
-    if (Array.isArray(res.data?.result)) {
-      return { data: res.data.result.slice(0, 111) };
-    }
-  } catch (e) {
-    //no indexer
+  const res = await forBuild(axios.get(`${url}/explorer/cache/richlist`));
+  if (Array.isArray(res?.data?.result)) {
+    return { data: res.data.result.slice(0, 111) };
   }
-  try {
-    return await Promise.race([
-      fetchRichlist(url),
-      new Promise((resolve) => setTimeout(() => resolve(null), buildTimeout)),
-    ]);
-  } catch (e) {
-    return null;
-  }
+  //no indexer
+  return forBuild(fetchRichlist(url));
 }
