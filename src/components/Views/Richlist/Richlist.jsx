@@ -4,6 +4,7 @@ import styles from './richlist.module.scss';
 import { intlNum } from 'utils/converter';
 import Distribution from './Distribution';
 import RichChains from './RichChains';
+import LegacyRich from './LegacyRich';
 //same toggle buttons as the home page activity chart
 import rangeStyles from '../Home/ActivityChart.module.scss';
 import TYPES from 'types';
@@ -23,7 +24,13 @@ export default function Richlist(props) {
   const [pieData, setPieData] = useState();
 
   // * api calls
-  const { network, getRichlist, getMining, getRichChains } = useNetwork();
+  const { network, getRichlist, getMining, getRichChains, getLegacyRich } =
+    useNetwork();
+  //daily, only once the legacy inputs are indexed
+  const legacyRQ = useQuery(['legacyrich', network.name], getLegacyRich, {
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
   const [view, setView] = useState('accounts');
   //one person often has several accounts, the index adds them up per chain
   const chainsRQ = useQuery(['richchains', network.name], getRichChains, {
@@ -136,23 +143,33 @@ export default function Richlist(props) {
   }, [richlist111.data, totalSupply]);
 
   const chains = chainsRQ.data;
+  const legacy = legacyRQ.data;
+  //views the explorer index can offer on this network
+  const views = [
+    ['accounts', 'Accounts', 'One line per account'],
+    chains && [
+      'chains',
+      'Signature chains',
+      'One line per signature chain, all its accounts together',
+    ],
+    legacy && [
+      'legacy',
+      'Legacy addresses',
+      'One line per pre Tritium address',
+    ],
+  ].filter(Boolean);
   return (
     <>
-      {chains && (
+      {views.length > 1 && (
         <div className={rangeStyles.head} style={{ marginBottom: '1rem' }}>
           <p className={rangeStyles.caption}>
-            {view === 'chains'
-              ? 'One line per signature chain, all its accounts together'
-              : 'One line per account'}
+            {views.find(([key]) => key === view)?.[2]}
           </p>
           <div
             className={rangeStyles.periods}
             role="group"
             aria-label="Count by">
-            {[
-              ['accounts', 'Accounts'],
-              ['chains', 'Signature chains'],
-            ].map(([key, label]) => (
+            {views.map(([key, label]) => (
               <button
                 key={key}
                 type="button"
@@ -166,6 +183,8 @@ export default function Richlist(props) {
       )}
       {chains && view === 'chains' ? (
         <RichChains data={chains} totalSupply={totalSupply} />
+      ) : legacy && view === 'legacy' ? (
+        <LegacyRich data={legacy} totalSupply={totalSupply} />
       ) : (
         <div className={styles.page} style={{ marginBottom: '1rem' }}>
           <PromiseLayout

@@ -176,6 +176,14 @@ export function useNetwork() {
     return null;
   };
 
+  //{total, addresses, negative, top: [{address, balance}]}, daily, indexer only
+  const getLegacyRich = () =>
+    cachedList(
+      'legacyrich',
+      () => null,
+      (v) => Array.isArray(v?.top)
+    );
+
   //nodes connected to the explorer's node: version (type), height, latency
   const getPeers = async () => {
     const res = await axios.get(`${url}/system/list/peers`);
@@ -376,6 +384,7 @@ export function useNetwork() {
     getDaily,
     getRichChains,
     getPeers,
+    getLegacyRich,
     findUser,
     getTokenHolders,
     getMining,
