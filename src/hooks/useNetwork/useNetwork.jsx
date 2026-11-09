@@ -176,6 +176,14 @@ export function useNetwork() {
     return null;
   };
 
+  //{chains, top: [{owner, total, balance, stake, accounts}]}, hourly, indexer only
+  const getRichChains = () =>
+    cachedList(
+      'richchains',
+      () => null,
+      (v) => Array.isArray(v?.top)
+    );
+
   //per UTC day [day, blocks stake/prime/hash, mint stake/prime/hash, txs, transfers], indexer only
   const getDaily = () => cachedList('daily', () => null);
 
@@ -360,6 +368,7 @@ export function useNetwork() {
     getAssets,
     getOwner,
     getDaily,
+    getRichChains,
     findUser,
     getTokenHolders,
     getMining,

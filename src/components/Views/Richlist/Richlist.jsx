@@ -3,6 +3,9 @@ import { useQuery } from 'react-query';
 import styles from './richlist.module.scss';
 import { intlNum } from 'utils/converter';
 import Distribution from './Distribution';
+import RichChains from './RichChains';
+//same toggle buttons as the home page activity chart
+import rangeStyles from '../Home/ActivityChart.module.scss';
 import TYPES from 'types';
 import { Hash } from 'components/Detail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
@@ -20,7 +23,13 @@ export default function Richlist(props) {
   const [pieData, setPieData] = useState();
 
   // * api calls
-  const { network, getRichlist, getMining } = useNetwork();
+  const { network, getRichlist, getMining, getRichChains } = useNetwork();
+  const [view, setView] = useState('accounts');
+  //one person often has several accounts, the index adds them up per chain
+  const chainsRQ = useQuery(['richchains', network.name], getRichChains, {
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
   const isMainnet = network.name === NETWORKS.MAINNET.name;
   const { isLoading, data, error, isError } = useQuery(
     ['richlist', pageIndex, pageSize, network.name],
@@ -124,25 +133,60 @@ export default function Richlist(props) {
     }
   }, [richlist111.data, totalSupply]);
 
+  const chains = chainsRQ.data;
   return (
     <>
-      <div className={styles.page} style={{ marginBottom: '1rem' }}>
-        <PromiseLayout
-          isLoading={isLoading}
-          isError={isError}
-          error={pathOr({}, ['response', 'data', 'error'], error)}>
-          {pieData && <Distribution values={pieData} labels={PIE_LABELS} />}
-
-          {/* // * Table with dual pagination */}
-          <div>
-            <div className={styles.top_pagination}>
-              {pageSize > 10 && <Pagination controls={dynamicPageControls} />}
-            </div>
-            <Table columns={columns} data={data?.data || []} paginate={false} />
-            <Pagination controls={dynamicPageControls} />
+      {chains && (
+        <div className={rangeStyles.head} style={{ marginBottom: '1rem' }}>
+          <p className={rangeStyles.caption}>
+            {view === 'chains'
+              ? 'One line per signature chain, all its accounts together'
+              : 'One line per account'}
+          </p>
+          <div
+            className={rangeStyles.periods}
+            role="group"
+            aria-label="Count by">
+            {[
+              ['accounts', 'Accounts'],
+              ['chains', 'Signature chains'],
+            ].map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={view === key}
+                onClick={() => setView(key)}>
+                {label}
+              </button>
+            ))}
           </div>
-        </PromiseLayout>
-      </div>
+        </div>
+      )}
+      {chains && view === 'chains' ? (
+        <RichChains data={chains} totalSupply={totalSupply} />
+      ) : (
+        <div className={styles.page} style={{ marginBottom: '1rem' }}>
+          <PromiseLayout
+            isLoading={isLoading}
+            isError={isError}
+            error={pathOr({}, ['response', 'data', 'error'], error)}>
+            {pieData && <Distribution values={pieData} labels={PIE_LABELS} />}
+
+            {/* // * Table with dual pagination */}
+            <div>
+              <div className={styles.top_pagination}>
+                {pageSize > 10 && <Pagination controls={dynamicPageControls} />}
+              </div>
+              <Table
+                columns={columns}
+                data={data?.data || []}
+                paginate={false}
+              />
+              <Pagination controls={dynamicPageControls} />
+            </div>
+          </PromiseLayout>
+        </div>
+      )}
     </>
   );
 }
