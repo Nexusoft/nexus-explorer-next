@@ -28,6 +28,7 @@ import { CARD_TYPES } from 'types/ConstantsTypes';
 import { ASSET_FORMATS, assetFormat, isAsset } from 'utils/assets';
 import TokenHolders from './TokenHolders';
 import RegisterHistory from './RegisterHistory';
+import ExportButton from './ExportButton';
 import Link from 'next/link';
 import { ownerInfo, registerIdFromAddress } from 'utils/address';
 import { userHref } from 'utils/search';
@@ -205,6 +206,7 @@ function AccountTransactions({ type, address }) {
   const [page, setPage] = useState(0);
   const {
     network,
+    getIndex,
     getAccountTransactions,
     getTrustTransactions,
     getTokenTransactions,
@@ -225,6 +227,12 @@ function AccountTransactions({ type, address }) {
 
   const rows = txRQ.data?.result || [];
   const hasNext = rows.length === pageSize;
+  //export only when the explorer index is there
+  const indexRQ = useQuery(
+    ['indexStatus', network.name],
+    () => getIndex('status'),
+    { retry: false, staleTime: 5 * 60 * 1000 }
+  );
 
   return (
     <Card>
@@ -332,6 +340,15 @@ function AccountTransactions({ type, address }) {
             Older
           </button>
         </div>
+      )}
+      {indexRQ.data && (
+        <ExportButton
+          filename={`nexus-${address.substring(0, 12)}-transactions.csv`}
+          addresses={new Set([address])}
+          fetchPage={(before, limit) =>
+            getIndex(`address/${address}/transactions`, { limit, before })
+          }
+        />
       )}
     </Card>
   );

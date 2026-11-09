@@ -27,6 +27,8 @@ const LABELS = {
   CLAIM: 'Claimed ownership',
   MIGRATE: 'Migrated legacy balance',
   LEGACY: 'Sent to legacy address',
+  //output of a pre Tritium transaction, an account claims it with a CREDIT
+  LEGACY_PAYMENT: 'Legacy payment',
   AUTHORIZE: 'Authorized',
   CONDITION: 'Condition',
   VALIDATE: 'Validated condition',
@@ -230,7 +232,11 @@ export function netForAddresses(tx, addresses) {
     if (other) counterparties.add(other);
     //a payment is a DEBIT by the sender, then a CREDIT by the receiver that names
     //the sender again: the sender loses on the DEBIT, the receiver gains on the CREDIT
-    if ((d.op === 'DEBIT' && toMine) || (d.op === 'CREDIT' && fromMine)) {
+    //a legacy payment to an account is the same: it counts on the CREDIT that claims it
+    if (
+      ((d.op === 'DEBIT' || d.op === 'LEGACY_PAYMENT') && toMine) ||
+      (d.op === 'CREDIT' && fromMine)
+    ) {
       continue;
     }
     nets[d.ticker] = (nets[d.ticker] || 0) + (toMine ? d.amount : -d.amount);
@@ -250,8 +256,13 @@ export function netForAddress(tx, address) {
 export function moveToContract(m, txType) {
   const to = { address: m.to_addr, name: m.to_name };
   return {
-    //an output of a legacy reward transaction is the reward itself
-    OP: m.op === 'LEGACY' && LEGACY_REWARDS[txType] ? txType : m.op,
+    OP:
+      m.op !== 'LEGACY' || !txType?.startsWith('legacy')
+        ? m.op
+        : //an output of a legacy reward transaction is the reward itself
+        LEGACY_REWARDS[txType]
+        ? txType
+        : 'LEGACY_PAYMENT',
     amount: m.amount,
     ticker: m.ticker,
     from: m.from_addr ? { address: m.from_addr, name: m.from_name } : null,

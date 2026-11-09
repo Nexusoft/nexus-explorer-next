@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import { Card, Hash, SectionTitle, styles } from '.';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
+import ExportButton from './ExportButton';
 import {
   formatAmount,
   formatDate,
@@ -58,7 +59,7 @@ export default function OwnerTransactions({ genesis }) {
   const rows = (txRQ.data?.result || []).map((t) => ({
     txid: t.txid,
     timestamp: t.time,
-    contracts: t.moves.map(moveToContract),
+    contracts: t.moves.map((m) => moveToContract(m, t.type)),
   }));
   const hasOlder = txRQ.data?.next != null;
 
@@ -189,6 +190,15 @@ export default function OwnerTransactions({ genesis }) {
         staking rewards included, from the explorer index. Moves between its own
         accounts net to zero.
       </p>
+      {txRQ.data && (
+        <ExportButton
+          filename={`nexus-${genesis.substring(0, 12)}-transactions.csv`}
+          addresses={null}
+          fetchPage={(before, limit) =>
+            getIndex(`owner/${genesis}/transactions`, { limit, before })
+          }
+        />
+      )}
     </Card>
   );
 }

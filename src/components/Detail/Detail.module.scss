@@ -243,6 +243,14 @@
   font-weight: 600;
 }
 
+.exportRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.75rem;
+}
+
 //claim status, condition, holder share under a contract
 .flowNote {
   grid-column: 1 / -1;
