@@ -35,20 +35,22 @@ export default function Richlist(props) {
     ['richlist', pageIndex, pageSize, network.name],
     () => getRichlist(pageIndex, pageSize),
     {
+      //the build may have had no rich list (slow node), then it loads here
       placeholderData:
-        pageIndex == 0
-          ? isMainnet && { data: props.data.data.slice(0, pageSize) }
+        pageIndex == 0 && isMainnet && props.data?.data
+          ? { data: props.data.data.slice(0, pageSize) }
           : undefined, // * for testnet we don't have data in the props
       staleTime: 1000 * 60, // * 1 min
     }
   );
 
   // * data for pieChart
+  const built = isMainnet && props.data?.data ? props.data : undefined;
   const richlist111 = useQuery(
     ['richlist', network.name],
-    isMainnet ? () => props.data : () => getRichlist(0, 111),
+    built ? () => built : () => getRichlist(0, 111),
     {
-      initialData: isMainnet ? props.data : undefined, // * for testnet we don't have data in the props
+      initialData: built, // * for testnet we don't have data in the props
     }
   );
 

@@ -20,12 +20,29 @@ import {
   timeAgo,
 } from 'utils/format';
 import { toTitleCase } from 'utils/converter';
-import { transactionHeadline } from 'utils/contracts';
+import { blockFinder, transactionHeadline } from 'utils/contracts';
+import { isLegacyAddress } from 'utils/address';
+import { useQuery } from 'react-query';
+import { useNetwork } from 'hooks/useNetwork/useNetwork';
 
 export default function BlockDetail({ block }) {
   const txs = block.tx || [];
   const confirmations = txs[0]?.confirmations;
   const height = block.height;
+  const finder = blockFinder(txs);
+  const { network, getScanResults } = useNetwork();
+  //previous block's time gives how long this one took
+  const prevRQ = useQuery(
+    ['blockTime', network.name, height - 1],
+    () =>
+      getScanResults('ledger/get/block', {
+        height: height - 1,
+        verbose: 'summary',
+      }),
+    { enabled: height > 1, staleTime: Infinity, retry: false }
+  );
+  const prevTime = prevRQ.data?.result?.timestamp;
+  const took = prevTime != null ? block.timestamp - prevTime : null;
 
   return (
     <DetailPage>
@@ -70,6 +87,30 @@ export default function BlockDetail({ block }) {
             big
           />
           <Stat label="Transactions" value={formatInt(txs.length)} big />
+          {finder && (
+            <Stat
+              label={`${finder.how} by`}
+              value={
+                <Hash value={finder.id} href={`/scan/${finder.id}`} keep={6} />
+              }
+              note={
+                finder.how === 'Mined'
+                  ? isLegacyAddress(finder.id)
+                    ? 'legacy address'
+                    : 'signature chain'
+                  : isLegacyAddress(finder.id)
+                  ? 'legacy trust key'
+                  : 'trust account'
+              }
+            />
+          )}
+          {took != null && (
+            <Stat
+              label="Block time"
+              value={`${formatInt(took)} s`}
+              note="after the previous block, all channels"
+            />
+          )}
           <Stat label="Difficulty" value={formatAmount(block.difficulty, 4)} />
           <Stat label="Size" value={formatBytes(block.size)} />
         </Stats>

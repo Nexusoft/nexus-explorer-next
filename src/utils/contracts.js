@@ -189,6 +189,29 @@ const rewardOps = ['COINBASE', 'TRUST', 'GENESIS'];
 const isRewardContract = (c) =>
   rewardOps.includes(c?.OP) || (c?.OP === 'CREDIT' && c?.for === 'COINBASE');
 
+/**
+ * Who found a block, from its reward transaction: {how: 'Mined'|'Staked', id} with id =
+ * a signature chain genesis (mining), a trust account or a legacy address, or null
+ */
+export function blockFinder(txs = []) {
+  for (const tx of txs) {
+    for (const c of tx?.contracts || []) {
+      if (c.OP === 'COINBASE' && c.genesis)
+        return { how: 'Mined', id: c.genesis };
+      if ((c.OP === 'TRUST' || c.OP === 'GENESIS') && c.address) {
+        return { how: 'Staked', id: c.address, owner: tx.genesis };
+      }
+    }
+    //pre Tritium: the reward transaction's first output
+    const out = (tx?.outputs || [])[0]?.address;
+    if (out && tx.type === 'legacy base') return { how: 'Mined', id: out };
+    if (out && (tx.type === 'legacy trust' || tx.type === 'legacy genesis')) {
+      return { how: 'Staked', id: out };
+    }
+  }
+  return null;
+}
+
 /** Only mining / staking rewards (a fee next to a reward claim still counts as a reward) */
 export function isRewardTx(tx) {
   if (LEGACY_REWARDS[tx?.type]) return true;
