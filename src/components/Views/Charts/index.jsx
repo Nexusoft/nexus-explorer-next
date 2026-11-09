@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery } from 'react-query';
 import { Card, SectionTitle, styles as detailStyles } from 'components/Detail';
 import Loader from 'components/common/NE_Loader';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import { useDarkMode } from 'hooks';
+import { useThemeColors } from 'hooks/useThemeColors/useThemeColors';
 import { formatAmount, formatInt } from 'utils/format';
 import { StringsTypes } from 'types/StringsTypes';
 //same range buttons and caption as the home page activity chart
@@ -23,17 +23,12 @@ const ranges = [
 const channels = [0, 1, 2];
 const channelVar = ['--ch-stake', '--ch-prime', '--ch-hash'];
 
-function readColors() {
-  if (typeof window === 'undefined') return null;
-  const css = getComputedStyle(document.body);
-  const get = (name) => css.getPropertyValue(name).trim();
-  return {
-    single: get('--c-link'),
-    channels: channelVar.map(get),
-    text: get('--c-ink-3'),
-    grid: get('--c-line-soft'),
-  };
-}
+const colorTokens = {
+  single: '--c-link',
+  channels: channelVar,
+  text: '--c-ink-3',
+  grid: '--c-line-soft',
+};
 
 /**
  * Daily rows into buckets of `size` days: {t, days, blocks[3], mint[3], txs, transfers,
@@ -147,14 +142,7 @@ export default function Charts() {
   });
   const [rangeKey, setRangeKey] = useState('1y');
   const range = ranges.find((r) => r.key === rangeKey);
-  const [isDarkMode] = useDarkMode();
-  const [colors, setColors] = useState(null);
-
-  useEffect(() => {
-    //wait a frame so the theme class is on the body before reading the tokens
-    const id = requestAnimationFrame(() => setColors(readColors()));
-    return () => cancelAnimationFrame(id);
-  }, [isDarkMode]);
+  const [colors, isDarkMode] = useThemeColors(colorTokens);
 
   const dailyRQ = useQuery(['daily', network.name], getDaily, {
     staleTime: 10 * 60 * 1000,

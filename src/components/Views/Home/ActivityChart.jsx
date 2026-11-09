@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useQuery } from 'react-query';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import { useDarkMode } from 'hooks';
+import { useThemeColors } from 'hooks/useThemeColors/useThemeColors';
 import { isRewardTx } from 'utils/contracts';
 import styles from './ActivityChart.module.scss';
 
@@ -17,30 +17,18 @@ const periods = [
 const bucketCount = 24;
 
 //chart colors follow the CSS tokens of the current theme
-function readColors() {
-  if (typeof window === 'undefined') return null;
-  const css = getComputedStyle(document.body);
-  const get = (name) => css.getPropertyValue(name).trim();
-  return {
-    tx: get('--c-link'),
-    reward: get('--c-ink-3'),
-    text: get('--c-ink-3'),
-    grid: get('--c-line-soft'),
-  };
-}
+const colorTokens = {
+  tx: '--c-link',
+  reward: '--c-ink-3',
+  text: '--c-ink-3',
+  grid: '--c-line-soft',
+};
 
 export default function ActivityChart({ initialBlocks }) {
   const [periodKey, setPeriodKey] = useState('2h');
   const period = periods.find((p) => p.key === periodKey);
-  const [isDarkMode] = useDarkMode();
-  const [colors, setColors] = useState(null);
+  const [colors, isDarkMode] = useThemeColors(colorTokens);
   const { network, getRecentBlocks } = useNetwork();
-
-  useEffect(() => {
-    //wait a frame so the theme class is on the body before reading the tokens
-    const id = requestAnimationFrame(() => setColors(readColors()));
-    return () => cancelAnimationFrame(id);
-  }, [isDarkMode]);
 
   const { data, isLoading, isError, isFetching } = useQuery(
     ['activity', network.name, period.blocks],

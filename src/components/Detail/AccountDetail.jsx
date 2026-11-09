@@ -29,6 +29,7 @@ import { ASSET_FORMATS, assetFormat, isAsset } from 'utils/assets';
 import TokenHolders from './TokenHolders';
 import RegisterHistory from './RegisterHistory';
 import ExportButton from './ExportButton';
+import StakingRewards from './StakingRewards';
 import Link from 'next/link';
 import { ownerInfo, registerIdFromAddress } from 'utils/address';
 import { userHref } from 'utils/search';
@@ -563,6 +564,10 @@ export default function AccountDetail({ type, data, username }) {
       )}
 
       {type === CARD_TYPES.TOKEN && <TokenHolders token={data} />}
+
+      {type === CARD_TYPES.TRUST && data.address && (
+        <StakingRewards address={data.address} />
+      )}
 
       {type === CARD_TYPES.TOKEN && <TokenizedAssets token={data.address} />}
 
