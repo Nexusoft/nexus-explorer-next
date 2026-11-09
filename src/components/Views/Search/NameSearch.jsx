@@ -14,13 +14,7 @@ import Loader from 'components/common/NE_Loader';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { ASSET_FORMATS } from 'utils/assets';
 import { timeAgo } from 'utils/format';
-
-const KIND_LABEL = {
-  token: 'Token',
-  name: 'Global name',
-  namespace: 'Namespace',
-  asset: 'Asset',
-};
+import { NAME_KIND_LABEL } from 'utils/search';
 
 function detail(r) {
   if (r.kind === 'asset') {
@@ -102,7 +96,7 @@ export default function NameSearch({ query }) {
                       <a>{r.name}</a>
                     </Link>
                   </td>
-                  <td>{KIND_LABEL[r.kind] || r.kind}</td>
+                  <td>{NAME_KIND_LABEL[r.kind] || r.kind}</td>
                   <td className={styles.hideMobile}>{detail(r)}</td>
                   <td className={styles.hideMobile}>
                     <Hash value={r.owner} href={`/scan/${r.owner}`} keep={6} />

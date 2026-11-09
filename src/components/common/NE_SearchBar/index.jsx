@@ -6,16 +6,17 @@ Search.propTypes = {
   long: PropTypes.bool,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
-  onKeyDown: PropTypes.func,
   onSearch: PropTypes.func,
+  suggestions: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      label: PropTypes.node,
+      note: PropTypes.node,
+    })
+  ),
+  onPick: PropTypes.func,
 };
 
 export default function Search(props) {
-  function handleOnKeyDown(e) {
-    if (e.key === 'Enter') {
-      props.onSearch();
-    }
-  }
-
-  return <SearchBar {...props} onKeyDown={handleOnKeyDown} />;
+  return <SearchBar {...props} />;
 }

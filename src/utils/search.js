@@ -43,6 +43,14 @@ export function classifySearch(input) {
 export const genesisHref = (value) =>
   classifySearch(value) === SEARCH_KINDS.GENESIS ? `/scan/${value}` : undefined;
 
+/** Register kinds the name search finds (explorer index /search) */
+export const NAME_KIND_LABEL = {
+  token: 'Token',
+  name: 'Global name',
+  namespace: 'Namespace',
+  asset: 'Asset',
+};
+
 /** Accepted search formats, shown when nothing matched */
 export const SEARCH_HELP = [
   ['Block height', '6930058'],

@@ -1,3 +1,49 @@
+.wrap {
+  position: relative;
+  width: 100%;
+}
+
+.suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-ctl);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  max-height: 22rem;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.875rem;
+    cursor: pointer;
+    color: var(--c-ink);
+  }
+  li.active {
+    background: var(--c-surface-2);
+  }
+  .label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .note {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    color: var(--c-ink-3);
+  }
+}
+
 .searchBar {
   display: flex;
   width: 100%;

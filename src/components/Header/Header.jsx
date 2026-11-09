@@ -7,6 +7,12 @@ import { NETWORKS } from 'types/ConstantsTypes';
 import { useAppContext } from 'contexts/AppContext';
 import Brand from './Brand';
 import { DesktopNavbar, Hamburger, MobileMenu } from './Navbar';
+import { useQuery } from 'react-query';
+import { useNetwork } from 'hooks/useNetwork/useNetwork';
+import { useDebounce } from 'hooks/useDebounce/useDebounce';
+import { classifySearch, NAME_KIND_LABEL } from 'utils/search';
+
+const maxSuggestions = 8;
 
 /**
  * Header component for the website
@@ -17,6 +23,38 @@ export const Header = () => {
   const [searchInput, setSearchInput] = useState('');
   const router = useRouter();
   const { appContext, setAppContext } = useAppContext();
+  const { network, getIndex } = useNetwork();
+
+  //names as you type, only for text that is no other search format
+  const typed = searchInput.trim();
+  const nameQuery = useDebounce(
+    typed.length >= 2 && !classifySearch(typed) ? typed : '',
+    250
+  );
+  const suggestRQ = useQuery(
+    ['nameSuggest', network.name, nameQuery],
+    () => getIndex('search', { q: nameQuery }),
+    {
+      enabled: !!nameQuery,
+      keepPreviousData: true,
+      staleTime: 60000,
+      retry: false,
+    }
+  );
+  //previous answer while the next one loads, minus names that no longer match
+  const suggestions =
+    typed.length >= 2 && !classifySearch(typed)
+      ? (suggestRQ.data?.result || [])
+          .filter((r) => r.name?.toLowerCase().startsWith(typed.toLowerCase()))
+          .slice(0, maxSuggestions)
+          .map((r) => ({
+            key: r.address,
+            address: r.address,
+            name: r.name,
+            label: r.name,
+            note: NAME_KIND_LABEL[r.kind] || r.kind,
+          }))
+      : [];
 
   const handleNetworkChange = (e) => {
     const val = e.target.value;
@@ -60,6 +98,11 @@ export const Header = () => {
               long
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
+              suggestions={suggestions}
+              onPick={(s) => {
+                setSearchInput(s.name);
+                router.push(`/scan/${s.address}`);
+              }}
               placeholder={TYPES.PLACE_HOLDER.SEARCH}
               onSearch={() => {
                 const q = searchInput.trim();
