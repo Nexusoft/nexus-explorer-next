@@ -159,6 +159,13 @@ export function useNetwork() {
   const findUser = async (username) => {
     const name = (username || '').trim();
     if (!name || name.includes(':')) return null;
+    //the explorer backend asks the node itself and answers null for unknown names,
+    //asked directly the node answers 400, which every browser logs as an error
+    try {
+      return (await getIndex(`user/${encodeURIComponent(name)}`)).result;
+    } catch (e) {
+      //older backend without /explorer/user
+    }
     for (const [endpoint, account] of [
       ['finance/get/account', 'default'],
       ['finance/get/trust', 'trust'],
