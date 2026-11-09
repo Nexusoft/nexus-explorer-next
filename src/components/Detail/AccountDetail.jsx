@@ -30,6 +30,7 @@ import TokenHolders from './TokenHolders';
 import RegisterHistory from './RegisterHistory';
 import ExportButton from './ExportButton';
 import StakingRewards from './StakingRewards';
+import WatchButton from './WatchButton';
 import Link from 'next/link';
 import { ownerInfo, registerIdFromAddress } from 'utils/address';
 import { userHref } from 'utils/search';
@@ -355,7 +356,7 @@ function AccountTransactions({ type, address }) {
   );
 }
 
-export default function AccountDetail({ type, data, username }) {
+export default function AccountDetail({ type, data, username, lookupName }) {
   const marketRQ = useQuery(['market'], fetchMarket, { retry: false });
   const price = marketRQ.data?.data?.market_data?.current_price?.usd;
   const isNxs = data.token === '0' || data.ticker === 'NXS';
@@ -397,6 +398,21 @@ export default function AccountDetail({ type, data, username }) {
     ? 'Key hashes'
     : data.name || 'Register';
 
+  const watchKind =
+    type === CARD_TYPES.USER
+      ? 'account'
+      : type === CARD_TYPES.TRUST
+      ? 'trust'
+      : type === CARD_TYPES.TOKEN
+      ? 'token'
+      : isName
+      ? 'name'
+      : isNamespace
+      ? 'namespace'
+      : asset
+      ? 'asset'
+      : 'register';
+
   //an asset's own fields go to its Content card, objects included
   const extra = Object.entries(data).filter(
     ([k, v]) =>
@@ -429,14 +445,21 @@ export default function AccountDetail({ type, data, username }) {
         ]}
         actions={
           data.address && (
-            <div className={styles.qr} title="Address QR code">
-              <QRCode
-                value={data.address}
-                size={84}
-                level="L"
-                fgColor={TYPES.COLORS.NEXUS_BLUE}
+            <>
+              <WatchButton
+                id={data.address}
+                kind={watchKind}
+                label={lookupName || title}
               />
-            </div>
+              <div className={styles.qr} title="Address QR code">
+                <QRCode
+                  value={data.address}
+                  size={84}
+                  level="L"
+                  fgColor={TYPES.COLORS.NEXUS_BLUE}
+                />
+              </div>
+            </>
           )
         }
       />

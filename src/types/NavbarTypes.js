@@ -11,6 +11,7 @@ const navLinks = [
     children: [
       { title: 'Rich list', path: '/richlist' },
       { title: 'Top stakers', path: '/trustlist' },
+      { title: 'Watchlist', path: '/watchlist' },
     ],
   },
   {

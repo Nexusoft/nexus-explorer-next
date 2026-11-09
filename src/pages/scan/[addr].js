@@ -221,6 +221,13 @@ function Scan({ addr }) {
                       ? addr.split(':')[0]
                       : null
                   }
+                  lookupName={
+                    [SEARCH_KINDS.NAME, SEARCH_KINDS.TRUST_NAME].includes(
+                      searchKind
+                    )
+                      ? addr
+                      : null
+                  }
                 />
               )}
               {cardType === CARD_TYPES.GENESIS && (

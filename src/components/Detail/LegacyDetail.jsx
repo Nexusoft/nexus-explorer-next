@@ -25,6 +25,7 @@ import {
   netForAddresses,
 } from 'utils/contracts';
 import ExportButton from './ExportButton';
+import WatchButton from './WatchButton';
 
 const pageSize = 25;
 
@@ -170,6 +171,13 @@ export default function LegacyDetail({ address }) {
       <DetailHeader
         kind="Legacy address"
         title={shortHash(address, 8)}
+        actions={
+          <WatchButton
+            id={address}
+            kind="legacy"
+            label={shortHash(address, 8)}
+          />
+        }
         subtitle={<Hash value={address} full />}
         badges={[
           { text: 'pre Tritium' },

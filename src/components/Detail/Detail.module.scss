@@ -243,6 +243,34 @@
   font-weight: 600;
 }
 
+.watchButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-ink-2);
+  border-radius: var(--radius-ctl);
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  white-space: nowrap;
+
+  svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+  &:hover {
+    border-color: var(--c-link);
+    color: var(--c-link);
+  }
+  &[aria-pressed='true'] {
+    color: var(--c-warn);
+    border-color: currentColor;
+  }
+}
+
 .exportRow {
   display: flex;
   flex-wrap: wrap;

@@ -17,6 +17,7 @@ import { formatAmount, formatInt, shortHash, timeAgo } from 'utils/format';
 import { ASSET_FORMATS } from 'utils/assets';
 import { cls } from 'utils';
 import OwnerTransactions from './OwnerTransactions';
+import WatchButton from './WatchButton';
 
 const preview = 10;
 
@@ -168,6 +169,13 @@ export default function OwnerDetail({ status }) {
       <DetailHeader
         kind={username ? 'User' : 'Signature chain'}
         title={username || shortHash(genesis, 8)}
+        actions={
+          <WatchButton
+            id={genesis}
+            kind="chain"
+            label={username || shortHash(genesis, 8)}
+          />
+        }
         subtitle={<Hash value={genesis} full />}
         badges={[
           { text: `${formatInt(status.transactions)} transactions` },

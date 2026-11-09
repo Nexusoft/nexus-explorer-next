@@ -20,6 +20,11 @@ export const PageMetaTypes = {
       DESCRIPTION:
         'Nexus supply, inflation, staking and ledger figures for the last day, week and month.',
     },
+    WATCHLIST: {
+      TITLE: page('Watchlist'),
+      DESCRIPTION:
+        'Nexus accounts, signature chains and addresses you follow, kept in your browser.',
+    },
     CHARTS: {
       TITLE: page('Charts'),
       DESCRIPTION:
