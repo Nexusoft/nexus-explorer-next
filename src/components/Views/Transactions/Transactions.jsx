@@ -4,6 +4,9 @@ import { useQuery } from 'react-query';
 import { useNetwork } from 'hooks';
 import { Card, Hash, Party, SectionTitle, styles } from 'components/Detail';
 import ListPager from 'components/Detail/ListPager';
+import { useRouter } from 'next/router';
+//same toggle buttons as the home page activity chart
+import rangeStyles from '../Home/ActivityChart.module.scss';
 import { formatAmount, formatDate, formatInt, timeAgo } from 'utils/format';
 import {
   describeContract,
@@ -14,7 +17,28 @@ import {
 
 const indexPageSize = 25;
 
+//kinds the explorer index stores per transaction (indexer TX_KINDS)
+const KINDS = [
+  ['', 'All kinds'],
+  ['payment', 'Payments'],
+  ['token', 'Tokens'],
+  ['register', 'Registers'],
+  ['ownership', 'Ownership'],
+  ['legacy', 'Legacy'],
+  ['reward', 'Rewards'],
+];
+
 export default function Transactions() {
+  const router = useRouter();
+  const kind = KINDS.some(([k]) => k && k === router.query.kind)
+    ? router.query.kind
+    : '';
+  const setKind = (k) =>
+    router.replace(
+      { pathname: router.pathname, query: k ? { kind: k } : {} },
+      undefined,
+      { shallow: true }
+    );
   const [page, setPage] = useState(0);
   const [blocksPerPage] = useState(50);
   const [transfersChoice, setTransfersChoice] = useState(null);
@@ -34,7 +58,7 @@ export default function Transactions() {
   useEffect(() => {
     setPage(0);
     setCursors([undefined]);
-  }, [network.name, transfersOnly, indexed]);
+  }, [network.name, transfersOnly, indexed, kind]);
 
   const txRQ = useQuery(
     ['transactions', page, blocksPerPage, network.name],
@@ -47,11 +71,13 @@ export default function Transactions() {
   );
 
   const idxRQ = useQuery(
-    ['indexedTransactions', network.name, transfersOnly, cursors[page]],
+    ['indexedTransactions', network.name, transfersOnly, kind, cursors[page]],
     () =>
       getIndex('transactions', {
         limit: indexPageSize,
-        transfers: transfersOnly ? 1 : 0,
+        //a chosen kind replaces the rewards switch
+        transfers: !kind && transfersOnly ? 1 : 0,
+        kind: kind || undefined,
         before: cursors[page],
       }),
     {
@@ -103,17 +129,36 @@ export default function Transactions() {
           ? `In blocks ${formatInt(last)} to ${formatInt(first)}`
           : 'Transactions'}
       </SectionTitle>
-      <label
-        className={styles.muted}
-        style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-        <input
-          type="checkbox"
-          checked={transfersOnly}
-          onChange={(e) => setTransfersChoice(e.target.checked)}
-        />
-        Hide mining and staking rewards
-        {transfersOnly && hidden > 0 && ` (${formatInt(hidden)} hidden)`}
-      </label>
+      {indexed && (
+        <div
+          className={rangeStyles.periods}
+          role="group"
+          aria-label="Kind of transaction"
+          style={{ flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+          {KINDS.map(([k, label]) => (
+            <button
+              key={k || 'all'}
+              type="button"
+              aria-pressed={kind === k}
+              onClick={() => setKind(k)}>
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+      {!kind && (
+        <label
+          className={styles.muted}
+          style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={transfersOnly}
+            onChange={(e) => setTransfersChoice(e.target.checked)}
+          />
+          Hide mining and staking rewards
+          {transfersOnly && hidden > 0 && ` (${formatInt(hidden)} hidden)`}
+        </label>
+      )}
 
       {activeRQ.isLoading && (
         <p className={styles.muted}>Loading transactions...</p>
