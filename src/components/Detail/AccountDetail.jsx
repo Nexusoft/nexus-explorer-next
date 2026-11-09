@@ -6,6 +6,7 @@ import {
   DetailHeader,
   DetailPage,
   Hash,
+  OwnerHash,
   SectionTitle,
   Stat,
   Stats,
@@ -26,6 +27,9 @@ import { isNum } from 'utils/converter';
 import { CARD_TYPES } from 'types/ConstantsTypes';
 import { ASSET_FORMATS, assetFormat, isAsset } from 'utils/assets';
 import TokenHolders from './TokenHolders';
+import RegisterHistory from './RegisterHistory';
+import Link from 'next/link';
+import { ownerInfo, registerIdFromAddress } from 'utils/address';
 import TYPES from 'types';
 
 const pageSize = 20;
@@ -128,6 +132,61 @@ function AssetContent({ data, fields }) {
         Written by the owner; the explorer shows it as stored and does not check
         it.
       </p>
+    </Card>
+  );
+}
+
+/** Registers handed to this token by tokenizing, from the owner index */
+function TokenizedAssets({ token }) {
+  const { network, getOwner } = useNetwork();
+  const id = registerIdFromAddress(token);
+  const ownedRQ = useQuery(['owner', network.name, id], () => getOwner(id), {
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+  const regs = ownedRQ.data?.registers || [];
+  if (!regs.length) return null;
+  return (
+    <Card>
+      <SectionTitle note={formatInt(regs.length)}>
+        Tokenized assets
+      </SectionTitle>
+      <p className={styles.muted}>
+        Owned by this token, so its holders own them together.
+      </p>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Register</th>
+              <th>Kind</th>
+              <th className={styles.hideMobile}>Last change</th>
+            </tr>
+          </thead>
+          <tbody>
+            {regs.map((r) => (
+              <tr key={r.address}>
+                <td style={{ overflowWrap: 'anywhere' }}>
+                  {r.name ? (
+                    <Link href={`/scan/${r.address}`}>
+                      <a>{r.name}</a>
+                    </Link>
+                  ) : (
+                    <Hash
+                      value={r.address}
+                      href={`/scan/${r.address}`}
+                      keep={6}
+                    />
+                  )}
+                </td>
+                <td>{r.info?.kind || r.kind}</td>
+                <td className={styles.hideMobile}>{timeAgo(r.modified)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Card>
   );
 }
@@ -455,8 +514,11 @@ export default function AccountDetail({ type, data }) {
           />
           <Stat
             label="Owner"
-            value={
-              <Hash value={data.owner} href={`/scan/${data.owner}`} keep={6} />
+            value={<OwnerHash owner={data.owner} />}
+            note={
+              ownerInfo(data.owner).what === 'token'
+                ? "Tokenized: the token's holders own it together"
+                : null
             }
           />
         </Stats>
@@ -470,6 +532,11 @@ export default function AccountDetail({ type, data }) {
       )}
 
       {type === CARD_TYPES.TOKEN && <TokenHolders token={data} />}
+
+      {type === CARD_TYPES.TOKEN && <TokenizedAssets token={data.address} />}
+
+      {(type === CARD_TYPES.TOKEN || type === CARD_TYPES.ASSET) &&
+        data.address && <RegisterHistory address={data.address} />}
 
       {hasTransfers && (
         <AccountTransactions type={type} address={data.address} />

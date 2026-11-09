@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useQuery } from 'react-query';
-import { Card, Hash, SectionTitle, Stat, Stats, styles } from '.';
+import { Card, Hash, OwnerHash, SectionTitle, Stat, Stats, styles } from '.';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { formatAmount, formatInt, timeAgo } from 'utils/format';
 import { marketView } from 'utils/market';
@@ -99,7 +99,7 @@ export default function TokenHolders({ token }) {
                     />
                   </td>
                   <td className={styles.hideMobile}>
-                    <Hash value={a.owner} href={`/scan/${a.owner}`} keep={6} />
+                    <OwnerHash owner={a.owner} />
                   </td>
                   <td className={styles.right}>
                     {formatAmount(a.balance)} {ticker}

@@ -6,6 +6,7 @@ import { handleCopy } from 'utils/helper';
 import { shortHash, formatAmount, formatDate, timeAgo } from 'utils/format';
 import { describeContract } from 'utils/contracts';
 import { cls } from 'utils';
+import { ownerInfo } from 'utils/address';
 import { StringsTypes } from 'types/StringsTypes';
 
 export { styles };
@@ -158,6 +159,20 @@ export function Hash({ value, href, full = false, keep = 8 }) {
       )}
       <CopyButton value={value} />
     </span>
+  );
+}
+
+/** Owner of a register: a signature chain, a register (tokenized) or nobody during a transfer */
+export function OwnerHash({ owner, keep = 6 }) {
+  const o = ownerInfo(owner);
+  if (o.kind === 'transfer') {
+    return <span className={styles.muted}>in transfer, not claimed yet</span>;
+  }
+  return (
+    <>
+      <Hash value={owner} href={o.href} keep={keep} />
+      {o.kind === 'register' && <span className={styles.muted}> {o.what}</span>}
+    </>
   );
 }
 

@@ -6,6 +6,7 @@ import {
   Card,
   DetailPage,
   Hash,
+  OwnerHash,
   SectionTitle,
   styles,
 } from 'components/Detail';
@@ -99,7 +100,7 @@ export default function NameSearch({ query }) {
                   <td>{NAME_KIND_LABEL[r.kind] || r.kind}</td>
                   <td className={styles.hideMobile}>{detail(r)}</td>
                   <td className={styles.hideMobile}>
-                    <Hash value={r.owner} href={`/scan/${r.owner}`} keep={6} />
+                    <OwnerHash owner={r.owner} />
                   </td>
                   <td className={styles.hideMobile}>{timeAgo(r.modified)}</td>
                 </tr>

@@ -45,7 +45,7 @@ const scanTitles = {
 function Scan({ addr }) {
   const goBack = useBack();
   const [cardType, setCardType] = useState();
-  const { network, getScanResults } = useNetwork();
+  const { network, getScanResults, getIndex } = useNetwork();
 
   const searchKind = classifySearch(addr);
 
@@ -61,6 +61,20 @@ function Scan({ addr }) {
    * @param {*} addr pass the address to scan
    * @returns {*} the {endpoint, params, type} to use
    */
+  //one lookup tells what the address holds, then ask the matching endpoint
+  async function addressAPI(address) {
+    const res = await axios.get(`${network.url}/register/get/any`, {
+      params: { address },
+    });
+    const object = res.data?.result || {};
+    Log('[RESOLVED]:', object.type);
+    const match = registerTypes[object.type] || {
+      endpoint: 'register/get/any',
+      type: CARD_TYPES.ASSET,
+    };
+    return { ...match, params: { address } };
+  }
+
   async function getAPI(addr) {
     switch (searchKind) {
       case SEARCH_KINDS.TRUST_NAME:
@@ -81,18 +95,19 @@ function Scan({ addr }) {
           params: { address: addr.substring(8) },
           type: CARD_TYPES.INVOICE,
         };
-      case SEARCH_KINDS.ADDRESS: {
-        //one lookup tells what the address holds, then ask the matching endpoint
-        const res = await axios.get(`${network.url}/register/get/any`, {
-          params: { address: addr },
-        });
-        const object = res.data?.result || {};
-        Log('[RESOLVED]:', object.type);
-        const match = registerTypes[object.type] || {
-          endpoint: 'register/get/any',
-          type: CARD_TYPES.ASSET,
-        };
-        return { ...match, params: { address: addr } };
+      case SEARCH_KINDS.ADDRESS:
+        return addressAPI(addr);
+      case SEARCH_KINDS.REGISTER_ID: {
+        //the node takes base58 only, the explorer index knows both forms
+        const res = await getIndex(`register/${addr.toLowerCase()}`).catch(
+          () => null
+        );
+        if (!res?.result?.address) {
+          throw new Error(
+            'This is a register address in hex form, which only the explorer index can look up, and it does not know this one'
+          );
+        }
+        return addressAPI(res.result.address);
       }
       case SEARCH_KINDS.GENESIS:
         return {

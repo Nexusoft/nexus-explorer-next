@@ -1,3 +1,5 @@
+import { isRegisterId } from './address';
+
 /**
  * Classifies what a user typed into the search box
  * Returns the kind of lookup, or null when the input matches no known format
@@ -11,6 +13,7 @@ export const SEARCH_KINDS = {
   TRUST_NAME: 'trustName',
   INVOICE: 'invoice',
   GENESIS: 'genesis',
+  REGISTER_ID: 'registerId',
 };
 
 const base58 = /^[1-9A-HJ-NP-Za-km-z]+$/;
@@ -29,7 +32,10 @@ export function classifySearch(input) {
   if (q.startsWith('invoice-') && base58.test(q.substring(8))) {
     return SEARCH_KINDS.INVOICE;
   }
-  if (hex.test(q) && q.length === 64) return SEARCH_KINDS.GENESIS;
+  if (hex.test(q) && q.length === 64) {
+    //owner of a tokenized register: the token's address in hex
+    return isRegisterId(q) ? SEARCH_KINDS.REGISTER_ID : SEARCH_KINDS.GENESIS;
+  }
   if (hex.test(q) && q.length === 128) return SEARCH_KINDS.TRANSACTION;
   if (hex.test(q) && q.length === 256) return SEARCH_KINDS.BLOCK_HASH;
   if (base58.test(q) && q.length === 51) return SEARCH_KINDS.ADDRESS;

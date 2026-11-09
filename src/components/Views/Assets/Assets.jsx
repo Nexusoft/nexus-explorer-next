@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import { Card, Hash, SectionTitle, styles } from 'components/Detail';
+import { Card, Hash, OwnerHash, SectionTitle, styles } from 'components/Detail';
 import ListPager from 'components/Detail/ListPager';
 import Loader from 'components/common/NE_Loader';
 import ErrorMessage from 'components/common/NE_ErrorMessage';
@@ -164,7 +164,7 @@ export default function Assets() {
                     {ASSET_FORMATS[a.type] || a.type}
                   </td>
                   <td className={styles.hideMobile}>
-                    <Hash value={a.owner} href={`/scan/${a.owner}`} keep={6} />
+                    <OwnerHash owner={a.owner} />
                   </td>
                   <td
                     title={`Created ${formatDateShort(a.created)}`}

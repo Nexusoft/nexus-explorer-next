@@ -64,6 +64,8 @@ export function describeContract(c = {}) {
     case 'APPEND':
     case 'TRANSFER':
     case 'CLAIM':
+      //tokenizing = forced transfer to a token, done without a claim
+      if (op === 'TRANSFER' && c.tokenized) label = 'Tokenized';
       to = party(c.address ? { address: c.address, name: c.name } : null);
       break;
     default:
