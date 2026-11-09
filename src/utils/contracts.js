@@ -52,9 +52,28 @@ export function describeContract(c = {}) {
     case 'UNSTAKE':
       to = { address: c.address, name: c.name };
       break;
+    case 'DEBIT':
+      //NXS or another token sent to a token pays every holder of it, each claims a share
+      if (isBurn(c)) label = 'Burned';
+      else if (c.to?.type === 'TOKEN') {
+        label =
+          c.token === c.to.address
+            ? 'Sent back to the token'
+            : 'Paid to token holders';
+      } else if (c.exchange) label = 'Sent, anyone may claim';
+      break;
     case 'CREDIT':
       if (c.for === 'COINBASE') label = 'Mining reward claimed';
       else if (c.for === 'LEGACY') label = 'Received from legacy';
+      else if (c.proof) {
+        //share of a payment to token holders, proven by holding the token
+        label = 'Holder share claimed';
+        from = party(c.proof.account);
+      }
+      //void, also a cancelled market order or invoice: credit back to the sender
+      else if (from?.address && from.address === to?.address) {
+        label = 'Returned to sender';
+      }
       break;
     case 'FEE':
       from = from || party(c.address && { address: c.address });
@@ -81,7 +100,75 @@ export function describeContract(c = {}) {
     ticker: c.ticker || (c.token === '0' ? 'NXS' : ''),
     reference: c.reference,
     txid: c.txid,
+    claim: claimStatus(c),
+    conditions: isBurn(c) ? null : c.conditions,
+    conditionWords: conditionInWords(c.conditions),
+    holderShare: c.proof?.ownership,
+    holderTicker: c.proof?.ticker,
   };
+}
+
+function duration(seconds) {
+  const units = [
+    [86400, 'day'],
+    [3600, 'hour'],
+    [60, 'minute'],
+  ];
+  for (const [size, name] of units) {
+    if (seconds >= size && seconds % size === 0) {
+      const n = seconds / size;
+      return `${n} ${name}${n === 1 ? '' : 's'}`;
+    }
+  }
+  return `${seconds} seconds`;
+}
+
+const shortGenesis = (g) => `${g.substring(0, 6)}...${g.slice(-4)}`;
+
+/**
+ * Plain words for the usual contract conditions (who may claim, time limits),
+ * null when the condition uses anything else
+ */
+export function conditionInWords(code) {
+  if (typeof code !== 'string' || !/caller\.|contract\./.test(code)) {
+    return null;
+  }
+  const words = code
+    .replace(
+      /caller\.genesis (==|!=) 0x([0-9a-f]{64})/gi,
+      (m, op, g) =>
+        `the claimer is ${op === '!=' ? 'not ' : ''}${shortGenesis(g)}`
+    )
+    .replace(
+      /contract\.timestamp \+ (\d+) (>|<) caller\.timestamp/g,
+      (m, s, op) =>
+        op === '>'
+          ? `claimed within ${duration(Number(s))} of sending`
+          : `claimed more than ${duration(Number(s))} after sending`
+    )
+    .replace(/ AND /g, ' and ')
+    .replace(/ OR /g, ' or ');
+  return /caller\.|contract\.|0x/.test(words) ? null : words;
+}
+
+//finance/burn: a debit whose condition can never be true
+const isBurn = (c) => c.OP === 'DEBIT' && c.conditions?.trim() === '4 == 2';
+
+/** How much of a debit the recipient took: {text, tone} or null */
+export function claimStatus(c) {
+  if (isBurn(c)) return { text: 'Can never be claimed', tone: 'warn' };
+  if (c.OP !== 'DEBIT' || typeof c.claimed !== 'number') return null;
+  const amount = typeof c.amount === 'number' ? c.amount : 0;
+  if (amount > 0 && c.claimed >= amount) {
+    return { text: 'Fully claimed', tone: 'good' };
+  }
+  if (c.claimed > 0) {
+    return {
+      text: `${Math.round((c.claimed / amount) * 100)}% claimed so far`,
+      tone: 'warn',
+    };
+  }
+  return { text: 'Not claimed yet', tone: 'warn' };
 }
 
 const rewardOps = ['COINBASE', 'TRUST', 'GENESIS'];

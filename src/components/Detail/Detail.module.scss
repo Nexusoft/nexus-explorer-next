@@ -243,6 +243,33 @@
   font-weight: 600;
 }
 
+//claim status, condition, holder share under a contract
+.flowNote {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--c-ink-2);
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.conditionCode {
+  summary {
+    cursor: pointer;
+    color: var(--c-link);
+  }
+  &[open] {
+    flex-basis: 100%;
+  }
+}
+
 .flowParties {
   display: flex;
   flex-wrap: wrap;
@@ -380,6 +407,9 @@
     .flowParties {
       grid-column: 1 / -1;
       grid-row: 2;
+    }
+    .flowNote {
+      grid-row: 3;
     }
   }
   .kv {

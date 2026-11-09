@@ -234,6 +234,33 @@ export function ContractFlow({ contract, self }) {
       <div className={styles.flowAmount} data-sign={sign}>
         {d.amount != null ? `${sign}${formatAmount(d.amount)} ${d.ticker}` : ''}
       </div>
+      {(d.claim || d.conditions || d.holderShare != null) && (
+        <div className={styles.flowNote}>
+          {d.claim && (
+            <span className={styles.badge} data-tone={d.claim.tone}>
+              {d.claim.text}
+            </span>
+          )}
+          {d.holderShare != null && (
+            <span>
+              holder of {formatAmount(d.holderShare, 2)}% of{' '}
+              {d.holderTicker || 'the token'} today
+            </span>
+          )}
+          {d.conditions && (
+            <span>
+              Can be claimed only if{' '}
+              {d.conditionWords || <code>{d.conditions}</code>}
+            </span>
+          )}
+          {d.conditionWords && (
+            <details className={styles.conditionCode}>
+              <summary>code</summary>
+              <code>{d.conditions}</code>
+            </details>
+          )}
+        </div>
+      )}
     </div>
   );
 }
