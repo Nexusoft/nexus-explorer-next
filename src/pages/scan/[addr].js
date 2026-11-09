@@ -206,7 +206,18 @@ function Scan({ addr }) {
                 CARD_TYPES.TOKEN,
                 CARD_TYPES.ASSET,
               ].includes(cardType) && (
-                <AccountDetail type={cardType} data={data.result} />
+                <AccountDetail
+                  type={cardType}
+                  data={data.result}
+                  username={
+                    //found by username:account, so the owner is that user
+                    [SEARCH_KINDS.NAME, SEARCH_KINDS.TRUST_NAME].includes(
+                      searchKind
+                    )
+                      ? addr.split(':')[0]
+                      : null
+                  }
+                />
               )}
               {cardType === CARD_TYPES.GENESIS && (
                 <OwnerDetail status={data.result} />

@@ -30,6 +30,7 @@ import TokenHolders from './TokenHolders';
 import RegisterHistory from './RegisterHistory';
 import Link from 'next/link';
 import { ownerInfo, registerIdFromAddress } from 'utils/address';
+import { userHref } from 'utils/search';
 import TYPES from 'types';
 
 const pageSize = 20;
@@ -336,7 +337,7 @@ function AccountTransactions({ type, address }) {
   );
 }
 
-export default function AccountDetail({ type, data }) {
+export default function AccountDetail({ type, data, username }) {
   const marketRQ = useQuery(['market'], fetchMarket, { retry: false });
   const price = marketRQ.data?.data?.market_data?.current_price?.usd;
   const isNxs = data.token === '0' || data.ticker === 'NXS';
@@ -519,7 +520,15 @@ export default function AccountDetail({ type, data }) {
           />
           <Stat
             label="Owner"
-            value={<OwnerHash owner={data.owner} />}
+            value={
+              username && ownerInfo(data.owner).kind === 'genesis' ? (
+                <Link href={userHref({ username, genesis: data.owner })}>
+                  <a>{username}</a>
+                </Link>
+              ) : (
+                <OwnerHash owner={data.owner} />
+              )
+            }
             note={
               ownerInfo(data.owner).what === 'token'
                 ? "Tokenized: the token's holders own it together"

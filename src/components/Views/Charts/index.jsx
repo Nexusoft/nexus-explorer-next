@@ -35,9 +35,13 @@ function readColors() {
   };
 }
 
-/** Daily rows into buckets of `size` days: {t, days, blocks[3], mint[3], txs, transfers} */
-function bucketize(rows, size) {
+/**
+ * Daily rows into buckets of `size` days: {t, days, blocks[3], mint[3], txs, transfers,
+ * created = all NXS minted up to the bucket's end, starting from `minted` before the rows}
+ */
+function bucketize(rows, size, minted = 0) {
   const out = [];
+  let created = minted;
   for (const [day, bs, bp, bh, ms, mp, mh, txs, transfers] of rows) {
     const start = Math.floor(day / size) * size;
     let b = out[out.length - 1];
@@ -58,6 +62,8 @@ function bucketize(rows, size) {
     [ms, mp, mh].forEach((n, i) => (b.mint[i] += n));
     b.txs += txs;
     b.transfers += transfers;
+    created += ms + mp + mh;
+    b.created = created;
   }
   //a week cut by the range start or by today counts too few days
   return out.filter((b) => b.days === size);
@@ -133,7 +139,12 @@ function ChartCard({ title, note, legend, children }) {
 
 /** Transactions, blocks per channel, minted NXS and block time over time */
 export default function Charts() {
-  const { network, getDaily } = useNetwork();
+  const { network, getDaily, getMining } = useNetwork();
+  //same query as the metrics page, cached 10 minutes by the proxy
+  const miningRQ = useQuery(['mining', network.name], getMining, {
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
   const [rangeKey, setRangeKey] = useState('1y');
   const range = ranges.find((r) => r.key === rangeKey);
   const [isDarkMode] = useDarkMode();
@@ -156,11 +167,19 @@ export default function Charts() {
     const today = Math.floor(Date.now() / 1000 / DAY);
     const done = rows.filter((r) => r[0] < today);
     const from = range.days ? today - range.days : -Infinity;
+    //NXS minted before the range, so the supply line starts at the right height
+    const before = done
+      .filter((r) => r[0] < from)
+      .reduce((s, r) => s + r[4] + r[5] + r[6], 0);
     return bucketize(
       done.filter((r) => r[0] >= from),
-      range.bucket
+      range.bucket,
+      before
     );
   }, [dailyRQ.data, range]);
+
+  //the node's supply = everything minted minus what was burned
+  const supply = miningRQ.data?.data?.result?.supply;
 
   if (dailyRQ.isLoading) return <Loader />;
   if (!dailyRQ.data) {
@@ -233,6 +252,36 @@ export default function Charts() {
         colors: colors.channels,
         fill: { type: 'solid', opacity: 0.85 },
         stroke: { width: 1, curve: 'straight', colors: ['transparent'] },
+      },
+    },
+    {
+      key: 'created',
+      title: 'NXS created',
+      note: supply?.total
+        ? `all block rewards so far; the node's supply today is ${formatAmount(
+            supply.total,
+            0
+          )} NXS after ${formatAmount(supply.burned || 0, 0)} NXS burned`
+        : 'all block rewards so far',
+      series: [
+        line(
+          'NXS created',
+          buckets.map((b) => Math.round(b.created))
+        ),
+      ],
+      options: {
+        ...baseOptions(colors, isDarkMode, 'NXS'),
+        colors: [colors.single],
+        yaxis: {
+          ...baseOptions(colors, isDarkMode, 'NXS').yaxis,
+          //from zero the last year would be a flat line
+          min: undefined,
+          //millions keep the axis labels short
+          labels: {
+            style: { colors: colors.text },
+            formatter: (v) => `${formatAmount(v / 1e6, 1)}M`,
+          },
+        },
       },
     },
     {
