@@ -25,6 +25,7 @@ const navLinks = [
   },
   { title: 'Market', path: '/market', disabledNets: [NETWORKS.TESTNET.name] },
   { title: 'Metrics', path: '/metrics' },
+  { title: 'Charts', path: '/charts' },
   {
     title: 'DAO',
     path: '#',

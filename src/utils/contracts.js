@@ -4,6 +4,13 @@
  */
 import { toTitleCase } from './converter';
 
+//pre Tritium reward transactions, by the node's transaction type
+export const LEGACY_REWARDS = {
+  'legacy base': 'Mining reward',
+  'legacy trust': 'Staking reward',
+  'legacy genesis': 'First staking reward',
+};
+
 const LABELS = {
   COINBASE: 'Mining reward',
   TRUST: 'Staking reward',
@@ -23,6 +30,7 @@ const LABELS = {
   AUTHORIZE: 'Authorized',
   CONDITION: 'Condition',
   VALIDATE: 'Validated condition',
+  ...LEGACY_REWARDS,
 };
 
 //a party is { address, name, genesis, type } - whatever the node gave us
@@ -177,6 +185,7 @@ const isRewardContract = (c) =>
 
 /** Only mining / staking rewards (a fee next to a reward claim still counts as a reward) */
 export function isRewardTx(tx) {
+  if (LEGACY_REWARDS[tx?.type]) return true;
   const contracts = tx?.contracts || [];
   return (
     contracts.some(isRewardContract) &&
@@ -187,7 +196,9 @@ export function isRewardTx(tx) {
 /** One line headline for a transaction, e.g. "Sent 9,277.99 NXS" */
 export function transactionHeadline(tx, formatAmount) {
   const contracts = tx?.contracts || [];
-  if (!contracts.length) return toTitleCase(tx?.type || 'transaction');
+  if (!contracts.length) {
+    return LEGACY_REWARDS[tx?.type] || toTitleCase(tx?.type || 'transaction');
+  }
   const described = contracts.map(describeContract);
   const labels = [...new Set(described.map((d) => d.label))];
   const ticker = described.find((d) => d.ticker)?.ticker || '';
@@ -236,10 +247,11 @@ export function netForAddress(tx, address) {
 }
 
 /** Indexer move row back into the contract shape describeContract reads */
-export function moveToContract(m) {
+export function moveToContract(m, txType) {
   const to = { address: m.to_addr, name: m.to_name };
   return {
-    OP: m.op,
+    //an output of a legacy reward transaction is the reward itself
+    OP: m.op === 'LEGACY' && LEGACY_REWARDS[txType] ? txType : m.op,
     amount: m.amount,
     ticker: m.ticker,
     from: m.from_addr ? { address: m.from_addr, name: m.from_name } : null,

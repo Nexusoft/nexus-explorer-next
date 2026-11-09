@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { useQuery } from 'react-query';
 import {
   Card,
@@ -124,7 +125,19 @@ function KeysCard({ crypto }) {
 
 export default function OwnerDetail({ status }) {
   const genesis = status.genesis;
-  const { network, getOwner } = useNetwork();
+  const { network, getOwner, findUser } = useNetwork();
+  const router = useRouter();
+  //username from a name search, shown only when its accounts really belong to this chain
+  const asked = typeof router.query.user === 'string' ? router.query.user : '';
+  const userRQ = useQuery(
+    ['findUser', network.name, asked],
+    () => findUser(asked),
+    { enabled: !!asked, staleTime: 60000, retry: false }
+  );
+  const username =
+    userRQ.data?.genesis?.toLowerCase() === genesis.toLowerCase()
+      ? userRQ.data.username
+      : null;
   const ownerRQ = useQuery(
     ['owner', network.name, genesis],
     () => getOwner(genesis),
@@ -153,8 +166,8 @@ export default function OwnerDetail({ status }) {
   return (
     <DetailPage>
       <DetailHeader
-        kind="Signature chain"
-        title={shortHash(genesis, 8)}
+        kind={username ? 'User' : 'Signature chain'}
+        title={username || shortHash(genesis, 8)}
         subtitle={<Hash value={genesis} full />}
         badges={[
           { text: `${formatInt(status.transactions)} transactions` },

@@ -15,7 +15,7 @@ import Loader from 'components/common/NE_Loader';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { ASSET_FORMATS } from 'utils/assets';
 import { timeAgo } from 'utils/format';
-import { NAME_KIND_LABEL } from 'utils/search';
+import { NAME_KIND_LABEL, userHref } from 'utils/search';
 
 function detail(r) {
   if (r.kind === 'asset') {
@@ -38,27 +38,34 @@ function detail(r) {
   return null;
 }
 
-/** Text that is no known format: look it up by name in the explorer index */
+/** Text that is no known format: a username, or a name in the explorer index */
 export default function NameSearch({ query }) {
   const router = useRouter();
-  const { network, getIndex } = useNetwork();
+  const { network, getIndex, findUser } = useNetwork();
   const searchRQ = useQuery(
     ['nameSearch', network.name, query],
     () => getIndex('search', { q: query }),
     { retry: false, staleTime: 60000 }
   );
+  const userRQ = useQuery(
+    ['findUser', network.name, query],
+    () => findUser(query),
+    { retry: false, staleTime: 60000 }
+  );
   const rows = searchRQ.data?.result || [];
+  const user = userRQ.data;
 
-  //one result with exactly this name: open it
-  const only =
+  //one clear answer: open it
+  const exact =
     rows.length === 1 && rows[0].name?.toLowerCase() === query.toLowerCase()
-      ? rows[0]
+      ? `/scan/${rows[0].address}`
       : null;
+  const target = user && !rows.length ? userHref(user) : !user ? exact : null;
   useEffect(() => {
-    if (only) router.replace(`/scan/${only.address}`);
-  }, [only?.address]);
+    if (target) router.replace(target);
+  }, [target]);
 
-  if (searchRQ.isLoading || only) return <Loader />;
+  if (searchRQ.isLoading || userRQ.isLoading || target) return <Loader />;
   if (!rows.length) {
     //without an index the text simply matches no search format
     return searchRQ.isError ? (
@@ -67,7 +74,7 @@ export default function NameSearch({ query }) {
       <SearchHelp
         query={query}
         notFound
-        message="No token, global name, namespace or asset starts with this."
+        message="No user with this name, and no token, global name, namespace or asset starts with it."
       />
     );
   }
@@ -75,7 +82,7 @@ export default function NameSearch({ query }) {
   return (
     <DetailPage>
       <Card>
-        <SectionTitle note={rows.length}>
+        <SectionTitle note={rows.length + (user ? 1 : 0)}>
           Names starting with “{query}”
         </SectionTitle>
         <div className={styles.tableWrap}>
@@ -90,6 +97,23 @@ export default function NameSearch({ query }) {
               </tr>
             </thead>
             <tbody>
+              {user && (
+                <tr>
+                  <td style={{ overflowWrap: 'anywhere' }}>
+                    <Link href={userHref(user)}>
+                      <a>{user.username}</a>
+                    </Link>
+                  </td>
+                  <td>User</td>
+                  <td className={styles.hideMobile}>
+                    signature chain with its accounts and transactions
+                  </td>
+                  <td className={styles.hideMobile}>
+                    <OwnerHash owner={user.genesis} />
+                  </td>
+                  <td className={styles.hideMobile} />
+                </tr>
+              )}
               {rows.map((r) => (
                 <tr key={r.address}>
                   <td style={{ overflowWrap: 'anywhere' }}>
@@ -109,8 +133,9 @@ export default function NameSearch({ query }) {
           </table>
         </div>
         <p className={styles.muted}>
-          Tokens, global names, namespaces and assets from the explorer index.
-          Account names are searched as username:account.
+          Users by their exact username, tokens, global names, namespaces and
+          assets by the start of the name. One account of a user is
+          username:account, e.g. {query}:default.
         </p>
       </Card>
     </DetailPage>

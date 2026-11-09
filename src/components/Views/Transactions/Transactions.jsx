@@ -78,7 +78,7 @@ export default function Transactions() {
         height: t.height,
         timestamp: t.time,
         type: t.type,
-        contracts: t.moves.map(moveToContract),
+        contracts: t.moves.map((m) => moveToContract(m, t.type)),
       }));
       return { rows: list, hidden: 0 };
     }

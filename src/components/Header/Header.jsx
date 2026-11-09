@@ -10,7 +10,7 @@ import { DesktopNavbar, Hamburger, MobileMenu } from './Navbar';
 import { useQuery } from 'react-query';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { useDebounce } from 'hooks/useDebounce/useDebounce';
-import { classifySearch, NAME_KIND_LABEL } from 'utils/search';
+import { classifySearch, NAME_KIND_LABEL, userHref } from 'utils/search';
 
 const maxSuggestions = 8;
 
@@ -23,7 +23,7 @@ export const Header = () => {
   const [searchInput, setSearchInput] = useState('');
   const router = useRouter();
   const { appContext, setAppContext } = useAppContext();
-  const { network, getIndex } = useNetwork();
+  const { network, getIndex, findUser } = useNetwork();
 
   //names as you type, only for text that is no other search format
   const typed = searchInput.trim();
@@ -41,19 +41,41 @@ export const Header = () => {
       retry: false,
     }
   );
+  //a username has to be typed whole, the chain only resolves exact names
+  const userRQ = useQuery(
+    ['findUser', network.name, nameQuery],
+    () => findUser(nameQuery),
+    { enabled: !!nameQuery, staleTime: 60000, retry: false }
+  );
+  const user = userRQ.data?.username === typed ? userRQ.data : null;
   //previous answer while the next one loads, minus names that no longer match
   const suggestions =
     typed.length >= 2 && !classifySearch(typed)
-      ? (suggestRQ.data?.result || [])
-          .filter((r) => r.name?.toLowerCase().startsWith(typed.toLowerCase()))
-          .slice(0, maxSuggestions)
-          .map((r) => ({
-            key: r.address,
-            address: r.address,
-            name: r.name,
-            label: r.name,
-            note: NAME_KIND_LABEL[r.kind] || r.kind,
-          }))
+      ? [
+          ...(user
+            ? [
+                {
+                  key: `user-${user.genesis}`,
+                  name: user.username,
+                  href: userHref(user),
+                  label: user.username,
+                  note: 'User',
+                },
+              ]
+            : []),
+          ...(suggestRQ.data?.result || [])
+            .filter((r) =>
+              r.name?.toLowerCase().startsWith(typed.toLowerCase())
+            )
+            .slice(0, maxSuggestions - (user ? 1 : 0))
+            .map((r) => ({
+              key: r.address,
+              name: r.name,
+              href: `/scan/${r.address}`,
+              label: r.name,
+              note: NAME_KIND_LABEL[r.kind] || r.kind,
+            })),
+        ]
       : [];
 
   const handleNetworkChange = (e) => {
@@ -101,7 +123,7 @@ export const Header = () => {
               suggestions={suggestions}
               onPick={(s) => {
                 setSearchInput(s.name);
-                router.push(`/scan/${s.address}`);
+                router.push(s.href);
               }}
               placeholder={TYPES.PLACE_HOLDER.SEARCH}
               onSearch={() => {

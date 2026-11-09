@@ -20,6 +20,11 @@ export const PageMetaTypes = {
       DESCRIPTION:
         'Nexus supply, inflation, staking and ledger figures for the last day, week and month.',
     },
+    CHARTS: {
+      TITLE: page('Charts'),
+      DESCRIPTION:
+        'Nexus over time: transactions, blocks per channel, minted NXS and block time per day since the start of the chain.',
+    },
     BLOCKS: {
       TITLE: page('Blocks'),
       DESCRIPTION:

@@ -49,6 +49,10 @@ export function classifySearch(input) {
 export const genesisHref = (value) =>
   classifySearch(value) === SEARCH_KINDS.GENESIS ? `/scan/${value}` : undefined;
 
+/** Signature chain page of a user found by name; the page checks the username itself */
+export const userHref = (user) =>
+  `/scan/${user.genesis}?user=${encodeURIComponent(user.username)}`;
+
 /** Register kinds the name search finds (explorer index /search) */
 export const NAME_KIND_LABEL = {
   token: 'Token',
@@ -65,5 +69,6 @@ export const SEARCH_HELP = [
   ['Signature chain (owner)', '64 hex characters'],
   ['Address', '51 characters, e.g. 8BZcAo489savefJH...'],
   ['Account or trust name', 'username:default, username:trust'],
+  ['User', 'the username'],
   ['Token, global name, namespace or asset', 'its name or the start of it'],
 ];

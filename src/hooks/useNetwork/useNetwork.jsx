@@ -152,6 +152,33 @@ export function useNetwork() {
   //NXS market pairs, collected by the indexer only (null when it is not running)
   const getMarkets = () => cachedList('markets', () => null);
 
+  /**
+   * A username: the chain keeps no plain usernames, but every profile has a "default" and
+   * a "trust" account named username:default / username:trust. {username, genesis} or null
+   */
+  const findUser = async (username) => {
+    const name = (username || '').trim();
+    if (!name || name.includes(':')) return null;
+    for (const [endpoint, account] of [
+      ['finance/get/account', 'default'],
+      ['finance/get/trust', 'trust'],
+    ]) {
+      try {
+        const res = await axios.get(`${url}/${endpoint}`, {
+          params: { name: `${name}:${account}` },
+        });
+        const owner = res.data?.result?.owner;
+        if (owner) return { username: name, genesis: owner };
+      } catch (e) {
+        //no such account, try the next one
+      }
+    }
+    return null;
+  };
+
+  //per UTC day [day, blocks stake/prime/hash, mint stake/prime/hash, txs, transfers], indexer only
+  const getDaily = () => cachedList('daily', () => null);
+
   //asset registers without content, indexer only like the markets
   const getAssets = () => cachedList('assets', () => null);
 
@@ -332,6 +359,8 @@ export function useNetwork() {
     getMarkets,
     getAssets,
     getOwner,
+    getDaily,
+    findUser,
     getTokenHolders,
     getMining,
     getAccount,
