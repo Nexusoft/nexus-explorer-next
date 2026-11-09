@@ -39,6 +39,7 @@ const columns = [
     title: 'Explorer',
     links: [
       ['About', '/about'],
+      ['Explorer API', '/developers'],
       ['Source code', 'https://github.com/Nexusoft/nexus-explorer-next'],
       ['Privacy policy', 'https://nexus.io/privacy'],
       ['Terms of use', 'https://nexus.io/terms'],

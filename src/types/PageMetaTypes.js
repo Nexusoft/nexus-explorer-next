@@ -20,6 +20,11 @@ export const PageMetaTypes = {
       DESCRIPTION:
         'Nexus supply, inflation, staking and ledger figures for the last day, week and month.',
     },
+    DEVELOPERS: {
+      TITLE: page('Explorer API'),
+      DESCRIPTION:
+        'Read only JSON API of the Nexus Explorer: owners of registers, register history, legacy balances, staking rewards, name and user search.',
+    },
     WATCHLIST: {
       TITLE: page('Watchlist'),
       DESCRIPTION:
