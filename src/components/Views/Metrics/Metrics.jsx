@@ -60,6 +60,90 @@ function PeriodTable({ rows }) {
   );
 }
 
+//a peer this many blocks behind the best one still counts as in sync
+const syncMargin = 2;
+
+/** Nodes the explorer's node is connected to: versions and sync, no addresses */
+function PeersCard() {
+  const { network, getPeers } = useNetwork();
+  const peersRQ = useQuery(['peers', network.name], getPeers, {
+    refetchInterval: 60 * 1000,
+    retry: false,
+  });
+  const peers = peersRQ.data || [];
+  const best = Math.max(0, ...peers.map((p) => p.height || 0));
+  const inSync = peers.filter((p) => best - (p.height || 0) <= syncMargin);
+  const latencies = peers
+    .map((p) => p.latency)
+    .filter((l) => isNum(l) && l < 60000)
+    .sort((a, b) => a - b);
+  const median = latencies.length
+    ? latencies[Math.floor(latencies.length / 2)]
+    : null;
+  //"5.1.6 Tritium++ CLI [LLD][x64]": the version is the first word
+  const versions = Object.entries(
+    peers.reduce((acc, p) => {
+      const v = (p.type || 'unknown').split(' ')[0];
+      acc[v] = (acc[v] || 0) + 1;
+      return acc;
+    }, {})
+  ).sort((a, b) => b[1] - a[1]);
+
+  return (
+    <Card>
+      <SectionTitle note="as seen by the explorer's node">Peers</SectionTitle>
+      <Loading rq={peersRQ}>
+        <Stats>
+          <Stat
+            label="Connected"
+            value={formatInt(peers.length)}
+            note={`${formatInt(
+              peers.filter((p) => p.outgoing).length
+            )} outgoing`}
+          />
+          <Stat
+            label="In sync"
+            value={formatInt(inSync.length)}
+            note={`at most ${syncMargin} blocks behind #${formatInt(best)}`}
+          />
+          <Stat
+            label="Median latency"
+            value={median != null ? `${formatInt(median)} ms` : '-'}
+          />
+        </Stats>
+        {versions.length > 0 && (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Version</th>
+                  <th className={styles.right}>Peers</th>
+                  <th className={styles.right}>Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {versions.map(([v, n]) => (
+                  <tr key={v}>
+                    <td>{v}</td>
+                    <td className={styles.right}>{formatInt(n)}</td>
+                    <td className={styles.right}>
+                      {pct((n / peers.length) * 100, 0)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className={styles.muted}>
+          Only the nodes connected to this explorer right now, not the whole
+          network; their addresses are not shown.
+        </p>
+      </Loading>
+    </Card>
+  );
+}
+
 export default function Metrics() {
   const { network, getMetrics, getMining, getTotalNXS, getLedgerMetrics } =
     useNetwork();
@@ -265,6 +349,8 @@ export default function Metrics() {
           </Stats>
         </Loading>
       </Card>
+
+      <PeersCard />
 
       <Card>
         <SectionTitle>Reserves</SectionTitle>
