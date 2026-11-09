@@ -1,19 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useQuery } from 'react-query';
 import { useNetwork } from 'hooks';
-import { Card, Hash, Party, SectionTitle, styles } from 'components/Detail';
+import { Card, SectionTitle, styles } from 'components/Detail';
 import ListPager from 'components/Detail/ListPager';
 import { useRouter } from 'next/router';
 //same toggle buttons as the home page activity chart
 import rangeStyles from '../Home/ActivityChart.module.scss';
-import { formatAmount, formatDate, formatInt, timeAgo } from 'utils/format';
-import {
-  describeContract,
-  isRewardTx,
-  moveToContract,
-  transactionHeadline,
-} from 'utils/contracts';
+import { formatInt } from 'utils/format';
+import { isRewardTx, moveToContract } from 'utils/contracts';
+import TxTable from './TxTable';
+import LargestPayments from './LargestPayments';
 
 const indexPageSize = 25;
 
@@ -26,6 +22,8 @@ const KINDS = [
   ['ownership', 'Ownership'],
   ['legacy', 'Legacy'],
   ['reward', 'Rewards'],
+  //not a kind: largest NXS payments of a period
+  ['largest', 'Largest'],
 ];
 
 export default function Transactions() {
@@ -81,7 +79,7 @@ export default function Transactions() {
         before: cursors[page],
       }),
     {
-      enabled: indexed,
+      enabled: indexed && kind !== 'largest',
       keepPreviousData: true,
       refetchInterval: page === 0 ? 30000 : false,
     }
@@ -121,11 +119,14 @@ export default function Transactions() {
     ? rows[rows.length - 1]?.height
     : blocks[blocks.length - 1]?.height;
   const indexLow = statusRQ.data?.result?.low;
+  const largest = indexed && kind === 'largest';
 
   return (
     <Card>
       <SectionTitle>
-        {first != null
+        {largest
+          ? 'Largest NXS payments'
+          : first != null
           ? `In blocks ${formatInt(last)} to ${formatInt(first)}`
           : 'Transactions'}
       </SectionTitle>
@@ -146,6 +147,7 @@ export default function Transactions() {
           ))}
         </div>
       )}
+      {largest && <LargestPayments />}
       {!kind && (
         <label
           className={styles.muted}
@@ -160,98 +162,53 @@ export default function Transactions() {
         </label>
       )}
 
-      {activeRQ.isLoading && (
-        <p className={styles.muted}>Loading transactions...</p>
-      )}
-      {activeRQ.isError && (
-        <p className={styles.muted}>
-          Could not load transactions from the node.
-        </p>
-      )}
-      {!activeRQ.isLoading && !activeRQ.isError && rows.length === 0 && (
-        <p className={styles.muted}>
-          {indexed
-            ? 'No transactions found.'
-            : `No ${transfersOnly ? 'transfers' : 'transactions'} in these ${
-                blocks.length
-              } blocks. Try Older.`}
-        </p>
-      )}
+      {!largest && (
+        <>
+          {activeRQ.isLoading && (
+            <p className={styles.muted}>Loading transactions...</p>
+          )}
+          {activeRQ.isError && (
+            <p className={styles.muted}>
+              Could not load transactions from the node.
+            </p>
+          )}
+          {!activeRQ.isLoading && !activeRQ.isError && rows.length === 0 && (
+            <p className={styles.muted}>
+              {indexed
+                ? 'No transactions found.'
+                : `No ${
+                    transfersOnly ? 'transfers' : 'transactions'
+                  } in these ${blocks.length} blocks. Try Older.`}
+            </p>
+          )}
 
-      {rows.length > 0 && (
-        <div
-          className={styles.tableWrap}
-          style={{
-            opacity: activeRQ.isFetching && activeRQ.isPreviousData ? 0.5 : 1,
-          }}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>What happened</th>
-                <th className={styles.hideMobile}>From</th>
-                <th className={styles.hideMobile}>To</th>
-                <th className={styles.hideMobile}>Block</th>
-                <th>Transaction</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((tx) => {
-                const d = describeContract(tx.contracts?.[0]);
-                const more = (tx.contracts?.length || 0) > 1;
-                return (
-                  <tr key={tx.txid}>
-                    <td
-                      title={formatDate(tx.timestamp)}
-                      style={{ whiteSpace: 'nowrap' }}>
-                      {timeAgo(tx.timestamp)}
-                    </td>
-                    <td>{transactionHeadline(tx, formatAmount)}</td>
-                    <td className={styles.hideMobile}>
-                      <Party party={d.from} />
-                    </td>
-                    <td className={styles.hideMobile}>
-                      <Party party={d.to} />
-                      {more && <div className={styles.muted}>and more</div>}
-                    </td>
-                    <td className={styles.hideMobile}>
-                      <Link href={`/scan/${tx.height}`}>
-                        <a>{formatInt(tx.height)}</a>
-                      </Link>
-                    </td>
-                    <td>
-                      <Hash
-                        value={tx.txid}
-                        href={`/scan/${tx.txid}`}
-                        keep={5}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+          {rows.length > 0 && (
+            <TxTable
+              rows={rows}
+              faded={activeRQ.isFetching && activeRQ.isPreviousData}
+            />
+          )}
+          <ListPager
+            page={page}
+            setPage={setPage}
+            pageSize={blocksPerPage}
+            hasOlder={
+              indexed
+                ? idxRQ.data?.next != null && cursors.length > page + 1
+                : last > 0
+            }
+          />
+          <p className={styles.muted}>
+            {indexed
+              ? `From the explorer index (blocks ${formatInt(
+                  indexLow
+                )} to ${formatInt(statusRQ.data.result.high)}${
+                  indexLow > 1 ? ', still indexing older blocks' : ''
+                }).`
+              : `The node has no global transaction index, so this list scans ${blocksPerPage} blocks per page.`}
+          </p>
+        </>
       )}
-      <ListPager
-        page={page}
-        setPage={setPage}
-        pageSize={blocksPerPage}
-        hasOlder={
-          indexed
-            ? idxRQ.data?.next != null && cursors.length > page + 1
-            : last > 0
-        }
-      />
-      <p className={styles.muted}>
-        {indexed
-          ? `From the explorer index (blocks ${formatInt(
-              indexLow
-            )} to ${formatInt(statusRQ.data.result.high)}${
-              indexLow > 1 ? ', still indexing older blocks' : ''
-            }).`
-          : `The node has no global transaction index, so this list scans ${blocksPerPage} blocks per page.`}
-      </p>
     </Card>
   );
 }
