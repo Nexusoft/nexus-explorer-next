@@ -60,6 +60,7 @@ export function describeContract(c = {}) {
     case 'GENESIS':
     case 'STAKE':
     case 'UNSTAKE':
+    case 'MIGRATE':
       to = { address: c.address, name: c.name };
       break;
     case 'DEBIT':
@@ -227,6 +228,11 @@ export function netForAddresses(tx, addresses) {
     if (d.amount == null) continue;
     const toMine = addresses.has(d.to?.address);
     const fromMine = addresses.has(d.from?.address);
+    //a void credits the sender's own account: the unclaimed payment comes back
+    if (d.op === 'CREDIT' && toMine && d.from?.address === d.to?.address) {
+      nets[d.ticker] = (nets[d.ticker] || 0) + d.amount;
+      continue;
+    }
     if (toMine === fromMine) continue;
     const other = toMine ? d.from?.address : d.to?.address;
     if (other) counterparties.add(other);
