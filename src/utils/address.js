@@ -25,6 +25,16 @@ const REGISTER_TYPES = {
 
 const typeByte = (hex) => parseInt(hex.substring(0, 2), 16);
 
+/**
+ * Pre Tritium address: base58 of the same length as a register address, but register
+ * addresses always start with 8 (their type bytes d1-ed are chosen for that)
+ */
+export const isLegacyAddress = (v) =>
+  typeof v === 'string' &&
+  v.length === 51 &&
+  v[0] !== '8' &&
+  [...v].every((ch) => base58Chars.includes(ch));
+
 /** 64 hex of a register owned by another register (e.g. a token), see ownerInfo */
 export const isRegisterId = (v) => isHex64(v) && !!REGISTER_TYPES[typeByte(v)];
 

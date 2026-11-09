@@ -1,4 +1,4 @@
-import { isRegisterId } from './address';
+import { isLegacyAddress, isRegisterId } from './address';
 
 /**
  * Classifies what a user typed into the search box
@@ -14,6 +14,7 @@ export const SEARCH_KINDS = {
   INVOICE: 'invoice',
   GENESIS: 'genesis',
   REGISTER_ID: 'registerId',
+  LEGACY_ADDRESS: 'legacyAddress',
 };
 
 const base58 = /^[1-9A-HJ-NP-Za-km-z]+$/;
@@ -38,7 +39,11 @@ export function classifySearch(input) {
   }
   if (hex.test(q) && q.length === 128) return SEARCH_KINDS.TRANSACTION;
   if (hex.test(q) && q.length === 256) return SEARCH_KINDS.BLOCK_HASH;
-  if (base58.test(q) && q.length === 51) return SEARCH_KINDS.ADDRESS;
+  if (base58.test(q) && q.length === 51) {
+    return isLegacyAddress(q)
+      ? SEARCH_KINDS.LEGACY_ADDRESS
+      : SEARCH_KINDS.ADDRESS;
+  }
   if (name.test(q)) {
     return q.endsWith(':trust') ? SEARCH_KINDS.TRUST_NAME : SEARCH_KINDS.NAME;
   }
@@ -68,6 +73,7 @@ export const SEARCH_HELP = [
   ['Transaction id', '128 hex characters'],
   ['Signature chain (owner)', '64 hex characters'],
   ['Address', '51 characters, e.g. 8BZcAo489savefJH...'],
+  ['Legacy address', 'pre Tritium, 51 characters, e.g. 2QzqXqL1oAmXidmu...'],
   ['Account or trust name', 'username:default, username:trust'],
   ['User', 'the username'],
   ['Token, global name, namespace or asset', 'its name or the start of it'],

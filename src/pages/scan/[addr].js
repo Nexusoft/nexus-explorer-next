@@ -4,6 +4,7 @@ import BlockDetail from 'components/Detail/BlockDetail';
 import TransactionDetail from 'components/Detail/TransactionDetail';
 import AccountDetail from 'components/Detail/AccountDetail';
 import OwnerDetail from 'components/Detail/OwnerDetail';
+import LegacyDetail from 'components/Detail/LegacyDetail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
@@ -48,6 +49,7 @@ function Scan({ addr }) {
   const { network, getScanResults, getIndex } = useNetwork();
 
   const searchKind = classifySearch(addr);
+  const isLegacy = searchKind === SEARCH_KINDS.LEGACY_ADDRESS;
 
   //register object type from register/get/any to the endpoint + card that shows it
   const registerTypes = {
@@ -145,7 +147,8 @@ function Scan({ addr }) {
     },
     {
       staleTime: 60000,
-      enabled: !!searchKind,
+      //legacy addresses have no register, the explorer index answers for them
+      enabled: !!searchKind && !isLegacy,
       retry: false,
     }
   );
@@ -172,6 +175,7 @@ function Scan({ addr }) {
       />
       <div>
         {!searchKind && <NameSearch query={addr} />}
+        {isLegacy && <LegacyDetail address={addr} />}
         {searchKind && isError && (
           <SearchHelp
             query={addr}
