@@ -345,6 +345,7 @@ export default function AccountDetail({ type, data }) {
   //names and namespaces are registers too, but hold no balance or transfers
   const isName = data.type === 'NAME';
   const isNamespace = data.type === 'NAMESPACE';
+  const isCrypto = data.type === 'CRYPTO';
   const hasBalance = isNum(Number(data.balance)) && data.balance !== undefined;
   const hasTransfers =
     !isName && !isNamespace && (type !== CARD_TYPES.ASSET || hasBalance);
@@ -355,6 +356,8 @@ export default function AccountDetail({ type, data }) {
       : 'Name'
     : isNamespace
     ? 'Namespace'
+    : isCrypto
+    ? 'Crypto register'
     : asset
     ? data.form === 'SUPPLY'
       ? 'Supply item'
@@ -371,6 +374,8 @@ export default function AccountDetail({ type, data }) {
     ? `${ticker} ${type === CARD_TYPES.TRUST ? 'trust account' : 'account'}`
     : asset
     ? assetTitle(data)
+    : isCrypto
+    ? 'Key hashes'
     : data.name || 'Register';
 
   //an asset's own fields go to its Content card, objects included

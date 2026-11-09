@@ -70,6 +70,58 @@ const changed = (r) => (
   </td>
 );
 
+//crypto register slots, in the node's order
+const KEY_SLOTS = [
+  ['auth', 'Authentication'],
+  ['lisp', 'LISP'],
+  ['network', 'Network'],
+  ['sign', 'Signing'],
+  ['verify', 'Verification'],
+  ['cert', 'TLS certificate'],
+  ['app1', 'App 1'],
+  ['app2', 'App 2'],
+  ['app3', 'App 3'],
+];
+
+/** Hashes of the public keys this signature chain published in its crypto register */
+function KeysCard({ crypto }) {
+  const keys = crypto.info || {};
+  const set = KEY_SLOTS.filter(([k]) => keys[k]);
+  return (
+    <Card>
+      <SectionTitle note={`${set.length} of ${KEY_SLOTS.length} set`}>
+        Key hashes
+      </SectionTitle>
+      {set.length > 0 && (
+        <dl className={styles.kv}>
+          {set.map(([k, label]) => (
+            <div key={k} style={{ display: 'contents' }}>
+              <dt>{label}</dt>
+              <dd>
+                <Hash value={keys[k]} keep={10} />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      <p className={styles.muted}>
+        Hashes of the public keys the owner published, for others to check its
+        signatures.
+        {set.length < KEY_SLOTS.length &&
+          ` Not set: ${KEY_SLOTS.filter(([k]) => !keys[k])
+            .map(([, l]) => l)
+            .join(', ')}.`}{' '}
+        Crypto register{' '}
+        <Hash
+          value={crypto.address}
+          href={`/scan/${crypto.address}`}
+          keep={6}
+        />
+      </p>
+    </Card>
+  );
+}
+
 export default function OwnerDetail({ status }) {
   const genesis = status.genesis;
   const { network, getOwner } = useNetwork();
@@ -88,6 +140,7 @@ export default function OwnerDetail({ status }) {
   const assets = of('asset');
   const names = of('name');
   const namespaces = of('namespace');
+  const crypto = of('crypto')[0];
 
   const nxs = [...accounts, ...trust]
     .filter(isNxs)
@@ -272,6 +325,8 @@ export default function OwnerDetail({ status }) {
           </>
         )}
       />
+
+      {crypto && <KeysCard crypto={crypto} />}
 
       <RegisterCard
         title="Namespaces"
