@@ -14,12 +14,17 @@ const ENDPOINTS = [
   [
     '/explorer/status',
     '/explorer/status',
-    'Indexed height range and when each cached list was last built.',
+    'Indexed height range and when each cached list was last built; result null when the backend has no index.',
   ],
   [
-    '/explorer/transactions?limit&transfers&before',
-    '/explorer/transactions?limit=5&transfers=1',
-    'Newest transactions with their value moves; transfers=1 leaves out mining and staking rewards; next = cursor for before.',
+    '/explorer/transactions?limit&transfers&kind&before',
+    '/explorer/transactions?limit=5&kind=token',
+    'Newest transactions with their value moves; transfers=1 leaves out mining and staking rewards; kind = payment, token, register, ownership, legacy, reward or other; next = cursor for before.',
+  ],
+  [
+    '/explorer/largest?days&limit',
+    '/explorer/largest?days=365&limit=5',
+    'Largest NXS payments of the last 7, 30 or 365 days, or of all time (days=0); moved = NXS sent without legacy change.',
   ],
   [
     '/explorer/address/<address>/transactions?limit&registers&before',

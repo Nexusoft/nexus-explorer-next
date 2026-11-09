@@ -3,6 +3,25 @@ import { useAppContext } from 'contexts/AppContext';
 import { NETWORKS, API_URLS } from 'types/ConstantsTypes';
 import { fetchRichlist } from 'utils/common/fetch';
 
+//backend routes that answer without an index (user asks the node itself)
+const WITHOUT_INDEX = ['status', 'user'];
+//asked again after this, an index started later is found without a reload
+const indexCheckMs = 300000;
+const indexChecks = new Map();
+
+/** true when the backend serves an explorer index; one status request per url and 5 minutes */
+function indexAvailable(url) {
+  const known = indexChecks.get(url);
+  if (known && Date.now() - known.at < indexCheckMs) return known.available;
+  //status answers result null without an index, an older backend without the route 404
+  const available = axios
+    .get(`${url}/explorer/status`)
+    .then((res) => !!res.data?.result?.high)
+    .catch(() => false);
+  indexChecks.set(url, { at: Date.now(), available });
+  return available;
+}
+
 export function useNetwork() {
   const { appContext } = useAppContext();
 
@@ -27,6 +46,15 @@ export function useNetwork() {
 
   //optional indexer next to the node (backend /explorer/...), callers fall back to the node API
   async function getIndex(path, params) {
+    //without an index, fail here: a request answered 503 shows as an error in the console
+    if (
+      !WITHOUT_INDEX.includes(path.split('/')[0]) &&
+      !(await indexAvailable(url))
+    ) {
+      throw Object.assign(new Error('explorer index not available'), {
+        indexUnavailable: true,
+      });
+    }
     const res = await axios.get(`${url}/explorer/${path}`, { params });
     return res.data;
   }

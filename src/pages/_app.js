@@ -1,6 +1,6 @@
 import 'styles/globals.scss';
 import { ContextWrapper } from 'contexts/AppContext';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { QueryClientProvider, QueryClient, setLogger } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { IconContext } from 'react-icons';
 import { useState } from 'react';
@@ -10,6 +10,15 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en.json';
 TimeAgo.addDefaultLocale(en);
 TimeAgo.addLocale(en);
+
+//a query that found no explorer index falls back to the node, not an error worth logging
+setLogger({
+  log: console.log,
+  warn: console.warn,
+  error: (e, ...rest) => {
+    if (!e?.indexUnavailable) console.error(e, ...rest);
+  },
+});
 
 const queryOptions = {
   defaultOptions: {

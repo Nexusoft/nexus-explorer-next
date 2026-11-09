@@ -343,7 +343,7 @@ function AccountTransactions({ type, address }) {
           </button>
         </div>
       )}
-      {indexRQ.data && (
+      {!!indexRQ.data?.result?.high && (
         <ExportButton
           filename={`nexus-${address.substring(0, 12)}-transactions.csv`}
           addresses={new Set([address])}

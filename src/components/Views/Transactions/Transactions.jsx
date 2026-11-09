@@ -64,7 +64,7 @@ export default function Transactions() {
     {
       keepPreviousData: true,
       refetchInterval: page === 0 ? 30000 : false,
-      enabled: statusRQ.isError,
+      enabled: statusRQ.isError || (statusRQ.isSuccess && !indexed),
     }
   );
 
