@@ -1,0 +1,28 @@
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  height: 3px;
+  width: 100%;
+  background: var(--c-brand);
+  transform-origin: left;
+  animation: grow 8s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+//fills fast at first, then crawls towards the end until the page is there
+@keyframes grow {
+  from {
+    transform: scaleX(0.05);
+  }
+  to {
+    transform: scaleX(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    animation: none;
+    transform: scaleX(0.6);
+  }
+}

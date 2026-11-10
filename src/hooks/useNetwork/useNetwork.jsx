@@ -3,6 +3,25 @@ import { useAppContext } from 'contexts/AppContext';
 import { NETWORKS, API_URLS } from 'types/ConstantsTypes';
 import { fetchRichlist } from 'utils/common/fetch';
 
+//backend routes that answer without an index (user asks the node itself)
+const WITHOUT_INDEX = ['status', 'user'];
+//asked again after this, an index started later is found without a reload
+const indexCheckMs = 300000;
+const indexChecks = new Map();
+
+/** true when the backend serves an explorer index; one status request per url and 5 minutes */
+function indexAvailable(url) {
+  const known = indexChecks.get(url);
+  if (known && Date.now() - known.at < indexCheckMs) return known.available;
+  //status answers result null without an index, an older backend without the route 404
+  const available = axios
+    .get(`${url}/explorer/status`)
+    .then((res) => !!res.data?.result?.high)
+    .catch(() => false);
+  indexChecks.set(url, { at: Date.now(), available });
+  return available;
+}
+
 export function useNetwork() {
   const { appContext } = useAppContext();
 
@@ -25,6 +44,32 @@ export function useNetwork() {
     ? TESTNET_PROXY_URL
     : TESTNET_URL;
 
+  //optional indexer next to the node (backend /explorer/...), callers fall back to the node API
+  async function getIndex(path, params) {
+    //without an index, fail here: a request answered 503 shows as an error in the console
+    if (
+      !WITHOUT_INDEX.includes(path.split('/')[0]) &&
+      !(await indexAvailable(url))
+    ) {
+      throw Object.assign(new Error('explorer index not available'), {
+        indexUnavailable: true,
+      });
+    }
+    const res = await axios.get(`${url}/explorer/${path}`, { params });
+    return res.data;
+  }
+
+  //cached node result from the indexer, or the slow node query when there is none
+  async function cachedList(key, fallback, isValid = Array.isArray) {
+    try {
+      const res = await getIndex(`cache/${key}`);
+      if (isValid(res?.result)) return res.result;
+    } catch (e) {
+      //no indexer, use the node
+    }
+    return fallback();
+  }
+
   // * resource heavy API takes 4 secs to fetch
   function getMetrics() {
     return axios.get(`${url}/system/get/metrics`, {
@@ -43,11 +88,18 @@ export function useNetwork() {
     });
   }
 
-  // * resource heavy API takes 10 secs with the exisitng node
+  //over 30 s on the node, the indexer keeps a copy refreshed every 10 min
   function getLedgerMetrics() {
-    return axios.get(`${url}/ledger/get/metrics`, {
-      headers: { 'Cache-Control': 'max-age=600' }, // * Cache for 10 min
-    });
+    return cachedList(
+      'ledgermetrics',
+      async () => {
+        const res = await axios.get(`${url}/ledger/get/metrics`, {
+          headers: { 'Cache-Control': 'max-age=600' },
+        });
+        return res.data.result;
+      },
+      (r) => !!r && typeof r === 'object' && !Array.isArray(r)
+    );
   }
 
   async function getRecentBlocks(MAX_ROWS = 6) {
@@ -58,6 +110,10 @@ export function useNetwork() {
   }
 
   const getTrustlist = async ({ queryKey }) => {
+    const [, page, limit] = queryKey;
+    const cached = await cachedList('trustlist', () => null);
+    if (cached)
+      return { result: cached.slice(page * limit, (page + 1) * limit) };
     const res = await axios.get(`${url}/register/list/finance:trust`, {
       headers: { 'Cache-Control': 'max-age=300' },
       params: {
@@ -71,11 +127,17 @@ export function useNetwork() {
   };
 
   const getRichlist = async (page = 0, limit = 111) => {
+    const cached = await cachedList('richlist', () => null);
+    if (cached && (page + 1) * limit <= cached.length) {
+      return { data: cached.slice(page * limit, (page + 1) * limit) };
+    }
     return fetchRichlist(url, page, limit);
   };
 
   // ! fetch doesnt return rejected promise by default which is required by react-query to correctly handle error scenarios, hence use axios library th
   const getGlobalNames = async () => {
+    const cached = await cachedList('globalnames', () => null);
+    if (cached) return { result: cached };
     const res = await axios(`${url}/register/list/names:global`, {
       method: 'POST',
       headers: {
@@ -97,7 +159,9 @@ export function useNetwork() {
     return res.data.result;
   };
 
-  const getNamespaces = () => {
+  const getNamespaces = async () => {
+    const cached = await cachedList('namespaces', () => null);
+    if (cached) return { data: { result: cached } };
     return axios.get(`${url}/register/list/names:namespaces?limit=1000`, {
       headers: { 'Cache-Control': 'max-age=300' },
     });
@@ -113,7 +177,88 @@ export function useNetwork() {
     return res.data.result;
   };
 
-  const getTokens = () => {
+  //NXS market pairs, collected by the indexer only (null when it is not running)
+  const getMarkets = () => cachedList('markets', () => null);
+
+  /**
+   * A username: the chain keeps no plain usernames, but every profile has a "default" and
+   * a "trust" account named username:default / username:trust. {username, genesis} or null
+   */
+  const findUser = async (username) => {
+    const name = (username || '').trim();
+    if (!name || name.includes(':')) return null;
+    //the explorer backend asks the node itself and answers null for unknown names,
+    //asked directly the node answers 400, which every browser logs as an error
+    try {
+      return (await getIndex(`user/${encodeURIComponent(name)}`)).result;
+    } catch (e) {
+      //older backend without /explorer/user
+    }
+    for (const [endpoint, account] of [
+      ['finance/get/account', 'default'],
+      ['finance/get/trust', 'trust'],
+    ]) {
+      try {
+        const res = await axios.get(`${url}/${endpoint}`, {
+          params: { name: `${name}:${account}` },
+        });
+        const owner = res.data?.result?.owner;
+        if (owner) return { username: name, genesis: owner };
+      } catch (e) {
+        //no such account, try the next one
+      }
+    }
+    return null;
+  };
+
+  //{total, addresses, negative, top: [{address, balance}]}, daily, indexer only
+  const getLegacyRich = () =>
+    cachedList(
+      'legacyrich',
+      () => null,
+      (v) => Array.isArray(v?.top)
+    );
+
+  //nodes connected to the explorer's node: version (type), height, latency
+  const getPeers = async () => {
+    const res = await axios.get(`${url}/system/list/peers`);
+    return res.data?.result || [];
+  };
+
+  //{chains, top: [{owner, total, balance, stake, accounts}]}, hourly, indexer only
+  const getRichChains = () =>
+    cachedList(
+      'richchains',
+      () => null,
+      (v) => Array.isArray(v?.top)
+    );
+
+  //per UTC day [day, blocks stake/prime/hash, mint stake/prime/hash, txs, transfers], indexer only
+  const getDaily = () => cachedList('daily', () => null);
+
+  //asset registers without content, indexer only like the markets
+  const getAssets = () => cachedList('assets', () => null);
+
+  //registers of one signature chain from the hourly owner index, null without an index
+  const getOwner = async (genesis) => {
+    try {
+      return (await getIndex(`owner/${genesis}`)).result;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  //{token address: {accounts, owners, top}}, indexer only, refreshed hourly
+  const getTokenHolders = () =>
+    cachedList(
+      'tokenholders',
+      () => null,
+      (v) => !!v && typeof v === 'object' && !Array.isArray(v)
+    );
+
+  const getTokens = async () => {
+    const cached = await cachedList('tokens', () => null);
+    if (cached) return { data: { result: cached } };
     return axios.get(
       `${url}/register/list/finance:tokens?sort=maxsupply&limit=1000`,
       {
@@ -193,16 +338,13 @@ export function useNetwork() {
   };
 
   const getTokenTransactions = async (address, page, limit) => {
-    const res = await axios.get(
-      `${url}/register/transactions/finance:token`,
-      {
-        params: {
-          address: address,
-          page: page,
-          limit: limit,
-        },
-      }
-    );
+    const res = await axios.get(`${url}/register/transactions/finance:token`, {
+      params: {
+        address: address,
+        page: page,
+        limit: limit,
+      },
+    });
     return res.data;
   };
 
@@ -265,11 +407,21 @@ export function useNetwork() {
 
   return {
     network: { name: appContext.network.name, url },
+    getIndex,
     getInfo,
     getTrust,
     getBlocks,
     getToken,
     getTokens,
+    getMarkets,
+    getAssets,
+    getOwner,
+    getDaily,
+    getRichChains,
+    getPeers,
+    getLegacyRich,
+    findUser,
+    getTokenHolders,
     getMining,
     getAccount,
     getInvoice,

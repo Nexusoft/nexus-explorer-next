@@ -1,142 +1,214 @@
-import { toTitleCase } from 'utils/converter';
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
-import Loader from 'components/common/NE_Loader';
-import Table from 'components/Table/Table';
-import { totalPages } from 'utils/helper';
-import DynamicPagination from 'components/common/NE_Pagination';
-import CopyText from 'components/common/NE_CopyText';
 import { useNetwork } from 'hooks';
+import { Card, SectionTitle, styles } from 'components/Detail';
+import ListPager from 'components/Detail/ListPager';
+import { useRouter } from 'next/router';
+//same toggle buttons as the home page activity chart
+import rangeStyles from '../Home/ActivityChart.module.scss';
+import { formatInt } from 'utils/format';
+import { isRewardTx, moveToContract } from 'utils/contracts';
+import TxTable from './TxTable';
+import LargestPayments from './LargestPayments';
+
+const indexPageSize = 25;
+
+//kinds the explorer index stores per transaction (indexer TX_KINDS)
+const KINDS = [
+  ['', 'All kinds'],
+  ['payment', 'Payments'],
+  ['token', 'Tokens'],
+  ['register', 'Registers'],
+  ['ownership', 'Ownership'],
+  ['legacy', 'Legacy'],
+  ['reward', 'Rewards'],
+  //not a kind: largest NXS payments of a period
+  ['largest', 'Largest'],
+];
 
 export default function Transactions() {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [pageCount, setPageCount] = useState(1);
-  const [totalRows, setTotalRows] = useState(0);
-  const [rows, setRows] = useState([]);
+  const router = useRouter();
+  const kind = KINDS.some(([k]) => k && k === router.query.kind)
+    ? router.query.kind
+    : '';
+  const setKind = (k) =>
+    router.replace(
+      { pathname: router.pathname, query: k ? { kind: k } : {} },
+      undefined,
+      { shallow: true }
+    );
+  const [page, setPage] = useState(0);
+  const [blocksPerPage] = useState(50);
+  const [transfersChoice, setTransfersChoice] = useState(null);
+  //cursor per page for the indexed list: list rows below this height
+  const [cursors, setCursors] = useState([undefined]);
+  const { network, getTransactions, getIndex } = useNetwork();
 
-  const { network, getTransactions } = useNetwork();
-  const { isLoading, data, error } = useQuery(
-    ['transactions', pageIndex, pageSize, network.name],
-    getTransactions
+  const statusRQ = useQuery(
+    ['indexStatus', network.name],
+    () => getIndex('status'),
+    { retry: false, refetchInterval: 60000 }
+  );
+  const indexed = statusRQ.isSuccess && !!statusRQ.data?.result?.high;
+  //with an index, transfers only is a useful default; scanning blocks it mostly finds nothing
+  const transfersOnly = transfersChoice ?? indexed;
+
+  useEffect(() => {
+    setPage(0);
+    setCursors([undefined]);
+  }, [network.name, transfersOnly, indexed, kind]);
+
+  const txRQ = useQuery(
+    ['transactions', page, blocksPerPage, network.name],
+    getTransactions,
+    {
+      keepPreviousData: true,
+      refetchInterval: page === 0 ? 30000 : false,
+      enabled: statusRQ.isError || (statusRQ.isSuccess && !indexed),
+    }
   );
 
-  // prepare rows when data gets fetched
-  useEffect(() => {
-    if (data) {
-      const txns = data.data.result.map((item) => item.tx);
-      let _rows = [];
-      txns.forEach((item) => {
-        item.forEach((i) => _rows.push(i));
-      });
-      setRows(_rows);
+  const idxRQ = useQuery(
+    ['indexedTransactions', network.name, transfersOnly, kind, cursors[page]],
+    () =>
+      getIndex('transactions', {
+        limit: indexPageSize,
+        //a chosen kind replaces the rewards switch
+        transfers: !kind && transfersOnly ? 1 : 0,
+        kind: kind || undefined,
+        before: cursors[page],
+      }),
+    {
+      enabled: indexed && kind !== 'largest',
+      keepPreviousData: true,
+      refetchInterval: page === 0 ? 30000 : false,
     }
-  }, [data]);
-
-  // reset all pagination props on network.name change
-  useEffect(() => {
-    setPageSize(10);
-    setPageIndex(0);
-    setPageCount(1);
-    setTotalRows(0);
-  }, [network.name]);
+  );
 
   useEffect(() => {
-    if (data) {
-      let height = data.data.result[0].height;
-      if (height > totalRows) {
-        setTotalRows(height);
-      }
+    const next = idxRQ.data?.next;
+    if (indexed && next != null && cursors.length === page + 1) {
+      setCursors((c) => [...c, next]);
     }
-  }, [data, pageSize]);
+  }, [idxRQ.data, page, indexed]);
 
-  useEffect(() => {
-    setPageCount(totalPages(totalRows, pageSize));
-  }, [totalRows, pageSize]);
+  const blocks = indexed ? [] : txRQ.data?.data?.result || [];
+  const activeRQ = indexed ? idxRQ : txRQ;
 
-  const columns = [
-    {
-      Header: 'Transaction ID',
-      accessor: 'txid',
-      Cell: (props) => (
-        <CopyText value={props.value} link={`/scan/${props.value}`} />
-      ),
-    },
-    {
-      Header: 'Contracts',
-      accessor: 'contracts',
-      Cell: (props) => <div>{props.value?.length || 0}</div>,
-    },
-    {
-      Header: 'Type',
-      accessor: 'type',
-      Cell: (props) => <span>{toTitleCase(props.value)}</span>,
-    },
-    {
-      Header: 'Confirmations',
-      accessor: 'confirmations',
-    },
-    {
-      Header: 'Timestamp',
-      accessor: 'timestamp',
-      Cell: (props) => (
-        <span>{new Date(props.value * 1000).toLocaleTimeString()}</span>
-      ),
-    },
-  ];
+  const { rows, hidden } = useMemo(() => {
+    if (indexed) {
+      const list = (idxRQ.data?.result || []).map((t) => ({
+        txid: t.txid,
+        height: t.height,
+        timestamp: t.time,
+        type: t.type,
+        contracts: t.moves.map((m) => moveToContract(m, t.type)),
+      }));
+      return { rows: list, hidden: 0 };
+    }
+    const all = [];
+    for (const b of blocks) {
+      for (const tx of b.tx || []) all.push({ ...tx, height: b.height });
+    }
+    const shown = transfersOnly ? all.filter((tx) => !isRewardTx(tx)) : all;
+    return { rows: shown, hidden: all.length - shown.length };
+  }, [blocks, transfersOnly, indexed, idxRQ.data]);
 
-  if (isLoading)
-    return (
-      <div
-        style={{
-          display: 'grid',
-          placeItems: 'center',
-          minHeight: '200px',
-          margin: 'auto',
-        }}>
-        <Loader type="circle" size="5rem" />
-      </div>
-    );
+  const first = indexed ? rows[0]?.height : blocks[0]?.height;
+  const last = indexed
+    ? rows[rows.length - 1]?.height
+    : blocks[blocks.length - 1]?.height;
+  const indexLow = statusRQ.data?.result?.low;
+  const largest = indexed && kind === 'largest';
 
-  if (error) {
-    return <pre>{JSON.stringify(error, null, 2)}</pre>;
-  }
-
-  if (data) {
-    const dynamicPaginationControls = {
-      canPreviousPage: pageIndex > 0,
-      canNextPage: pageIndex < pageCount - 1,
-      pageCount: pageCount,
-      gotoPage: (pageIndex) => {
-        setPageIndex(pageIndex);
-      },
-      setPageSize: (pageSize) => {
-        setPageIndex(0);
-        setPageSize(pageSize);
-      },
-      pageIndex: pageIndex,
-      pageSize: pageSize,
-      handleStartOfPageClick: () => {
-        setPageIndex(0);
-      },
-      handlePreviousPageClick: () => {
-        setPageIndex(pageIndex - 1);
-      },
-      handleNextPageClick: () => {
-        setPageIndex(pageIndex + 1);
-      },
-    };
-
-    return (
-      <div>
-        <Table columns={columns} data={rows} paginate={false} />
-        <div style={{ marginBottom: '1rem' }}>
-          <DynamicPagination
-            controls={dynamicPaginationControls}
-            isStaticPanination={false}
-          />
+  return (
+    <Card>
+      <SectionTitle>
+        {largest
+          ? 'Largest NXS payments'
+          : first != null
+          ? `In blocks ${formatInt(last)} to ${formatInt(first)}`
+          : 'Transactions'}
+      </SectionTitle>
+      {indexed && (
+        <div
+          className={rangeStyles.periods}
+          role="group"
+          aria-label="Kind of transaction"
+          style={{ flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+          {KINDS.map(([k, label]) => (
+            <button
+              key={k || 'all'}
+              type="button"
+              aria-pressed={kind === k}
+              onClick={() => setKind(k)}>
+              {label}
+            </button>
+          ))}
         </div>
-      </div>
-    );
-  }
+      )}
+      {largest && <LargestPayments />}
+      {!kind && (
+        <label
+          className={styles.muted}
+          style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={transfersOnly}
+            onChange={(e) => setTransfersChoice(e.target.checked)}
+          />
+          Hide mining and staking rewards
+          {transfersOnly && hidden > 0 && ` (${formatInt(hidden)} hidden)`}
+        </label>
+      )}
+
+      {!largest && (
+        <>
+          {activeRQ.isLoading && (
+            <p className={styles.muted}>Loading transactions...</p>
+          )}
+          {activeRQ.isError && (
+            <p className={styles.muted}>
+              Could not load transactions from the node.
+            </p>
+          )}
+          {!activeRQ.isLoading && !activeRQ.isError && rows.length === 0 && (
+            <p className={styles.muted}>
+              {indexed
+                ? 'No transactions found.'
+                : `No ${
+                    transfersOnly ? 'transfers' : 'transactions'
+                  } in these ${blocks.length} blocks. Try Older.`}
+            </p>
+          )}
+
+          {rows.length > 0 && (
+            <TxTable
+              rows={rows}
+              faded={activeRQ.isFetching && activeRQ.isPreviousData}
+            />
+          )}
+          <ListPager
+            page={page}
+            setPage={setPage}
+            pageSize={blocksPerPage}
+            hasOlder={
+              indexed
+                ? idxRQ.data?.next != null && cursors.length > page + 1
+                : last > 0
+            }
+          />
+          <p className={styles.muted}>
+            {indexed
+              ? `From the explorer index (blocks ${formatInt(
+                  indexLow
+                )} to ${formatInt(statusRQ.data.result.high)}${
+                  indexLow > 1 ? ', still indexing older blocks' : ''
+                }).`
+              : `The node has no global transaction index, so this list scans ${blocksPerPage} blocks per page.`}
+          </p>
+        </>
+      )}
+    </Card>
+  );
 }

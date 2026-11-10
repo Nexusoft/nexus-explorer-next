@@ -1,16 +1,17 @@
 import Table from 'components/Table/Table';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import React, { useState } from 'react';
+import { useBack } from 'hooks/useBack/useBack';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import { columns } from './columns';
 import { BsBoxArrowLeft } from 'react-icons/bs';
-import { cls, pathOr } from 'utils';
+import { pathOr } from 'utils';
 import styles from './invoices.module.scss';
 import { useRouter } from 'next/router';
-import TYPES from 'types';
 import NE_Pagination from 'components/common/NE_Pagination';
 import { InvoiceModal } from '../InvoiceModal';
 import { FiInfo } from 'react-icons/fi';
+import { PageTitle } from 'components/Detail';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 
 function InvoicesView({ username }) {
@@ -28,16 +29,19 @@ function InvoicesView({ username }) {
     () => getInvoices(username, pageIndex, pageSize)
   );
   const router = useRouter();
+  const goBack = useBack();
   const updatedColumn = [
     {
       Header: '',
       accessor: 'address',
       Cell: (props) => (
-        <div
+        <button
+          type="button"
           className={styles.info_icon}
+          aria-label="Invoice details"
           onClick={() => handleModalOpen(props.row.original)}>
-          <FiInfo />
-        </div>
+          <FiInfo aria-hidden="true" />
+        </button>
       ),
     },
     ...columns,
@@ -58,35 +62,43 @@ function InvoicesView({ username }) {
     },
   };
 
+  //url shows the open invoice so it can be copied, back to the list url on close
   const handleModalOpen = (data) => {
     setModalData(data);
     setIsOpen(true);
-    window &&
-      window.history.replaceState(
-        'InvoiceInfo',
-        'Title',
-        '/scan?invoice=' + data.address
-      );
+    window.history.replaceState(
+      window.history.state,
+      '',
+      '/scan/invoice-' + data.address
+    );
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setIsOpen(false);
-    // TODO: need to restore prevoius url after modal close
-  };
+    window.history.replaceState(window.history.state, '', router.asPath);
+  }, [router.asPath]);
+
+  //put the list url back before leaving, or next.js replaces the list entry instead of adding one
+  useEffect(() => {
+    if (!isOpen) return;
+    const restore = () =>
+      window.history.replaceState(window.history.state, '', router.asPath);
+    router.events.on('routeChangeStart', restore);
+    return () => router.events.off('routeChangeStart', restore);
+  }, [isOpen, router.asPath, router.events]);
 
   return (
     <PromiseLayout
       isLoading={isLoading}
       isError={isError}
-      error={pathOr({}, ['response', 'data', 'error'], error)}
-      loaderType={TYPES.LOADER.DOT}
-      loaderSize={'2.5rem'}>
-      <div className={cls(styles.header)}>
-        <BsBoxArrowLeft className={styles.backIcon} onClick={router.back} />
-        <p>
-          Invoices {' > '} {username}
-        </p>
-      </div>
+      error={pathOr({}, ['response', 'data', 'error'], error)}>
+      <button type="button" className={styles.back} onClick={goBack}>
+        <BsBoxArrowLeft aria-hidden="true" /> Back
+      </button>
+      <PageTitle title={`Invoices of ${username}`}>
+        Payment requests sent from this DAO account. Open one with the info
+        icon.
+      </PageTitle>
       <Table columns={updatedColumn} data={data} paginate={false} />
       <NE_Pagination controls={dynamicPageControls} />
       {isOpen && (

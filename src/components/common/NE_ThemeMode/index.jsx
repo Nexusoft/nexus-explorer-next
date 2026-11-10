@@ -1,7 +1,6 @@
 import styles from './ThemeMode.module.scss';
 import { BsMoonFill, BsSunFill } from 'react-icons/bs';
-import { useDarkMode, useMediaQuery } from 'hooks';
-import { cls } from 'utils';
+import { useDarkMode } from 'hooks';
 
 /**
  * Toggle button Component for theme selection
@@ -11,50 +10,17 @@ import { cls } from 'utils';
  */
 export default function ThemeMode() {
   const [isDarkMode, setDarkMode] = useDarkMode();
-  const isSmallScreen = useMediaQuery('(max-width: 920px)');
-  const toggleStyle = isDarkMode
-    ? { justifyContent: 'flex-end' }
-    : { justifyContent: 'flex-start' };
-
-  const Icon = ({ isDark }) => {
-    return (
-      <>
-        {isDark ? (
-          <BsMoonFill
-            color="inherit"
-            className={styles.themeMode__thumb__icon}
-          />
-        ) : (
-          <BsSunFill
-            color="inherit"
-            className={styles.themeMode__thumb__icon}
-          />
-        )}
-      </>
-    );
-  };
-
   return (
-    <>
-      {isSmallScreen ? (
-        <button
-          className={styles.themeMode}
-          style={toggleStyle}
-          onClick={() => setDarkMode(!isDarkMode)}>
-          <div className={styles.themeMode__thumb}>
-            <Icon isDark={isDarkMode} />
-          </div>
-        </button>
+    <button
+      className={styles.themeMode}
+      onClick={() => setDarkMode(!isDarkMode)}
+      aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      title={isDarkMode ? 'Light mode' : 'Dark mode'}>
+      {isDarkMode ? (
+        <BsSunFill color="inherit" />
       ) : (
-        <button
-          className={cls(
-            styles.themeMode__thumb,
-            styles.themeMode__thumb__desktop
-          )}
-          onClick={() => setDarkMode(!isDarkMode)}>
-          <Icon isDark={isDarkMode} />
-        </button>
+        <BsMoonFill color="inherit" />
       )}
-    </>
+    </button>
   );
 }

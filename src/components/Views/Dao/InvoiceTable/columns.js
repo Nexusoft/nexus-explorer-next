@@ -1,11 +1,12 @@
-import { intlNum, timestampToDate } from 'utils';
+import { intlNum } from 'utils';
+import { formatDateShort } from 'utils/format';
 import { InvoiceStatus } from '../InvoiceStatus/invoiceStatus';
 
 export const columns = [
   {
     Header: 'Time',
     accessor: 'modified',
-    Cell: (props) => timestampToDate(props.value),
+    Cell: (props) => formatDateShort(props.value),
   },
   {
     Header: 'Status',
@@ -14,6 +15,7 @@ export const columns = [
   },
   {
     Header: 'Amount',
+    align: 'right',
     accessor: 'json.amount',
     Cell: (props) => (
       <div>
@@ -24,11 +26,13 @@ export const columns = [
   },
   {
     Header: 'Reference',
+    hideMobile: true,
     accessor: 'json.reference',
     Cell: (props) => <div>{props.value}</div>,
   },
   {
-    Header: 'Sender Detail',
+    Header: 'Sender',
+    hideMobile: true,
     accessor: 'json.sender_detail',
   },
 

@@ -8,8 +8,7 @@ export const REFETCH_INTERVALS = {
   METRICS: 1000 * 60,
   MARKET: 1000 * 60 * 5, // 5 minutes
   INFO: 1000 * 30, // 30 sec
-  REGENERATE_SSG_INTERVAL: 1000 * 60 * 5, // 5 min
-  WORLD_NODES: 1000 * 60 * 60, // 1 hour
+  REGENERATE_SSG_INTERVAL: 60 * 5, //seconds, next.js revalidate is not in ms
 };
 
 export const CARD_TYPES = {
@@ -20,6 +19,7 @@ export const CARD_TYPES = {
   INVOICE: 'invoice',
   TOKEN: 'token',
   ASSET: 'asset',
+  GENESIS: 'genesis',
 };
 
 const MAX_SUPPLY = 72586439.41;

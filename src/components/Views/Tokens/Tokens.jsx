@@ -1,5 +1,5 @@
-import CopyText from 'components/common/NE_CopyText';
-import ErrorCard from 'components/common/NE_ErrorCard';
+import { Hash } from 'components/Detail';
+import ErrorMessage from 'components/common/NE_ErrorMessage';
 import Loader from 'components/common/NE_Loader';
 import Table from 'components/Table';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
@@ -7,58 +7,66 @@ import { useQuery } from 'react-query';
 import { intlNum } from 'utils/converter';
 
 export default function Tokens() {
-  const { network, getTokens } = useNetwork();
+  const { network, getTokens, getTokenHolders } = useNetwork();
   const { isLoading, data, error } = useQuery(
     ['tokens', network.name],
     getTokens
   );
+  const holdersRQ = useQuery(['tokenholders', network.name], getTokenHolders, {
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+  const holders = holdersRQ.data;
+
+  const holdersColumn = {
+    Header: 'Holders',
+    id: 'holders',
+    align: 'right',
+    accessor: (row) => holders?.[row.token]?.owners || 0,
+    sortDescFirst: true,
+    Cell: ({ value }) => intlNum(value),
+  };
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
+      hideMobile: true,
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
     {
-      Header: 'Token Register Address',
+      Header: 'Address',
       accessor: 'token',
-      Cell: ({ value }) => (
-        <CopyText value={value} link={`/scan?token=${value}`} />
-      ),
+      Cell: ({ value }) => <Hash value={value} href={`/scan/${value}`} />,
     },
     {
-      Header: 'Token Name',
+      Header: 'Ticker',
       accessor: 'ticker',
+      Cell: ({ value }) => value || '-',
     },
     {
-      Header: 'Max Supply',
+      Header: 'Maximum supply',
+      hideMobile: true,
+      align: 'right',
       accessor: 'maxsupply',
       Cell: ({ value }) => intlNum(value),
     },
     {
-      Header: 'Current Supply',
+      Header: 'Current supply',
+      align: 'right',
       accessor: 'currentsupply',
       Cell: ({ value }) => intlNum(value),
     },
+    ...(holders ? [holdersColumn] : []),
   ];
 
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: 'grid',
-          placeItems: 'center',
-          minHeight: '200px',
-          margin: 'auto',
-        }}>
-        <Loader type="circle" size="5rem" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
     return (
       <div>
-        <ErrorCard />
+        <ErrorMessage error={error} />
       </div>
     );
   }

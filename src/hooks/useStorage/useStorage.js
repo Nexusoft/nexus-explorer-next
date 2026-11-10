@@ -1,55 +1,46 @@
 import { useCallback, useState, useEffect } from 'react';
 
-export function useLocalStorage(key, defaultValue) {
-  const [value, setValue] = useState(() => {
-    const jsonValue =
-      typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
-    if (jsonValue != null) return JSON.parse(jsonValue);
-
-    if (typeof defaultValue === 'function') {
-      return defaultValue();
-    } else {
-      return defaultValue;
-    }
-  });
+/**
+ * State kept in localStorage / sessionStorage
+ * The first render always uses the default (same as the server render, no hydration mismatch),
+ * the saved value is loaded right after mount
+ */
+function useStorage(storageName, key, defaultValue) {
+  const [value, setValue] = useState(defaultValue);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (value === undefined) return window.localStorage.removeItem(key);
-      window.localStorage.setItem(key, JSON.stringify(value));
+    try {
+      const jsonValue = window[storageName].getItem(key);
+      if (jsonValue != null) setValue(JSON.parse(jsonValue));
+    } catch (e) {
+      //storage blocked or bad json, keep the default
     }
-  }, [key, value]);
+    setLoaded(true);
+  }, [storageName, key]);
+
+  //only write after loading, else the default would overwrite the saved value
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      if (value === undefined) window[storageName].removeItem(key);
+      else window[storageName].setItem(key, JSON.stringify(value));
+    } catch (e) {
+      //storage blocked, keep it in memory only
+    }
+  }, [storageName, key, value, loaded]);
 
   const remove = useCallback(() => {
     setValue(undefined);
   }, []);
 
-  return [value, setValue, remove];
+  return [value, setValue, remove, loaded];
+}
+
+export function useLocalStorage(key, defaultValue) {
+  return useStorage('localStorage', key, defaultValue);
 }
 
 export function useSessionStorage(key, defaultValue) {
-  const [value, setValue] = useState(() => {
-    const jsonValue =
-      typeof window !== 'undefined' ? window.sessionStorage.getItem(key) : null;
-    if (jsonValue != null) return JSON.parse(jsonValue);
-
-    if (typeof defaultValue === 'function') {
-      return defaultValue();
-    } else {
-      return defaultValue;
-    }
-  });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (value === undefined) return window.sessionStorage.removeItem(key);
-      window.sessionStorage.setItem(key, JSON.stringify(value));
-    }
-  }, [key, value]);
-
-  const remove = useCallback(() => {
-    setValue(undefined);
-  }, []);
-
-  return [value, setValue, remove];
+  return useStorage('sessionStorage', key, defaultValue);
 }

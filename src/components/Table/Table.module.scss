@@ -1,19 +1,22 @@
 .tableContainer {
   overflow: auto;
-  margin-bottom: var(--space-l);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-panel);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  border-spacing: 0;
-  color: var(--theme-page-text);
-  background: var(--theme-page-background);
-  border-radius: 4px;
-  box-shadow: var(--card-shadow);
-  font-size: var(--font-normal);
-  font-variant-numeric: tabular-nums;
-  overflow: auto;
+  color: var(--c-ink);
+  font-size: 0.9rem;
+
+  a {
+    color: var(--c-link);
+  }
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 .thead {
@@ -21,50 +24,51 @@
 }
 
 .thead > tr > th {
-  padding: 0.6rem;
-  background: var(--theme-tab-bg);
-  color: var(--theme-tab-text);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--c-ink-3);
+  border-bottom: 1px solid var(--c-line);
+  white-space: nowrap;
+  user-select: none;
 }
 
 .th {
-  font-weight: normal;
+  font-weight: 500;
 }
 
-.tbody {
-  margin-top: 1rem;
+.sort {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.25rem;
+  color: var(--c-ink-2);
+  svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
 }
 
 .tr {
-  border-top: 1px solid var(--theme-tab-bg);
+  border-top: 1px solid var(--c-line-soft);
+}
+
+.tbody .tr:hover td {
+  background: var(--c-surface-2);
 }
 
 .td {
-  padding: 10px;
-}
-
-.thead tr {
-  border: none;
-  & th:first-child {
-    border-top-left-radius: var(--space-xxxs);
-  }
-  & th:last-child {
-    border-top-right-radius: var(--space-xxxs);
-  }
-}
-
-.tbody tr:last-child {
-  & td:first-child {
-    border-bottom-left-radius: var(--space-xxxs);
-  }
-  & td:last-child {
-    border-bottom-right-radius: var(--space-xxxs);
-  }
+  padding: 0.6rem 0.75rem;
 }
 
 .noRecords {
-  color: var(--theme-page-text);
-  display: flex;
-  padding: 0.5rem 1rem;
-  justify-content: center;
-  align-items: center;
+  color: var(--c-ink-3);
+  padding: 1rem;
+  text-align: center;
+}
+
+//columns marked hideMobile in the column definition
+@media screen and (max-width: 768px) {
+  .hideMobile {
+    display: none;
+  }
 }

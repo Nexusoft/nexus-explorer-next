@@ -8,3 +8,4 @@ export * from './useNetwork/useNetwork';
 export * from './useStorage/useStorage';
 export * from './useWindowSize/useWindowSize';
 export * from './useDebounce/useDebounce';
+export * from './useBack/useBack';

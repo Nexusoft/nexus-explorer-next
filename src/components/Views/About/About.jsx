@@ -1,109 +1,104 @@
-import Image from 'next/image';
+import Link from 'next/link';
+import { VscGithub } from 'react-icons/vsc';
+import { Card, DetailPage, PageTitle, SectionTitle } from 'components/Detail';
 import styles from './about.module.scss';
-import ASSESTS from 'assets';
-import TYPES from 'types';
-import { VscGithub, VscGithubInverted } from 'react-icons/vsc';
-import { useAppContext } from 'contexts/AppContext';
-import { cls } from 'utils';
+
+const REPO_URL = 'https://github.com/rayanfer32/nexus-explorer-next';
+
+const sections = [
+  ['/blocks', 'Blocks', 'every block with its channel, size and transactions'],
+  ['/transactions', 'Transactions', 'the newest transactions and contracts'],
+  [
+    '/richlist',
+    'Rich list',
+    'the largest NXS accounts and how supply is spread',
+  ],
+  [
+    '/trustlist',
+    'Top stakers',
+    'trust accounts by stake, rate and trust score',
+  ],
+  ['/globalnames', 'Global names', 'names registered on the chain'],
+  ['/namespaces', 'Namespaces', 'namespaces and who owns them'],
+  ['/tokens', 'Tokens', 'tokens created on Nexus with their supply'],
+  ['/metrics', 'Network metrics', 'supply, staking and ledger figures'],
+  ['/dao', 'DAO', 'DAO accounts, balances and invoices'],
+];
 
 const About = ({ data }) => {
-  const {
-    sharedState: { theme },
-  } = useAppContext();
-
-  let ThemedVscLogo = () => {
-    return theme == TYPES.THEME.DARK ? (
-      <VscGithub
-        style={{
-          color: 'white',
-        }}
-      />
-    ) : (
-      <VscGithubInverted
-        style={{
-          color: 'black',
-        }}
-      />
-    );
-  };
+  const contributors = Array.isArray(data)
+    ? data
+        .map((item) => item.author)
+        .filter(
+          (a) =>
+            a &&
+            a.type !== 'Bot' &&
+            !['web-flow', 'actions-user'].includes(a.login)
+        )
+    : [];
 
   return (
-    <main className={styles.main}>
-      <article>
-        <div>
-          <h1>Nexus Explorer V2</h1>
-          <p>A Redesigned Explorer for the nexus blockchain.</p>
-        </div>
-        <p>
-          Nexus Explorer V2 aims to be visually modern by design, and present
-          the user with realtime statistics with graphically illustrated data to
-          inspect the nexus blockchain as deeply as possible.
-        </p>
-        <p>
-          After many iterations over the design, we came up with the new look
-          for the explorer, We made sure the project is built with the all the
-          latest tech in the the web development space, The frontend is crafted
-          with next.js and for the backend we have used python. For
-          contributions and suggestions please feel free to reach out to us on
-          our github page.
-        </p>
-        <div>
-          <p className={styles.contributer}>Made with ❤️ in India, by</p>
-          <p className={styles.contributer}>
-            {Array.isArray(data) &&
-              data.map((item) => {
-                if (item.author.type === 'Bot') return;
-                if (item.author.login === 'web-flow') return;
-                return (
-                  <span key={item.author.login} className={styles.links}>
-                    <a
-                      href={item.author.html_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={styles.link}>
-                      <ThemedVscLogo />
-                      {item.author.login}
-                    </a>
-                  </span>
-                );
-              })}
+    <DetailPage>
+      <PageTitle title="About">
+        A block explorer for the Nexus blockchain.
+      </PageTitle>
+
+      <Card>
+        <div className={styles.text}>
+          <p>
+            The explorer reads the chain from a Nexus node and shows blocks,
+            transactions, accounts and registers. Search by block height, block
+            hash, transaction id, address or name from the bar at the top of
+            every page.
+          </p>
+          <p>
+            Figures come straight from the node API. Times are shown in UTC.
+            Amounts are in NXS unless a token ticker is given.
           </p>
         </div>
-      </article>
-      <aside>
-        <span>
-          <Image
-            src={ASSESTS.IMAGE.BLOB.THREE}
-            alt="blob_three"
-            layout="fill"
-            className={cls(styles.blob, styles.three)}
-          />
-        </span>
-        <span>
-          <Image
-            src={ASSESTS.IMAGE.BLOB.TWO}
-            alt="blob_two"
-            layout="fill"
-            className={cls(styles.blob, styles.two)}
-          />
-        </span>
-        <span>
-          <Image
-            src={ASSESTS.IMAGE.BLOB.ONE}
-            alt="blob_one"
-            layout="fill"
-            className={cls(styles.blob, styles.one)}
-          />
-        </span>
-        <span className={styles.developImg}>
-          <Image
-            src={ASSESTS.IMAGE.DEVELOPMENT.ONE}
-            alt="blob_one"
-            layout="fill"
-          />
-        </span>
-      </aside>
-    </main>
+      </Card>
+
+      <Card>
+        <SectionTitle>What you can look up</SectionTitle>
+        <ul className={styles.sections}>
+          {sections.map(([href, label, text]) => (
+            <li key={href}>
+              <Link href={href}>
+                <a>{label}</a>
+              </Link>
+              <span>{text}</span>
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card>
+        <SectionTitle>Source and contributors</SectionTitle>
+        <div className={styles.text}>
+          <p>
+            Built with Next.js and a Python backend. The code is open source;
+            suggestions and contributions are welcome on{' '}
+            <a href={REPO_URL} target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+            .
+          </p>
+          {contributors.length > 0 && <p>Originally built in India by</p>}
+        </div>
+        {contributors.length > 0 && (
+          <ul className={styles.contributors}>
+            {contributors.map((a) => (
+              <li key={a.login}>
+                <a href={a.html_url} target="_blank" rel="noreferrer">
+                  <VscGithub aria-hidden="true" />
+                  {a.login}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </DetailPage>
   );
 };
 

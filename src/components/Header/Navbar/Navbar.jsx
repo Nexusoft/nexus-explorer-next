@@ -5,6 +5,8 @@ import styles from './Navbar.module.scss';
 import NavLinks from '../Navlinks';
 import PropTypes from 'prop-types';
 import { cls } from 'utils';
+import { useEffect } from 'react';
+import { FiMenu, FiX } from 'react-icons/fi';
 
 /**
  * Component to display navigation links
@@ -40,9 +42,13 @@ export const DesktopNavbar = ({
  */
 export const Hamburger = ({ onClick = () => null }) => {
   return (
-    <div className={styles.mobile__hamburger} onClick={onClick}>
-      <div className={styles.hamIcon} />
-    </div>
+    <button
+      type="button"
+      className={cls(styles.iconButton, styles.mobile__hamburger)}
+      aria-label="Open menu"
+      onClick={onClick}>
+      <FiMenu aria-hidden="true" />
+    </button>
   );
 };
 
@@ -61,6 +67,15 @@ export const MobileMenu = ({
   onClose = () => null,
   onNetworkChange = () => null,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   return (
     <>
       <div
@@ -70,7 +85,10 @@ export const MobileMenu = ({
         )}
         onClick={onClose}
       />
-      <aside className={cls(styles.mobileView, !isOpen && styles.collapseView)}>
+      <aside
+        className={cls(styles.mobileView, !isOpen && styles.collapseView)}
+        aria-label="Menu"
+        aria-hidden={!isOpen}>
         <div className={styles.mobileView__header}>
           <ThemeMode />
           <SelectInput
@@ -78,7 +96,13 @@ export const MobileMenu = ({
             value={network}
             onChange={onNetworkChange}
           />
-          <div className={styles.closeHamIcon} onClick={onClose} />
+          <button
+            type="button"
+            className={styles.iconButton}
+            aria-label="Close menu"
+            onClick={onClose}>
+            <FiX aria-hidden="true" />
+          </button>
         </div>
         <div className={styles.mobileView__content}>
           <NavLinks

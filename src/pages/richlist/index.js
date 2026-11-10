@@ -1,12 +1,13 @@
+import { PageTitle } from 'components/Detail';
 import PageHeader from 'components/Header/PageHeader';
 import Layout from 'components/Layout';
 import Richlist from 'components/Views/Richlist';
 import React from 'react';
 import TYPES from 'types';
 
-import { fetchRichlist } from 'utils/common/fetch';
+import { fetchRichlistForBuild } from 'utils/common/fetch';
 export async function getStaticProps() {
-  const resp = await fetchRichlist();
+  const resp = await fetchRichlistForBuild();
   return {
     props: {
       richlistData: resp || null,
@@ -19,6 +20,9 @@ function index(props) {
   return (
     <Layout>
       <PageHeader page="Richlist" />
+      <PageTitle title="Rich list">
+        The largest NXS balances held in Tritium accounts and trust accounts.
+      </PageTitle>
       <Richlist data={props.richlistData} />
     </Layout>
   );

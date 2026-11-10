@@ -1,19 +1,24 @@
 .brand {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  font-size: 1.25rem;
-  color: var(--theme-nav-brand);
-  padding: var(--space-xs);
-  font-family: 'Niamey', var(--font-family);
-  &:hover {
-    opacity: 0.9;
-    cursor: pointer;
-  }
+  gap: 0.6rem;
+  color: var(--c-band-ink);
+  flex-shrink: 0;
+
   .explorer {
-    font-style: normal;
-    font-weight: lighter;
-    font-size: var(--font-xl);
-    font-family: var(--font-family);
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--c-band-ink-2);
+    padding-left: 0.6rem;
+    border-left: 1px solid var(--c-band-2);
+    line-height: 1.6rem;
+  }
+  .testnet {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    background: var(--c-warn);
+    color: #fff;
   }
 }

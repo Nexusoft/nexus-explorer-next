@@ -1,9 +1,18 @@
 import Layout from 'components/Layout';
+import PageHeader from 'components/Header/PageHeader';
 import CustomError from 'components/Views/error';
 
 const ErrorScreen = (props) => {
   return (
     <Layout>
+      <PageHeader
+        page={props.statusCode == 404 ? 'NOT_FOUND' : 'HOME'}
+        title={
+          props.statusCode && props.statusCode != 404
+            ? `Error ${props.statusCode} | Nexus Explorer`
+            : undefined
+        }
+      />
       <CustomError {...props} />
     </Layout>
   );

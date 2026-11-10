@@ -1,46 +1,49 @@
 import 'styles/globals.scss';
 import { ContextWrapper } from 'contexts/AppContext';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { QueryClientProvider, QueryClient, setLogger } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { IconContext } from 'react-icons';
-import TYPES from 'types';
-import { AnimatePresence } from 'framer-motion';
-import { fixTimeoutTransition } from '../utils/page_anim_hotfix';
+import { useState } from 'react';
+import RouteProgress from 'components/common/RouteProgress';
 
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en.json';
 TimeAgo.addDefaultLocale(en);
 TimeAgo.addLocale(en);
 
-const queryClient = new QueryClient({
+//a query that found no explorer index falls back to the node, not an error worth logging
+setLogger({
+  log: console.log,
+  warn: console.warn,
+  error: (e, ...rest) => {
+    if (!e?.indexUnavailable) console.error(e, ...rest);
+  },
+});
+
+const queryOptions = {
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
     },
   },
-});
+};
 
-// * hotfix for retaining module css until animations complete
-fixTimeoutTransition(2000);
+function MyApp({ Component, pageProps }) {
+  //one cache per app instance: a module level cache is shared by all server renders
+  //and leaks older data into later pages (hydration mismatches)
+  const [queryClient] = useState(() => new QueryClient(queryOptions));
 
-function MyApp({ Component, pageProps, router }) {
   return (
     <ContextWrapper>
       <IconContext.Provider
         value={{
-          color: TYPES.COLORS.NEXUS_BLUE,
-          size: '1.5rem',
+          color: 'currentColor',
+          size: '1.25rem',
           style: { verticalAlign: 'middle' },
         }}>
         <QueryClientProvider client={queryClient}>
-          <AnimatePresence
-            mode="popLayout"
-            initial={false}
-            onExitComplete={() => {
-              window.scrollTo(0, 0);
-            }}>
-            <Component {...pageProps} key={router.asPath} />
-          </AnimatePresence>
+          <RouteProgress />
+          <Component {...pageProps} />
           <ReactQueryDevtools position="bottom-right" />
         </QueryClientProvider>
       </IconContext.Provider>

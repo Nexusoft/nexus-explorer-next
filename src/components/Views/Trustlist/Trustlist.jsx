@@ -2,13 +2,11 @@ import Table from 'components/Table/Table';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
 import styles from './trustlist.module.scss';
-import CopyText from 'components/common/NE_CopyText/CopyText';
+import { Hash } from 'components/Detail';
 import { useNetwork } from 'hooks/useNetwork/useNetwork';
-import PageHeader from 'components/Header/PageHeader';
 import DynamicPagination from 'components/common/NE_Pagination';
 import PromiseLayout from 'components/HOC/PromiseLayout';
 import { intlNum, pathOr } from 'utils';
-import TYPES from 'types';
 
 export default function Trustlist() {
   const [pageIndex, setPageIndex] = useState(0);
@@ -23,7 +21,7 @@ export default function Trustlist() {
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
       Cell: (props) => (
         <div>{parseInt(props.cell.row.id) + 1 + pageIndex * pageSize}</div>
       ),
@@ -31,24 +29,49 @@ export default function Trustlist() {
     {
       Header: 'Address',
       accessor: 'address',
-      Cell: ({ value }) => <CopyText link={`/scan/${value}`} value={value} />,
+      Cell: ({ value }) => <Hash value={value} href={`/scan/${value}`} />,
     },
     {
       Header: 'Balance',
+      hideMobile: true,
+      align: 'right',
       accessor: 'balance',
-      Cell: (props) => intlNum(props.value.toFixed(2)) + ' NXS',
+      Cell: (props) =>
+        intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
     },
     {
       Header: 'Stake',
+      align: 'right',
       accessor: 'stake',
-      Cell: (props) => intlNum(props.value.toFixed(2)) + ' NXS',
+      Cell: (props) =>
+        intlNum(props.value, 'en-US', { maximumFractionDigits: 2 }) + ' NXS',
     },
     {
-      Header: 'Stake Rate',
+      Header: 'Rate',
+      hideMobile: true,
+      align: 'right',
       accessor: 'rate',
+      Cell: ({ value }) => (value != null ? `${value} %` : '-'),
     },
     {
-      Header: 'Trust',
+      Header: 'Reward per day (est.)',
+      hideMobile: true,
+      align: 'right',
+      id: 'daily',
+      accessor: (row) => (row.stake * row.rate) / 100 / 365,
+      Cell: ({ value }) =>
+        Number.isFinite(value) ? `${value.toFixed(2)} NXS` : '-',
+    },
+    {
+      Header: 'Staking for',
+      hideMobile: true,
+      accessor: 'age',
+      Cell: ({ value }) => (value ? value.split(',')[0] : '-'),
+    },
+    {
+      Header: 'Trust score',
+      hideMobile: true,
+      align: 'right',
       accessor: 'trust',
       Cell: (props) => intlNum(props.value),
     },
@@ -80,13 +103,11 @@ export default function Trustlist() {
 
   return (
     <>
-      <PageHeader page={'trustlist'} />
       <div className={styles.page} style={{ marginBottom: '1rem' }}>
         <PromiseLayout
           isLoading={isLoading}
           isError={isError}
-          error={pathOr({}, ['response', 'data', 'error'], error)}
-          loaderType={TYPES.LOADER.CIRCLE}>
+          error={pathOr({}, ['response', 'data', 'error'], error)}>
           {data && (
             <Table
               columns={columns}

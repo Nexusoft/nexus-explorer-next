@@ -1,0 +1,44 @@
+.book {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  min-width: 0;
+
+  > * {
+    min-width: 0;
+  }
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.selected td {
+  background: var(--c-surface-2);
+}
+
+.buy {
+  color: var(--c-up);
+  font-weight: 600;
+}
+
+.sell {
+  color: var(--c-down);
+  font-weight: 600;
+}
+
+.more {
+  all: unset;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--c-link);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--c-focus);
+    outline-offset: 2px;
+  }
+}

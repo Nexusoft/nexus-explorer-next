@@ -7,8 +7,15 @@ import daoObject from '../../../../public/embassy.json';
 function EmbassyDAOPage() {
   return (
     <Layout>
-      <PageHeader title={TYPES.PAGEMETA.DAO.EMBASSY.TITLE} />
-      <DaoInfo title={'Embassy DAO'} daoObject={daoObject} />
+      <PageHeader
+        title={TYPES.PAGEMETA.DAO.EMBASSY.TITLE}
+        description={TYPES.PAGEMETA.DAO.EMBASSY.DESCRIPTION}
+      />
+      <DaoInfo
+        title={'Embassy DAO'}
+        description={TYPES.PAGEMETA.DAO.EMBASSY.DESCRIPTION}
+        daoObject={daoObject}
+      />
     </Layout>
   );
 }

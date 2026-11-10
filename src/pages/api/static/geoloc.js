@@ -19,7 +19,7 @@ export default async function handler(req, res) {
           console.error(
             `Failed to get geolocation for node ${node.address}: ${err}`
           );
-          return { location: { lat: 0, lng: 0 } };
+          return null;
         })
       );
     });
@@ -28,7 +28,9 @@ export default async function handler(req, res) {
       const packedData = [];
       results.forEach((result, index) => {
         if (result.status !== 'fulfilled') return;
-        const { latitude, longitude } = result.value.location;
+        //unknown ip or no city record: nothing to plot
+        const { latitude, longitude } = result.value?.location || {};
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
         const { latency } = nodesList.data.result[index];
         packedData.push({ latitude, longitude, latency });
       });

@@ -1,18 +1,42 @@
-.header {
-  color: var(--theme-page-text);
-  display: flex;
-  gap: var(--space-xs);
+.back {
+  all: unset;
+  display: inline-flex;
   align-items: center;
-  .backIcon {
-    cursor: pointer;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--c-link);
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--c-focus);
+    outline-offset: 2px;
+  }
+  svg {
+    width: 1rem;
+    height: 1rem;
   }
 }
 
 .info_icon {
+  all: unset;
+  display: inline-flex;
+  padding: 0.2rem;
+  border-radius: var(--radius-ctl);
+  color: var(--c-ink-2);
   cursor: pointer;
-  :hover {
-    transition: all 0.2s ease;
-    transform: scale(1.1);
-    transform-origin: center;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+  &:hover {
+    color: var(--c-link);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--c-focus);
+    outline-offset: 2px;
   }
 }

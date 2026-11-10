@@ -1,66 +1,54 @@
-@use 'styles/mixins' as *;
-
 .dropDown {
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: stretch;
+  height: 100%;
 
-  /* Dropdown button */
   &__btn {
     all: unset;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: max-content;
-    gap: var(--space-xxxs);
-    background-color: var(--theme-tab-background);
-    color: var(--theme-page-text);
-    font-family: inherit;
-    border: none;
-    border-radius: var(--space-xxxs);
-    padding: var(--space-xxs);
+    gap: 0.25rem;
+    padding: 0 0.6rem;
+    color: var(--c-band-ink-2);
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
     cursor: pointer;
 
-    &:hover {
-      color: var(--nexus-blue);
+    &:hover,
+    &:focus-visible {
+      color: var(--c-band-ink);
+    }
+    &.selected {
+      color: var(--c-band-ink);
+      border-bottom-color: var(--c-brand);
     }
   }
 
-  /* Dropdown Content (Hidden by Default) */
   &__content {
-    @include hide-scrollbar;
     position: absolute;
-    background-color: var(--theme-page-background);
-    border-radius: var(--space-xxxs);
-    box-shadow: 0rem var(--space-xxxs) var(--space-s) 0rem rgba(0, 0, 0, 0.3);
-    max-height: 0;
-    z-index: 10;
-    transition: all 0.3s ease;
-    overflow: auto;
+    top: 100%;
+    left: 0;
+    min-width: 11rem;
+    padding: 0.3rem;
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-ctl);
+    box-shadow: 0 8px 24px rgba(8, 24, 38, 0.18);
+    z-index: 20;
+    visibility: hidden;
     opacity: 0;
+    transition: opacity 120ms ease;
 
     &__item {
       display: block;
-      color: var(--theme-page-text);
-      font-size: var(--font-normal);
-      font-family: inherit;
-      transition: all 0.25s ease;
-      margin: var(--space-xxxs);
-      cursor: pointer;
-
-      &:hover,
-      &:focus {
-        color: var(--theme-hover-bg);
-        background-color: var(--theme-hover-text);
-        border-radius: var(--space-xxxs);
-      }
+      font-size: 0.9rem;
     }
   }
 
-  /* Show the dropdown menu on hover */
   &:hover &__content,
-  &:focus &__content {
-    max-height: 14rem;
-    margin-top: 0.25rem;
+  &:focus-within &__content {
+    visibility: visible;
     opacity: 1;
   }
 }

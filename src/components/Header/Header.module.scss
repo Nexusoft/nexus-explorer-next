@@ -1,62 +1,27 @@
 .container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  margin: 0 auto;
   width: 100%;
-  padding-bottom: var(--space-xxs);
-  margin-bottom: var(--space-xs);
-  box-shadow: 0 0.25rem 0.25rem #0002;
-  color: var(--theme-page-text);
-  background-color: var(--theme-nav-bg);
-  background-image: var(--theme-nav-bg);
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 12;
-  transition: transform 800ms ease-out;
-
-  &::after {
-    content: '';
-    position: absolute;
-    background: var(--theme-tab-bg);
-    border-radius: 0.25rem;
-    height: 0.125rem;
-    width: 95%;
-    top: 8rem;
-  }
+  background: var(--c-band);
+  color: var(--c-band-ink);
+  border-bottom: 1px solid var(--c-band-2);
 
   .header {
     width: 100%;
     max-width: var(--screen-lg);
+    margin: 0 auto;
+    padding: 0 1rem 1rem;
 
     .nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      min-height: 4rem;
-      width: 100%;
-      font-size: var(--font-normal);
-      font-weight: 500;
+      gap: 1rem;
+      min-height: 3.75rem;
+      font-size: 0.9rem;
     }
-  }
-
-  &.imgBg {
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: cover;
-    width: 100%;
-    height: 100%;
   }
 }
 
-/* search section */
 .searchBar {
   width: 100%;
-  padding: var(--space-xxs) var(--space-xxxl);
-  /* mobile screen classes */
-  @media (max-width: 54em) {
-    padding: var(--space-xxs) var(--space-s);
-  }
+  max-width: 46rem;
 }

@@ -1,67 +1,111 @@
+.wrap {
+  position: relative;
+  width: 100%;
+}
+
+.suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-ctl);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  max-height: 22rem;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.875rem;
+    cursor: pointer;
+    color: var(--c-ink);
+  }
+  li.active {
+    background: var(--c-surface-2);
+  }
+  .label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .note {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    color: var(--c-ink-3);
+  }
+}
+
 .searchBar {
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
-  max-height: 3.25rem;
-  filter: drop-shadow(var(--card-shadow-subtle));
+  height: 2.75rem;
+  border-radius: var(--radius-ctl);
+  background: var(--c-surface);
+  border: 1px solid transparent;
+
   &:focus-within {
-    outline: none;
+    border-color: var(--c-focus);
+    box-shadow: 0 0 0 2px rgba(12, 164, 251, 0.35);
   }
 
   .searchInput {
+    flex: 1;
+    min-width: 0;
     border: none;
     outline: none;
-    height: 2.625rem;
-    width: 100%;
-    color: var(--midnight-blue);
-    background: var(--theme-search);
-    padding-left: var(--space-xxs);
-    border-radius: var(--space-xxxs);
-    font-size: var(--font-normal);
-    font-family: inherit;
-    box-shadow: var(--card-shadow-subtle);
+    background: transparent;
+    color: var(--c-ink);
+    padding: 0 0.875rem;
+    font: inherit;
+    font-size: 0.95rem;
 
-    &:focus {
-      outline: solid 0.125rem var(--nexus-blue);
-      border-radius: 2pt;
-      color: var(--midnight-blue);
+    &::placeholder {
+      color: var(--c-ink-3);
     }
     &::-webkit-search-cancel-button {
-      position: relative;
-      width: 1.5rem;
-      height: 1.5rem;
-      background: url('../../../assets/icons/cross.svg');
-      background-repeat: no-repeat;
-      background-position: center;
-      filter: hue-rotate(180deg);
-      -webkit-appearance: none;
       cursor: pointer;
-    }
-    &:-ms-input-placeholder,
-    &::placeholder {
-      color: var(--theme-search-text);
     }
   }
 
   .searchBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     border: none;
-    margin: 0;
-    padding: 0;
-    width: 2.625rem;
-    height: 2.625rem;
-    margin-left: 0.25rem;
-    background: var(--theme-search);
-    border-radius: var(--space-xxxs);
-    box-shadow: var(--card-shadow-subtle);
+    margin: 0.25rem;
+    padding: 0 1rem;
+    border-radius: 3px;
+    //same blue in both themes so the white label keeps its contrast
+    background: #0868a8;
+    color: #fff;
+    font: inherit;
+    font-weight: 500;
     cursor: pointer;
 
-    &:focus {
-      outline: solid 0.125rem var(--nexus-blue);
-      border-radius: 2pt;
+    svg {
+      width: 1rem;
+      height: 1rem;
     }
-    &:active {
-      transform: scale(1.05);
+    &:hover {
+      filter: brightness(1.1);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .searchBtn span {
+      display: none;
+    }
+    .searchBtn {
+      padding: 0 0.75rem;
     }
   }
 }

@@ -4,6 +4,7 @@ import { NavDropdown } from 'components/Header/NavDropdown';
 import Link from 'next/link';
 import { useId, useState } from 'react';
 import { cls } from 'utils';
+import { FiChevronDown } from 'react-icons/fi';
 
 const isRouteEqual = (r1, r2) => r1 === r2;
 
@@ -29,27 +30,25 @@ export const StaticNavLinks = ({
 
   if (isMobile) {
     return (
-      <span
-        className={cls(styles.mNav, isActivePath && styles.mactive)}
-        onClick={onClick}>
-        <Link href={pathname}>{label}</Link>
-      </span>
+      <Link href={pathname}>
+        <a
+          className={cls(styles.mNav, isActivePath && styles.mactive)}
+          aria-current={isActivePath ? 'page' : undefined}
+          onClick={onClick}>
+          {label}
+        </a>
+      </Link>
     );
   }
 
   return (
-    <>
-      <Link href={pathname} passHref>
-        <span className={cls(isActivePath && styles.active)}>{label}</span>
-      </Link>
-      <style jsx>{`
-        span {
-          justify-content: center;
-          padding: 0.5rem 1rem;
-          padding: var(--space-xxs);
-        }
-      `}</style>
-    </>
+    <Link href={pathname}>
+      <a
+        className={cls(styles.navItem, isActivePath && styles.active)}
+        aria-current={isActivePath ? 'page' : undefined}>
+        {label}
+      </a>
+    </Link>
   );
 };
 
@@ -67,39 +66,41 @@ export const NestedNavLinks = ({
   isMobile = false,
   onClick = () => null,
 }) => {
-  const [isExpand, setExpand] = useState(false);
+  const hasActiveChild = options.some((item) => activePathname === item.path);
+  //section of the current page starts open
+  const [isExpand, setExpand] = useState(hasActiveChild);
 
   if (isMobile) {
     return (
-      <div
-        className={cls(styles.mNestedNav, isExpand && styles.mNavTitleActive)}>
-        <span
-          className={cls(
-            styles.mTitle,
-            isExpand && styles.expanded,
-            options.some((item) => activePathname === item.path) &&
-              styles.active
-          )}
+      <div className={styles.mNestedNav}>
+        <button
+          type="button"
+          className={cls(styles.mTitle, hasActiveChild && styles.active)}
+          aria-expanded={isExpand}
           onClick={() => setExpand((o) => !o)}>
           {title}
-        </span>
-        <div
-          className={cls(styles.mNestedNavlist, isExpand && styles.expanded)}>
-          {options.map((item, index) => {
-            return (
-              <Link key={item.path + index} href={item.path} passHref>
-                <span
-                  className={cls(
-                    styles.mNav,
-                    isRouteEqual(activePathname, item.path) && styles.mactive
-                  )}
-                  onClick={onClick}>
-                  {item.title}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+          <FiChevronDown
+            aria-hidden="true"
+            className={cls(styles.chevron, isExpand && styles.open)}
+          />
+        </button>
+        {isExpand && (
+          <div className={styles.mNestedNavlist}>
+            {options.map((item, index) => {
+              const isActive = isRouteEqual(activePathname, item.path);
+              return (
+                <Link key={item.path + index} href={item.path}>
+                  <a
+                    className={cls(styles.mNav, isActive && styles.mactive)}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={onClick}>
+                    {item.title}
+                  </a>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
@@ -109,15 +110,18 @@ export const NestedNavLinks = ({
       title={title}
       selected={options.some((item) => activePathname === item.path)}>
       {options.map((item, index) => (
-        <Link key={item.path + index} href={item.path} passHref>
-          <span
+        <Link key={item.path + index} href={item.path}>
+          <a
             className={cls(
               isRouteEqual(activePathname, item.path) &&
                 styles.dropDown__active,
               styles.dropDown__item
-            )}>
+            )}
+            aria-current={
+              isRouteEqual(activePathname, item.path) ? 'page' : undefined
+            }>
             {item.title}
-          </span>
+          </a>
         </Link>
       ))}
     </NavDropdown>

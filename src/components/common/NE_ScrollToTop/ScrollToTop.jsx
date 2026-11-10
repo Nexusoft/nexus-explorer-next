@@ -33,9 +33,13 @@ export const ScrollToTop = () => {
   return (
     <div className={styles.scrollToTop}>
       {isVisible && (
-        <div className={styles.scrollToTop__clickAble} onClick={scrollToTop}>
+        <button
+          type="button"
+          className={styles.scrollToTop__clickAble}
+          onClick={scrollToTop}
+          aria-label="Back to top">
           <BsArrowUpShort />
-        </div>
+        </button>
       )}
     </div>
   );

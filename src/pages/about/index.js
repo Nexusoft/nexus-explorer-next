@@ -1,14 +1,17 @@
 import { LinksTypes } from 'types/LinksTypes';
+import { forBuild } from 'utils/common/fetch';
 import PageHeader from 'components/Header/PageHeader';
 import AboutView from 'components/Views/About';
 import Layout from 'components/Layout';
 
 export const getStaticProps = async () => {
-  const res = await fetch(LinksTypes.LINKS.CONTRIBUTORS_API);
-  const data = await res.json();
+  //github can be offline, slow or rate limited, the page still builds without the list
+  const res = await forBuild(fetch(LinksTypes.LINKS.CONTRIBUTORS_API));
+  const data = (res?.ok && (await forBuild(res.json()))) || [];
 
   return {
-    props: { data: data },
+    props: { data },
+    revalidate: 86400,
   };
 };
 

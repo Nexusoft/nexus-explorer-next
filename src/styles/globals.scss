@@ -24,7 +24,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--theme-page-text);
+  background: var(--c-line);
   border-radius: var(--space-xs);
 }
 
@@ -40,14 +40,6 @@
   all: unset;
 }
 
-.center-loader {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-inline: auto;
-  height: 50vh;
-}
-
 .monospace {
-  font-family: 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-family: var(--font-mono);
 }

@@ -1,5 +1,6 @@
-import CopyText from 'components/common/NE_CopyText';
-import ErrorCard from 'components/common/NE_ErrorCard';
+import { Hash } from 'components/Detail';
+import { formatDateShort } from 'utils/format';
+import ErrorMessage from 'components/common/NE_ErrorMessage';
 import Loader from 'components/common/NE_Loader';
 import Table from 'components/Table/Table';
 import { useNetwork } from 'hooks';
@@ -14,16 +15,15 @@ export default function Namespaces() {
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
+      hideMobile: true,
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
 
     {
       Header: 'Address',
       accessor: 'address',
-      Cell: ({ value }) => (
-        <CopyText value={value} link={`/scan?namespace=${value}`} />
-      ),
+      Cell: ({ value }) => <Hash value={value} href={`/scan/${value}`} />,
     },
     {
       Header: 'Namespace',
@@ -31,29 +31,20 @@ export default function Namespaces() {
     },
     {
       Header: 'Created',
+      hideMobile: true,
       accessor: 'created',
-      Cell: ({ value }) => new Date(value * 1000).toDateString(),
+      Cell: ({ value }) => formatDateShort(value),
     },
   ];
 
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: 'grid',
-          placeItems: 'center',
-          minHeight: '200px',
-          margin: 'auto',
-        }}>
-        <Loader type="circle" size="5rem" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
     return (
       <div>
-        <ErrorCard />
+        <ErrorMessage error={error} />
       </div>
     );
   }

@@ -1,4 +1,5 @@
-import CopyText from 'components/common/NE_CopyText/CopyText';
+import { Hash } from 'components/Detail';
+import { formatDateShort } from 'utils/format';
 import Loader from 'components/common/NE_Loader';
 import Table from 'components/Table/Table';
 import { useQuery } from 'react-query';
@@ -14,15 +15,14 @@ export default function GlobalNames() {
 
   const columns = [
     {
-      Header: '#ID',
+      Header: '#',
+      hideMobile: true,
       Cell: (props) => <div>{parseInt(props.cell.row.id) + 1}</div>,
     },
     {
       Header: 'Address',
       accessor: 'address',
-      Cell: ({ value }) => (
-        <CopyText value={value} link={`/scan?globalname=${value}`} />
-      ),
+      Cell: ({ value }) => <Hash value={value} href={`/scan/${value}`} />,
     },
     {
       Header: 'Name',
@@ -30,23 +30,14 @@ export default function GlobalNames() {
     },
     {
       Header: 'Created',
+      hideMobile: true,
       accessor: 'created',
-      Cell: ({ value }) => new Date(value * 1000).toDateString(),
+      Cell: ({ value }) => formatDateShort(value),
     },
   ];
 
   if (isLoading) {
-    return (
-      <div
-        style={{
-          display: 'grid',
-          placeItems: 'center',
-          minHeight: '200px',
-          margin: 'auto',
-        }}>
-        <Loader type="circle" size="5rem" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
